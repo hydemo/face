@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "noImplicitAny": false,
+    "removeComments": true,
+    "noLib": false,
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "target": "es6",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "strict": true,
+    "paths": {
+      "src/*": [
+        "src/*",
+        "dist/*"
+      ],
+      "@api/*": [
+        "src/api/*",
+        "dist/api/*"
+      ],
+      "@common/*": [
+        "src/common/*",
+        "dist/common/*"
+      ],
+      "@utils/*": [
+        "src/utils/*",
+        "dist/utils/*"
+      ],
+      "@config/*": [
+        "src/config/*",
+        "dist/config/*"
+      ],
+      "@database/*": [
+        "src/database/*",
+        "dist/database/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
+}
