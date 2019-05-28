@@ -15,4 +15,5 @@ export enum ApiErrorCode {
   CODE_EXPIRE = 10015,
   CODE_INVALID = 10016,
   NO_VERIFY = 10017,
+  APPLICATION_EXIST = 10018,
 }

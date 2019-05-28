@@ -14,7 +14,7 @@ import { OrbitService } from 'src/module/orbit/orbit.service';
 import { CreateOrbitDTO } from 'src/module/orbit/dto/orbit.dto';
 
 
-@ApiUseTags('orbits')
+@ApiUseTags('cms/orbits')
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 // @UseGuards(AuthGuard(), RolesGuard)
 @Controller('cms/orbits')

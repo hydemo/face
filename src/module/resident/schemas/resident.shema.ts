@@ -1,18 +1,19 @@
 import * as mongoose from 'mongoose';
-import { number } from 'joi';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 export const ResidentSchema = new mongoose.Schema(
   {
+    // 房间
+    address: ObjectId,
     // 区域
     zone: ObjectId,
     // 用户
-    user: String,
+    user: ObjectId,
     // 审核情况 1:待审核 2:通过 3:拒绝
     checkResult: { type: Number, enum: [1, 2, 3] },
     // 住客类型 1:业主 2 租客 3 常住人
-    type: { type: String, enum: ['owner', 'tenant', 'family'] },
+    type: { type: String, enum: ['owner', 'tenant', 'family', 'visitor'] },
     // 添加时间
     addTime: Date,
     // 申请时间
@@ -23,6 +24,12 @@ export const ResidentSchema = new mongoose.Schema(
     isDelete: { type: Boolean, default: false },
     // 审核时间
     checkTime: Date,
+    // 审核人
+    reviewer: ObjectId,
+    // 有效期
+    expireTime: Date,
+    // 是否推送
+    isPush: { type: Boolean, default: false }
   },
   { collection: 'resident', versionKey: false, timestamps: true },
 );

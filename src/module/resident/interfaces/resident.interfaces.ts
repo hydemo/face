@@ -1,10 +1,12 @@
 import { Document } from 'mongoose';
 
 export interface IResident extends Document {
+  // 地址
+  readonly address: any;
   // 区域
   readonly zone: string;
   // 用户
-  readonly user: string;
+  readonly user: any;
   // 审核情况
   readonly checkResult: number;
   // 住客类型
@@ -19,4 +21,7 @@ export interface IResident extends Document {
   readonly isDelete: boolean;
   // 审核时间
   readonly checkTime: Date;
+  // 有效期
+  readonly expireTime: Date;
+
 }

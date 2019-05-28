@@ -33,6 +33,11 @@ import { ZoneController } from './controller/api/zone.controller';
 import { ResidentController } from './controller/api/resident.controller';
 import { CMSResidentController } from './controller/cms/resident.controller';
 import { ResidentModule } from './module/resident/resident.module';
+import { OrbitController } from './controller/api/orbit.controller';
+import { WeixinUtil } from './utils/weixin.util';
+import { WeixinController } from './controller/weixin.controller';
+import { MessageModule } from './module/message/message.module';
+import { MessageController } from './controller/api/message.controller';
 
 @Module({
   imports: [
@@ -50,6 +55,7 @@ import { ResidentModule } from './module/resident/resident.module';
     OrbitModule,
     StrangerModule,
     ResidentModule,
+    MessageModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => configService.redis,
@@ -60,6 +66,7 @@ import { ResidentModule } from './module/resident/resident.module';
     QiniuUtil,
     CameraUtil,
     CryptoUtil,
+    WeixinUtil,
   ],
   controllers: [
     CallbackController,
@@ -76,6 +83,9 @@ import { ResidentModule } from './module/resident/resident.module';
     ZoneController,
     UserController,
     ResidentController,
+    OrbitController,
+    WeixinController,
+    MessageController,
   ]
 })
 export class AppModule { }

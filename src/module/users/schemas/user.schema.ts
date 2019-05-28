@@ -9,7 +9,7 @@ export const UserSchema = new mongoose.Schema(
     // 注册ip
     registerIp: String,
     // 手机
-    phone: { type: String, required: true, unique: true },
+    phone: { type: String },
     // 微信id
     weixinOpenid: { type: String },
     // 头像

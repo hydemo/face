@@ -6,11 +6,14 @@ import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
+import { CameraUtil } from 'src/utils/camera.util';
+import { IUser } from '../users/interfaces/user.interfaces';
 
 @Injectable()
 export class FaceService {
   constructor(
     @Inject('FaceModelToken') private readonly faceModel: Model<IFace>,
+    @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
   ) { }
 
   // 创建数据
@@ -84,5 +87,21 @@ export class FaceService {
       .exec();
     const total = await this.faceModel.countDocuments(condition);
     return { list, total };
+  }
+  // 根据条件更新
+  async updatePic(condition: any, user: IUser) {
+    const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
+    return await Promise.all(faces.map(async face => {
+      const result = await this.cameraUtil.updateOnePic(face, user)
+      const update = {
+        libIndex: result.LibIndex,
+        flieIndex: result.FlieIndex,
+        pic: result.pic,
+      }
+      await this.faceModel.findByIdAndUpdate(face._id, update)
+    }))
+  }
+  async updateByCondition(condition: any, update: any) {
+    return await this.faceModel.updateMany(condition, update)
   }
 }

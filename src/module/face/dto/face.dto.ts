@@ -1,19 +1,22 @@
 import { ApiModelProperty, ApiModelPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsMongoId, IsPositive, IsBoolean, IsOptional, IsArray, IsEnum } from 'class-validator';
+import { IsString, IsNumber, IsMongoId, IsPositive, IsBoolean, IsOptional, IsArray, IsEnum, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateFaceDTO {
   @IsMongoId()
-  @IsOptional()
   @Type(() => String)
   @ApiModelProperty({ description: '设备' })
   readonly device: string;
 
   @IsMongoId()
-  @IsOptional()
   @Type(() => String)
   @ApiModelProperty({ description: '用户' })
   readonly user: string;
+
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '绑定id' })
+  readonly resident: string;
 
   @IsNumber()
   @IsEnum([1, 2, 3])
@@ -35,4 +38,9 @@ export class CreateFaceDTO {
   @Type(() => String)
   @ApiModelProperty({ description: '图片名' })
   readonly pic: string;
+
+  @IsDate()
+  @Type(() => Date)
+  @ApiModelProperty({ description: '申请时间' })
+  expire?: Date;
 }

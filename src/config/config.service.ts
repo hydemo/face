@@ -77,6 +77,10 @@ export class ConfigService {
 
       SOC_AESSECRET: Joi.string().required(),
 
+      WEIXIN_APPID: Joi.string().required(),
+
+      WEIXIN_APPSECRET: Joi.string().required(),
+
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -177,5 +181,13 @@ export class ConfigService {
 
   get socAESSecret(): string {
     return this.envConfig.SOC_AESSECRET
+  }
+
+  get weixinAppid(): string {
+    return this.envConfig.WEIXIN_APPID
+  }
+
+  get weixinAppSecret(): string {
+    return this.envConfig.WEIXIN_APPSECRET
   }
 }

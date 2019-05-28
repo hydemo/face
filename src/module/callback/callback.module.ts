@@ -5,6 +5,7 @@ import { DeviceModule } from '../device/device.module';
 import { OrbitModule } from '../orbit/orbit.module';
 import { StrangerModule } from '../stranger/stranger.module';
 import { QiniuUtil } from 'src/utils/qiniu.util';
+import { MessageModule } from '../message/message.module';
 
 
 @Module({
@@ -18,6 +19,7 @@ import { QiniuUtil } from 'src/utils/qiniu.util';
     DeviceModule,
     OrbitModule,
     StrangerModule,
+    MessageModule,
   ],
 })
 

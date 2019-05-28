@@ -11,12 +11,22 @@ export class CreateUserDTO {
   @IsString()
   @Type(() => String)
   @ApiModelPropertyOptional({ description: '密码' })
-  password: string;
+  password?: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '人脸' })
+  readonly faceUrl?: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '头像' })
+  readonly cardNumber?: string;
 
   @IsMobilePhone('zh-CN')
   @Type(() => String)
   @ApiModelProperty({ description: '手机号' })
-  readonly phone: string;
+  readonly phone?: string;
 
   @IsString()
   @Type(() => String)
@@ -28,6 +38,10 @@ export class CreateUserDTO {
   @ApiModelProperty({ description: '注册ip' })
   readonly registerIp: string;
 
+  @IsBoolean()
+  @Type(() => Boolean)
+  @ApiModelProperty({ description: '是否手机认证' })
+  readonly isVerify: boolean;
 
   @IsBoolean()
   @Type(() => Boolean)
@@ -77,7 +91,7 @@ export class VerifyUserDTO {
   @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '人脸' })
-  readonly faceUrl?: string;
+  readonly faceUrl: string;
 
   @IsString()
   @Type(() => String)

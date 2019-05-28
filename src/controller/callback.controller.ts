@@ -11,8 +11,6 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { CallbackService } from 'src/module/callback/callback.service';
-import { QiniuUtil } from 'src/utils/qiniu.util';
-import { CameraUtil } from 'src/utils/camera.util';
 
 @ApiUseTags('callback')
 @ApiBearerAuth()
@@ -21,8 +19,6 @@ import { CameraUtil } from 'src/utils/camera.util';
 export class CallbackController {
   constructor(
     private readonly callbackService: CallbackService,
-    private readonly qiniuUtil: QiniuUtil,
-    private readonly cameraUtil: CameraUtil,
   ) { }
 
   @ApiOkResponse({
@@ -32,6 +28,7 @@ export class CallbackController {
 
   @ApiOperation({ title: '人脸识别回调', description: '人脸识别回调' })
   async faceInfo(@Request() req) {
+    console.log(222)
     await this.callbackService.callback(req.body)
     return { status: 200 }
   }

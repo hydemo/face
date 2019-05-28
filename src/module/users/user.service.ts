@@ -18,6 +18,7 @@ import { CameraUtil } from 'src/utils/camera.util';
 import { CreateFaceDTO } from '../face/dto/face.dto';
 import { FaceService } from '../face/face.service';
 import { PhoneUtil } from 'src/utils/phone.util';
+import { RedisService } from 'nestjs-redis';
 
 @Injectable()
 export class UserService {
@@ -31,6 +32,7 @@ export class UserService {
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(PhoneUtil) private readonly phoneUtil: PhoneUtil,
+    private readonly redis: RedisService,
   ) { }
 
   // 根据id查询
@@ -106,10 +108,10 @@ export class UserService {
     if (user.phone) {
       const existing = await this.userModel.findOne({ _id: { $ne: _id }, phone: user.phone });
       if (existing) {
-        throw new ApiException('邮箱已存在', ApiErrorCode.PHONE_EXIST, 406);
+        throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
       }
     }
-    return await this.userModel.findByIdAndUpdate(_id, user).exec();
+    return await this.userModel.findByIdAndUpdate(_id, user, { new: true }).exec();
   }
   // 根据id删除
   async blockById(_id: string) {
@@ -263,6 +265,9 @@ export class UserService {
 
   // 管理员新增账号
   async createByAdmin(createUserDto: CreateUserDTO, ip: string): Promise<IUser> {
+    if (!createUserDto.password) {
+      throw new ApiException('密码不能为空', ApiErrorCode.INPUT_ERROR, 406);
+    }
     const createUser: CreateUserDTO = {
       ...createUserDto,
       registerTime: new Date(),
@@ -271,6 +276,13 @@ export class UserService {
     }
     const user = new this.userModel(createUser);
     await user.save();
+    return user;
+  }
+
+  // 管理员新增账号
+  async create(createUser: CreateUserDTO): Promise<IUser> {
+
+    const user = await this.userModel.create(createUser);
     return user;
   }
 
@@ -286,6 +298,7 @@ export class UserService {
       registerTime: new Date(),
       registerIp: ip,
       isPhoneVerify: true,
+      isVerify: false,
       password: this.cryptoUtil.encryptPassword(userDto.password),
     }
     const user: IUser = new this.userModel(createUser);
@@ -342,5 +355,19 @@ export class UserService {
   // 根据条件查询
   async findByCondition(condition: any): Promise<IUser[]> {
     return await this.userModel.find(condition).lean().exec();
+  }
+
+  // 生成个人二维码
+  async genQrcode(user: IUser) {
+    const key = uuid()
+    const client = this.redis.getClient()
+    const value = {
+      _id: user._id,
+      username: user.username,
+      phone: user.phone,
+      faceUrl: user.faceUrl,
+    }
+    client.set(key, JSON.stringify(value), 'EX', 60 * 2);
+    return { key, value }
   }
 }

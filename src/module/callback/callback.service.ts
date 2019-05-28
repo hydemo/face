@@ -1,8 +1,4 @@
-import { Model } from 'mongoose';
-import { Inject, Injectable, HttpException } from '@nestjs/common';
-import * as fs from 'fs';
-import axios from 'axios';
-import * as md5 from 'md5'
+import { Inject, Injectable } from '@nestjs/common';
 import { UserService } from '../users/user.service';
 import { DeviceService } from '../device/device.service';
 import { CreatAttributeDTO } from '../orbit/dto/attribute.dto';
@@ -13,7 +9,11 @@ import { StrangerService } from '../stranger/stranger.service';
 import { CreateOrbitDTO } from '../orbit/dto/orbit.dto';
 import { QiniuUtil } from 'src/utils/qiniu.util';
 import { IUser } from '../users/interfaces/user.interfaces';
-import { ConfigService } from 'src/config/config.service';
+import { MessageService } from '../message/message.service';
+import { IOrbit } from '../orbit/interfaces/orbit.interfaces';
+import { ResidentService } from '../resident/resident.service';
+import { IResident } from '../resident/interfaces/resident.interfaces';
+import { CreateOrbitMessageDTO } from '../message/dto/message.dto';
 
 @Injectable()
 export class CallbackService {
@@ -21,9 +21,10 @@ export class CallbackService {
     @Inject(UserService) private readonly userService: UserService,
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(OrbitService) private readonly orbitService: OrbitService,
+    // @Inject(ResidentService) private readonly residentService: ResidentService,
+    // @Inject(MessageService) private readonly messageService: MessageService,
     @Inject(StrangerService) private readonly strangerService: StrangerService,
     @Inject(QiniuUtil) private readonly qiniuUtil: QiniuUtil,
-    @Inject(ConfigService) private readonly configService: ConfigService,
   ) { }
   async callback(body: any) {
     const device: IDevice | null = await this.deviceService.findByUUID(body.DeviceUUID)
@@ -31,7 +32,6 @@ export class CallbackService {
       return;
     }
     const img: string = await this.qiniuUtil.uploadB64(body.img)
-    // const imgex: string = await this.qiniuUtil.uploadB64(body.imgex)
 
     const { Attribute } = body
     const attribute: CreatAttributeDTO = {
@@ -63,31 +63,53 @@ export class CallbackService {
         return
       }
       const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, ...stranger }
-      await this.orbitService.create(orbit);
+      const createOrbit: IOrbit = await this.orbitService.create(orbit);
+      // await this.sendMessage(createOrbit, user, device.zone)
     }
     return
-
-
-    // const user = await this.userService.findById(body.userID)
-    // const deviceUUID: string = 'umett6f28vij';
-    // const timeStamp = Date.now();
-    // const username = 'admin';
-    // const password = 'oyxj19891024'
-    // const sign = md5(`${deviceUUID}:${username}:${password}:${timeStamp}`)
-    // const result = await axios({
-    //   method: 'post',
-    //   url: 'http://119.29.108.177:8011',
-    //   data: {
-    //     Name: 'WBListInfoREQ',
-    //     TimeStamp: timeStamp,
-    //     Sign: sign,
-    //     Mode: 2,
-    //     Action: 'GetList',
-    //     UUID: deviceUUID,
-    //   }
-    // });
-    // console.log(result.data.GetList.List, 'result')
   }
+
+  // // 发送消息
+  // async sendMessage(orbit: IOrbit, user: IUser, zone: string) {
+  //   const receivers: string[] = await this.receivers(orbit, user, zone)
+  //   return await Promise.all(receivers.map(async receiver => {
+  //     const message: CreateOrbitMessageDTO = {
+  //       sender: user._id,
+  //       receiver,
+  //       type: 'orbit',
+  //       orbit: orbit._id
+  //     }
+  //     await this.messageService.createOrbitMessage(message)
+  //   }))
+  // }
+
+  // // 发送消息
+  // async receivers(orbit: IOrbit, user: IUser, zone: string): Promise<string[]> {
+  //   const receivers: string[] = []
+  //   const residents: IResident[] = await this.residentService.findByCondition({
+  //     isDelete: false, user: user._id, checkResult: 2
+  //   });
+  //   const residents: IResident[] = await this.residentService.findByCondition({
+  //     isDelete: false, user: user._id, checkResult: 2
+  //   });
+  //   await Promise.all(residents.map(async resident => {
+  //     if (resident.type === 'visitor') {
+  //       await this.visitorReceiver(resident, zone)
+  //     }
+
+  //   }))
+
+
+
+  // }
+
+  // // 访客推送人
+  // async visitorReceivers(resident: IResident, zone: string): Promise<string[]> {
+
+
+
+
+  // }
 
 
 }

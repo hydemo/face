@@ -51,10 +51,22 @@ export class CMSResidentController {
     description: '同意业主申请',
   })
   @ApiOperation({ title: '同意业主申请', description: '同意业主申请' })
-  async ownerApplication(
+  async agreeOwnerApplication(
     @Param('id', new MongodIdPipe()) id: string
   ) {
-    await this.residentService.agree(id);
+    await this.residentService.agreeOwner(id);
+    return { statusCode: 200, msg: '申请成功' };
+  }
+
+  @Put('/:id/reject')
+  @ApiOkResponse({
+    description: '同意业主申请',
+  })
+  @ApiOperation({ title: '同意业主申请', description: '同意业主申请' })
+  async rejectOwnerApplication(
+    @Param('id', new MongodIdPipe()) id: string
+  ) {
+    await this.residentService.rejectOwner(id);
     return { statusCode: 200, msg: '申请成功' };
   }
 

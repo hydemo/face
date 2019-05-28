@@ -12,7 +12,13 @@ export class OrbitService {
   constructor(
     @Inject('OrbitModelToken') private readonly orbitModel: Model<IOrbit>,
   ) { }
-
+  async canActive(id: string, userId: string) {
+    const orbit: IOrbit | null = await this.orbitModel.findById(id);
+    if (!orbit || String(orbit.user) !== String(userId)) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    return orbit
+  }
   // 创建数据
   async create(createOrbitDTO: CreateOrbitDTO): Promise<IOrbit> {
     const creatOrbit = new this.orbitModel(createOrbitDTO);
@@ -52,5 +58,28 @@ export class OrbitService {
       .exec();
     const total = await this.orbitModel.countDocuments(condition);
     return { list, total };
+  }
+
+  // 查询我的轨迹
+  async myOrbits(pagination: Pagination, userId: String): Promise<IList<IOrbit>> {
+    const condition: any = { user: userId, isDelete: false };
+
+    const list = await this.orbitModel
+      .find(condition)
+      .limit(pagination.limit)
+      .skip((pagination.offset - 1) * pagination.limit)
+      .sort({ passTime: -1 })
+      .populate({ path: 'device', model: 'device' })
+      .populate({ path: 'zone', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
+      .lean()
+      .exec();
+    const total = await this.orbitModel.countDocuments(condition);
+    return { list, total };
+  }
+
+  // 根据id删除
+  async delete(id: string, userId: string) {
+    await this.canActive(id, userId);
+    await this.orbitModel.findByIdAndUpdate(id, { isDelete: true })
   }
 }

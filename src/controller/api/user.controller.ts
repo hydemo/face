@@ -5,6 +5,7 @@ import {
   ApiOkResponse,
   ApiForbiddenResponse,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { RegisterUserDTO, LoginUserDTO, VerifyUserDTO, ForgetPasswordDTO, BindPhoneDTO, ResetPasswordDTO } from 'src/module/users/dto/users.dto';
@@ -12,7 +13,7 @@ import { UserService } from 'src/module/users/user.service';
 import { PhonePipe } from 'src/common/pipe/phone.pipe';
 
 @ApiUseTags('users')
-
+@ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/users')
 export class UserController {
@@ -59,6 +60,19 @@ export class UserController {
   ) {
     await this.userService.getCode(phone)
     return { statusCode: 200, msg: '验证码已发送' };
+  }
+
+  @Get('/qrcode')
+  @UseGuards(AuthGuard())
+  @ApiOkResponse({
+    description: '获取我的二维码',
+  })
+  @ApiOperation({ title: '获取我的二维码', description: '获取我的二维码' })
+  async genQrcode(
+    @Request() req: any
+  ) {
+    const data = await this.userService.genQrcode(req.user)
+    return { statusCode: 200, data };
   }
 
   @Get('/check/phone')

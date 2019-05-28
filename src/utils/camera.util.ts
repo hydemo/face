@@ -87,9 +87,8 @@ export class CameraUtil {
    * 删除单张图片
    * 
    * @param face 名单信息
-   * @param Mode 模式
    */
-  async deleteOnePic(face: IFace, Mode: number): Promise<boolean> {
+  async deleteOnePic(face: IFace): Promise<boolean> {
     const { device } = face
     const { username, password, deviceUUID } = device
     const timeStamp: string = Date.now().toString()
@@ -101,7 +100,7 @@ export class CameraUtil {
         Name: 'WBListInfoACK',
         TimeStamp: timeStamp,
         Sign: sign,
-        Mode,
+        Mode: face.mode,
         Action: 'DeleteOneP',
         UUID: deviceUUID,
         DeleteOneP: {
@@ -115,6 +114,16 @@ export class CameraUtil {
       return true
     }
     return false
+  }
+
+  /**
+   * 删除单张图片
+   * 
+   * @param face 名单信息
+   */
+  async updateOnePic(face: IFace, user: IUser) {
+    await this.deleteOnePic(face)
+    return await this.addOnePic(face.device, user, face.mode)
   }
 
   /**
@@ -146,7 +155,7 @@ export class CameraUtil {
   * @param user 用户信息
   * @param face 名单信息
   */
-  async addOnePic(device: IDevice, user: IUser, Mode: number): Promise<boolean> {
+  async addOnePic(device: IDevice, user: any, Mode: number) {
     const { username, password, deviceUUID } = device
     const Img = await this.getImg(`${this.config.qiniuLink}/${user.faceUrl}`);
     const ImgName = user.username;
@@ -170,7 +179,6 @@ export class CameraUtil {
         }
       }
     });
-    console.log(result, 'result')
     if (result.data.Result === 'ok') {
       return result.data.AddOnePic;
     }

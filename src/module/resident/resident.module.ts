@@ -7,13 +7,15 @@ import { ZoneModule } from '../zone/zone.module';
 import { UserModule } from '../users/user.module';
 import { CameraUtil } from 'src/utils/camera.util';
 import { FaceModule } from '../face/face.module';
+import { WeixinUtil } from 'src/utils/weixin.util';
 
 @Module({
   providers: [
     ResidentService,
     CameraUtil,
-
-    ...residentsProviders],
+    WeixinUtil,
+    ...residentsProviders
+  ],
   exports: [ResidentService],
   imports: [
     DatabaseModule,

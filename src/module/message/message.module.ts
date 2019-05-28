@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { OrbitService } from './orbit.service';
-import { orbitsProviders } from './orbit.providers';
+import { MessageService } from './message.service';
+import { messagesProviders } from './message.providers';
 import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  providers: [OrbitService, ...orbitsProviders],
-  exports: [OrbitService],
+  providers: [MessageService, ...messagesProviders],
+  exports: [MessageService],
   imports: [
     DatabaseModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
 })
 
-export class OrbitModule { }
+export class MessageModule { }

@@ -16,6 +16,10 @@ export const FaceSchema = new mongoose.Schema(
     flieIndex: Number,
     // 图片名
     pic: String,
+    // 过期时间
+    expire: Date,
+    // 绑定id
+    resident: ObjectId,
   },
   { collection: 'face', versionKey: false, timestamps: true },
 );

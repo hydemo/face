@@ -73,13 +73,13 @@ export class AdminService {
   // 根据id修改
   async updateById(_id: string, updateAdminDto: UpdateAdminDTO): Promise<boolean> {
     const admin = await this.adminModel
-      .findByIdAndUpdate(_id, updateAdminDto)
+      .findByIdAndUpdate(_id, updateAdminDto, { new: true })
       .lean()
       .exec();
     if (!admin) {
       throw new ApiException('管理员账号不存在', ApiErrorCode.NO_EXIST, 404);
     }
-    return true
+    return admin
   }
   // 根据id删除
   async deleteById(_id: string): Promise<boolean> {

@@ -26,6 +26,8 @@ export const OrbitSchema = new mongoose.Schema(
     faceQuality: { type: Number },
     // 人脸特征值
     faceFeature: { type: String },
+    // 是否删除
+    isDelete: { type: Boolean, default: false },
     // 人脸属性
     attribute: {
       // 年龄

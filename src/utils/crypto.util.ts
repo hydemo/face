@@ -45,63 +45,38 @@ export class CryptoUtil {
      */
     encText(text, key, newIv) {
         const IV = new Buffer([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-        const CBC = 'cbc';
         const ECB = 'ecb';
         const NULL_IV = new Buffer([]);
-
         const cipherMode = ECB;
-        const keySize = 128;
-        const algorithm = 'aes-' + keySize + '-' + cipherMode;;
         var outputEncoding = 'hex';
-        var inputEncoding = 'utf8';
+        const inputEncoding = 'utf8';
         this.checkKey(key);
-        var iv = newIv || IV;
+        let iv = newIv || IV;
         if (cipherMode === ECB) iv = NULL_IV;
-        var inEncoding = inputEncoding;
-        var outEncoding = outputEncoding;
-        var buff = new Buffer(text, inEncoding);
-        var out = this.encBytes(buff, key, iv);
-        var re = new Buffer(out).toString(outEncoding);
+        const inEncoding = inputEncoding;
+        const outEncoding = outputEncoding;
+        const buff = new Buffer(text, inEncoding);
+        const out = this.encBytes(buff, key, iv);
+        const re = new Buffer(out).toString(outEncoding);
         return re.toUpperCase();
     }
 
     encBytes(buffer, key, newIv) {
         const IV = new Buffer([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-        const CBC = 'cbc';
         const ECB = 'ecb';
         const NULL_IV = new Buffer([]);
 
         const cipherMode = ECB;
         const keySize = 128;
         const algorithm = 'aes-' + keySize + '-' + cipherMode;;
-        var outputEncoding = 'base64';
-        var inputEncoding = 'utf8';
-        var outputEncoding = 'base64';
-        var inputEncoding = 'utf8';
         this.checkKey(key);
-        var iv = newIv || IV;
+        let iv = newIv || IV;
         if (cipherMode === ECB) iv = NULL_IV;
-        var cipher = crypto.createCipheriv(algorithm, key, iv);
+        const cipher = crypto.createCipheriv(algorithm, key, iv);
         cipher.setAutoPadding(true);
-        var re = Buffer.concat([cipher.update(buffer), cipher.final()]);
-        // console.log('enc re:%s,len:%d', printBuf(re), re.length);
+        const re = Buffer.concat([cipher.update(buffer), cipher.final()]);
         return re;
     }
-    // return crypted;
-    // const iv = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
-    //     0x0e, 0x0f];
-    // const cipher = crypto.createCipheriv(
-    //     'aes-128-cbc',
-    //     new Buffer(key, 'hex'),
-    //     new Buffer(iv)
-    // );
-    // // cipher.setAutoPadding(true);
-    // let encrypted = cipher.update(message, 'utf8', 'base64');
-    // encrypted += cipher.final('base64');
-    // console.log('encode message: ' + encrypted);
-    // return crypted;
-    // }
-
     strToBytes(str: string): any {
         let pos = 0;
         let len = str.length;
@@ -127,17 +102,6 @@ export class CryptoUtil {
             pos += 2;
         }
         return hexA;
-
-        // const buffer = new Buffer(8)
-        // const result: any = []
-        // for (let i = 0; i < str.length / 2; i++) {
-        //     const high = parseInt(str.substring(i * 2, i * 2 + 1), 16);
-        //     const low = parseInt(str.substring(i * 2 + 1, i * 2 + 2), 16);
-        //     const number = high * 16 + low
-        //     result[i] = buffer.writeDoubleLE(number);
-        //     console.log(result[i])
-        // }
-        // return result;
     }
 
 
