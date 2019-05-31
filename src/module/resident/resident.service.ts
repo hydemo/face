@@ -246,6 +246,7 @@ export class ResidentService {
         flieIndex: result.FlieIndex,
         pic: result.pic,
         resident,
+        zone: zone.zoneId,
       }
       if (expire) {
         face.expire = expire;
@@ -483,7 +484,7 @@ export class ResidentService {
     return await Promise.all(owners.map(async owner => {
       const address = owner.address;
       const users = await this.residentModel
-        .find({ zone: address._id, isDelete: false, checkResult: 2, type: 'visitor' })
+        .find({ address: address._id, isDelete: false, checkResult: 2, type: 'visitor' })
         .populate({ path: 'user', model: 'user', select: '-password' })
         .lean()
         .exec()

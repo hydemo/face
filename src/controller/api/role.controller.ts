@@ -12,11 +12,13 @@ import { AuthGuard } from '@nestjs/passport';
 import { RoleService } from 'src/module/role/role.service';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { CreateRoleDTO, RoleDTO, CreateRoleByScanDTO } from 'src/module/role/dto/role.dto';
+import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
+import { UserRoles } from 'src/common/decorator/roles.decorator';
 
 @ApiUseTags('roles')
 @ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-@UseGuards(AuthGuard())
+@UseGuards(AuthGuard(), UserRolesGuard)
 @Controller('api/roles')
 export class RoleController {
   constructor(
@@ -28,11 +30,12 @@ export class RoleController {
     isArray: true,
   })
   @Get('/')
+  @UserRoles(1)
   @ApiOperation({ title: '管理人员列表', description: '管理人员列表' })
   managements(
     @Request() req: any,
   ) {
-    return this.roleService.findByManagement(req.zones);
+    return this.roleService.findByManagement(req.user._id);
   }
 
   @ApiOkResponse({
@@ -66,10 +69,10 @@ export class RoleController {
   })
   @Get('/me')
   @ApiOperation({ title: '获取我的角色', description: '获取我的角色' })
-  MyRole(
+  async myRole(
     @Request() req: any,
   ) {
-    const data = this.roleService.myRoles(req.user._id);
+    const data = await this.roleService.myRoles(req.user._id);
     return { statusCode: 200, data };
   }
 

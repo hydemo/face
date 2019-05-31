@@ -14,6 +14,7 @@ import { ZoneService } from 'src/module/zone/zone.service';
 import { CreateZoneDTO, ZoneDTO } from 'src/module/zone/dto/zone.dto';
 import { IZone } from 'src/module/zone/interfaces/zone.interfaces';
 import { FaceService } from 'src/module/face/face.service';
+import { RoleService } from 'src/module/role/role.service';
 
 
 @ApiUseTags('cms/zones')
@@ -24,6 +25,7 @@ export class CMSZoneController {
   constructor(
     @Inject(ZoneService) private zoneService: ZoneService,
     @Inject(FaceService) private faceService: FaceService,
+    @Inject(RoleService) private roleService: RoleService,
   ) { }
 
   @ApiOkResponse({
@@ -46,6 +48,19 @@ export class CMSZoneController {
   async findById(@Param('id', new MongodIdPipe()) id: string) {
     const data: IZone = await this.zoneService.findTreeById(id);
     return { statusCode: 200, msg: '获取区域成功', data };
+  }
+
+  @Get('/:id/roles')
+  @ApiOkResponse({
+    description: '获取区域成功',
+  })
+  @ApiCreatedResponse({ description: '获取区域' })
+  @ApiOperation({ title: '根据id获取区域信息', description: '根据id获取区域信息' })
+  async getRoleByZone(
+    @Query() pagination: Pagination,
+    @Param('id', new MongodIdPipe()) id: string,
+  ) {
+    return await this.roleService.findByZone(pagination, id);
   }
 
   @Post('')

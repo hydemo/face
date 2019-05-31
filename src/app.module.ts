@@ -39,7 +39,6 @@ import { WeixinController } from './controller/weixin.controller';
 import { MessageModule } from './module/message/message.module';
 import { MessageController } from './controller/api/message.controller';
 import { RoleModule } from './module/role/role.module';
-import { CMSRoleController } from './controller/cms/role.controller';
 import { RoleController } from './controller/api/role.controller';
 
 @Module({
@@ -84,7 +83,6 @@ import { RoleController } from './controller/api/role.controller';
     CMSOrbitController,
     CMSStrangerController,
     CMSResidentController,
-    CMSRoleController,
     ZoneController,
     UserController,
     ResidentController,

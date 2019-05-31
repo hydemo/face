@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+import * as uuid from 'uuid/v4';
 import { Inject, Injectable } from '@nestjs/common';
 import { IZone } from './interfaces/zone.interfaces';
 import { CreateZoneDTO, ZoneDTO } from './dto/zone.dto';
@@ -6,11 +7,15 @@ import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
+import { RoleService } from '../role/role.service';
+import { RedisService } from 'nestjs-redis';
 
 @Injectable()
 export class ZoneService {
   constructor(
     @Inject('ZoneModelToken') private readonly zoneModel: Model<IZone>,
+    @Inject(RoleService) private readonly roleService: RoleService,
+    private readonly redis: RedisService,
   ) { }
 
   // 创建数据
@@ -22,6 +27,22 @@ export class ZoneService {
     creatZone.zoneId = creatZone._id
     await creatZone.save();
     return true;
+  }
+
+  async getVisitorQrcode(user: string, zoneId: string) {
+    const canActive = await this.roleService.checkRoles({ user, role: { $in: [1, 3] }, zoneId, isDelete: false })
+    if (!canActive) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const zone: IZone | null = await this.zoneModel.findById(zoneId)
+    if (!zone) {
+      throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
+    }
+    const key = uuid()
+    const client = this.redis.getClient()
+    const value = zone;
+    await client.set(key, JSON.stringify(value), 'EX', 60 * 2);
+    return key
   }
 
   // 根据条件查询

@@ -20,6 +20,8 @@ export const FaceSchema = new mongoose.Schema(
     expire: Date,
     // 绑定id
     resident: ObjectId,
+    // 区域
+    zone: ObjectId,
   },
   { collection: 'face', versionKey: false, timestamps: true },
 );

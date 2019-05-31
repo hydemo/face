@@ -6,4 +6,4 @@ import { ReflectMetadata } from '@nestjs/common';
 
 export const Roles = (...roles: string[]) => ReflectMetadata('roles', roles);
 
-export const UserRoles = (...userRoles: string[]) => ReflectMetadata('userRoles', userRoles);
+export const UserRoles = (...userRoles: number[]) => ReflectMetadata('userRoles', userRoles);

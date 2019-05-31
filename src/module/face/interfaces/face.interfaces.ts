@@ -15,4 +15,6 @@ export interface IFace extends Document {
   readonly flieIndex: number;
   // 图片名
   readonly pic: string;
+  // 区域
+  readonly zone: string;
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, Inject } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, Inject, Request } from '@nestjs/common';
 import {
   ApiUseTags,
   ApiOkResponse,
@@ -51,14 +51,17 @@ export class ZoneController {
 
   @Get('/:id/qrcode')
   @UseGuards(AuthGuard(), UserRolesGuard)
-  @UserRoles('1')
+  @UserRoles(1, 3)
   @ApiOkResponse({
     description: '获取访客二维码',
   })
   @ApiCreatedResponse({ description: '获取访客二维码' })
   @ApiOperation({ title: '获取访客二维码', description: '获取访客二维码' })
-  async getVisitorQrcode(@Param('id', new MongodIdPipe()) id: string) {
-    // const data: IZone = await this.zoneService.getVisitorQrcode(id);
+  async getVisitorQrcode(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
+  ) {
+    const data: string = await this.zoneService.getVisitorQrcode(req.user._id, id);
     return { statusCode: 200, msg: '获取区域成功' };
   }
 

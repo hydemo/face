@@ -366,6 +366,7 @@ export class UserService {
       username: user.username,
       phone: user.phone,
       faceUrl: user.faceUrl,
+      cardNumber: user.cardNumber,
     }
     client.set(key, JSON.stringify(value), 'EX', 60 * 2);
     return key

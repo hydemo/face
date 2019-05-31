@@ -15,6 +15,11 @@ export class CreateFaceDTO {
 
   @IsMongoId()
   @Type(() => String)
+  @ApiModelProperty({ description: '区域' })
+  readonly zone: string;
+
+  @IsMongoId()
+  @Type(() => String)
   @ApiModelProperty({ description: '绑定id' })
   readonly resident: string;
 
