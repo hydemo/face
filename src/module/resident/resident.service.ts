@@ -19,6 +19,8 @@ import { CreateFaceDTO } from '../face/dto/face.dto';
 import { CreateUserDTO } from '../users/dto/users.dto';
 import { WeixinUtil } from 'src/utils/weixin.util';
 import { IFace } from '../face/interfaces/face.interfaces';
+import { RoleService } from '../role/role.service';
+import { RoleDTO } from '../role/dto/role.dto';
 
 @Injectable()
 export class ResidentService {
@@ -30,6 +32,7 @@ export class ResidentService {
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+    @Inject(RoleService) private readonly roleService: RoleService,
   ) { }
 
   // 申请重复确认
@@ -229,7 +232,7 @@ export class ResidentService {
   async addToDevice(zone: IZone, user: IUser, resident: string, expire?: Date) {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
-
+    console.log(devices, 'dd')
     await Promise.all(devices.map(async device => {
       const result: any = await this.cameraUtil.addOnePic(device, user, 2)
       if (!result) {
@@ -268,6 +271,13 @@ export class ResidentService {
       addTime: new Date(),
       checkTime: new Date(),
     })
+    const role: RoleDTO = {
+      role: 4,
+      description: '业主',
+      user: resident.user._id,
+      zone: resident.address._id,
+    }
+    await this.roleService.create(role)
     return true;
   }
 

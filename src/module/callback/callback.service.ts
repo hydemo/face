@@ -21,8 +21,8 @@ export class CallbackService {
     @Inject(UserService) private readonly userService: UserService,
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(OrbitService) private readonly orbitService: OrbitService,
-    // @Inject(ResidentService) private readonly residentService: ResidentService,
-    // @Inject(MessageService) private readonly messageService: MessageService,
+    @Inject(ResidentService) private readonly residentService: ResidentService,
+    @Inject(MessageService) private readonly messageService: MessageService,
     @Inject(StrangerService) private readonly strangerService: StrangerService,
     @Inject(QiniuUtil) private readonly qiniuUtil: QiniuUtil,
   ) { }
@@ -64,52 +64,61 @@ export class CallbackService {
       }
       const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, ...stranger }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
-      // await this.sendMessage(createOrbit, user, device.zone)
+      await this.sendMessage(createOrbit, user, device.zone)
     }
     return
   }
 
-  // // 发送消息
-  // async sendMessage(orbit: IOrbit, user: IUser, zone: string) {
-  //   const receivers: string[] = await this.receivers(orbit, user, zone)
-  //   return await Promise.all(receivers.map(async receiver => {
-  //     const message: CreateOrbitMessageDTO = {
-  //       sender: user._id,
-  //       receiver,
-  //       type: 'orbit',
-  //       orbit: orbit._id
-  //     }
-  //     await this.messageService.createOrbitMessage(message)
-  //   }))
-  // }
+  // 发送消息
+  async sendMessage(orbit: IOrbit, user: IUser, zone: string) {
+    const receivers: string[] = await this.receivers(orbit, user, zone)
+    return await Promise.all(receivers.map(async receiver => {
+      const message: CreateOrbitMessageDTO = {
+        sender: user._id,
+        receiver,
+        type: 'orbit',
+        orbit: orbit._id
+      }
+      await this.messageService.createOrbitMessage(message)
+    }))
+  }
 
-  // // 发送消息
-  // async receivers(orbit: IOrbit, user: IUser, zone: string): Promise<string[]> {
-  //   const receivers: string[] = []
-  //   const residents: IResident[] = await this.residentService.findByCondition({
-  //     isDelete: false, user: user._id, checkResult: 2
-  //   });
-  //   const residents: IResident[] = await this.residentService.findByCondition({
-  //     isDelete: false, user: user._id, checkResult: 2
-  //   });
-  //   await Promise.all(residents.map(async resident => {
-  //     if (resident.type === 'visitor') {
-  //       await this.visitorReceiver(resident, zone)
-  //     }
+  // 发送消息
+  async receivers(orbit: IOrbit, user: IUser, zone: string): Promise<string[]> {
+    const receivers: string[] = []
+    const residents: IResident[] = await this.residentService.findByCondition({
+      isDelete: false, user: user._id, checkResult: 2
+    });
+    await Promise.all(residents.map(async resident => {
+      if (resident.type === 'visitor') {
+        await this.visitorReceivers(resident, zone, receivers)
+      } else if (resident.type === 'family') {
+        await this.familyReceivers(resident, receivers)
+      }
+    }))
+    return receivers
+  }
 
-  //   }))
+  // 访客推送人
+  async visitorReceivers(resident: IResident, zone: string, receivers: string[]) {
+    const residents: IResident[] = await this.residentService.findByCondition({
+      zone,
+      isDelete: false,
+      isPush: true,
+      address: resident.address,
+      checkResult: 2
+    })
+    return residents.map(resid => receivers.push(resid.user))
+  }
 
-
-
-  // }
-
-  // // 访客推送人
-  // async visitorReceivers(resident: IResident, zone: string): Promise<string[]> {
-
-
-
-
-  // }
-
-
+  // 访客推送人
+  async familyReceivers(resident: IResident, receivers: string[]) {
+    const residents: IResident[] = await this.residentService.findByCondition({
+      isDelete: false,
+      isPush: true,
+      address: resident.address,
+      checkResult: 2
+    })
+    return residents.map(resid => receivers.push(resid.user))
+  }
 }

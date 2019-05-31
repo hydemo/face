@@ -4,6 +4,7 @@ import {
   ApiOkResponse,
   ApiForbiddenResponse,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/common/guard/roles.guard';
@@ -15,6 +16,7 @@ import { CreateResidentDTO, CreateFamilyDTO, AgreeVisitorDTO, AgreeFamilyDTO, Cr
 
 @ApiUseTags('residents')
 @UseGuards(AuthGuard())
+@ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/residents')
 export class ResidentController {

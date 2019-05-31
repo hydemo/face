@@ -6,13 +6,14 @@ import {
   ApiOkResponse,
   ApiForbiddenResponse,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { OrbitService } from 'src/module/orbit/orbit.service';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 
 @ApiUseTags('orbits')
-
+@ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @UseGuards(AuthGuard())
 @Controller('api/orbits')

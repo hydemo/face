@@ -9,6 +9,7 @@ import {
   ApiForbiddenResponse,
   ApiCreatedResponse,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { MongodIdPipe } from '../../common/pipe/mongodId.pipe';
 import { AuthGuard } from '@nestjs/passport';
@@ -16,7 +17,7 @@ import { RolesGuard } from '../../common/guard/roles.guard';
 import { Roles } from '../../common/decorator/roles.decorator';
 
 @ApiUseTags('devices')
-
+@ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @UseGuards(AuthGuard(), RolesGuard)
 @Controller('api/devices')

@@ -8,6 +8,7 @@ import { UserModule } from '../users/user.module';
 import { CameraUtil } from 'src/utils/camera.util';
 import { FaceModule } from '../face/face.module';
 import { WeixinUtil } from 'src/utils/weixin.util';
+import { RoleModule } from '../role/role.module';
 
 @Module({
   providers: [
@@ -22,6 +23,7 @@ import { WeixinUtil } from 'src/utils/weixin.util';
     ZoneModule,
     UserModule,
     FaceModule,
+    RoleModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
 })

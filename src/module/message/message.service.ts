@@ -55,7 +55,7 @@ export class MessageService {
 
   // 查询全部数据
   async findMessagesById(pagination: Pagination, id: string, userId: string): Promise<IList<IMessage>> {
-    const message: IMessage | null = await this.messageModel.findById(id)
+    const message: IMessage | null = await this.messageModel.findByIdAndUpdate(id, { isRead: true })
     if (!message) {
       throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
     }

@@ -368,6 +368,6 @@ export class UserService {
       faceUrl: user.faceUrl,
     }
     client.set(key, JSON.stringify(value), 'EX', 60 * 2);
-    return { key, value }
+    return key
   }
 }

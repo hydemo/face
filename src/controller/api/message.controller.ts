@@ -6,13 +6,14 @@ import {
   ApiOkResponse,
   ApiForbiddenResponse,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { MessageService } from 'src/module/message/message.service';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 
 @ApiUseTags('messages')
-
+@ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @UseGuards(AuthGuard())
 @Controller('api/message')

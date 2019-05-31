@@ -38,6 +38,9 @@ import { WeixinUtil } from './utils/weixin.util';
 import { WeixinController } from './controller/weixin.controller';
 import { MessageModule } from './module/message/message.module';
 import { MessageController } from './controller/api/message.controller';
+import { RoleModule } from './module/role/role.module';
+import { CMSRoleController } from './controller/cms/role.controller';
+import { RoleController } from './controller/api/role.controller';
 
 @Module({
   imports: [
@@ -56,6 +59,7 @@ import { MessageController } from './controller/api/message.controller';
     StrangerModule,
     ResidentModule,
     MessageModule,
+    RoleModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => configService.redis,
@@ -80,12 +84,14 @@ import { MessageController } from './controller/api/message.controller';
     CMSOrbitController,
     CMSStrangerController,
     CMSResidentController,
+    CMSRoleController,
     ZoneController,
     UserController,
     ResidentController,
     OrbitController,
     WeixinController,
     MessageController,
+    RoleController,
   ]
 })
 export class AppModule { }
