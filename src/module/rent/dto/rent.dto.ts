@@ -1,76 +1,49 @@
 import { ApiModelProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsMongoId, IsEnum, IsDate } from 'class-validator';
+import { IsMongoId, IsDate, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class BlackDTO {
-  @IsNumber()
-  @IsEnum([1, 2, 3])
-  @Type(() => Number)
-  @ApiModelProperty({ description: '审核情况 1:待审核 2:通过 3:拒绝' })
-  readonly checkResult: number;
-
+export class RentDTO {
   @IsMongoId()
   @Type(() => String)
-  @ApiModelProperty({ description: '申请人' })
-  readonly applicant: string;
+  @ApiModelProperty({ description: '业主' })
+  readonly owner: string;
 
   @IsDate()
   @Type(() => Date)
-  @ApiModelProperty({ description: '申请时间' })
-  readonly applicationTime: Date;
-
+  @ApiModelProperty({ description: '出租时间' })
+  readonly rentTime: Date;
 
   @IsMongoId()
   @Type(() => String)
-  @ApiModelProperty({ description: '申请小区' })
-  readonly zone: string;
+  @ApiModelProperty({ description: '租客' })
+  readonly tenant: string;
 
-  @IsNumber()
-  @IsEnum([1, 2, 3])
-  @Type(() => Number)
-  @ApiModelProperty({ description: '类型 1:监控 2:报警' })
-  readonly type: number;
-
-  @IsString()
-  @Type(() => String)
-  @ApiModelProperty({ description: '姓名' })
-  readonly usename: string;
-
-  @IsString()
-  @Type(() => String)
-  @ApiModelProperty({ description: '身份证' })
-  readonly cardNumber: string;
-
-  @IsString()
-  @Type(() => String)
-  @ApiModelProperty({ description: '申请理由' })
-  readonly reason: string;
-}
-
-export class CreateBlackDTO {
   @IsMongoId()
   @Type(() => String)
-  @ApiModelProperty({ description: '申请小区' })
+  @ApiModelProperty({ description: '小区' })
   readonly zone: string;
 
-  @IsNumber()
-  @IsEnum([1, 2, 3])
-  @Type(() => Number)
-  @ApiModelProperty({ description: '类型 1:监控 2:报警' })
-  readonly type: number;
-
-  @IsString()
+  @IsMongoId()
   @Type(() => String)
-  @ApiModelProperty({ description: '姓名' })
-  readonly usename: string;
-
-  @IsString()
-  @Type(() => String)
-  @ApiModelProperty({ description: '身份证' })
-  readonly cardNumber: string;
-
-  @IsString()
-  @Type(() => String)
-  @ApiModelProperty({ description: '申请理由' })
-  readonly reason: string;
+  @ApiModelProperty({ description: '地址' })
+  readonly address: string;
 }
+
+export class CreateRentDTO {
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '租客' })
+  readonly tenant: string;
+
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '地址' })
+  readonly address: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '二维码' })
+  readonly key: string;
+}
+
+

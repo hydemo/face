@@ -36,8 +36,7 @@ export class RoleController {
     @Query() pagination: Pagination,
     @Request() req: any,
   ) {
-    const data = await this.roleService.findByManagement(pagination, req.user._id);
-    return { statusCode: 200, data };
+    return await this.roleService.findByManagement(pagination, req.user._id);
   }
 
   @ApiOkResponse({

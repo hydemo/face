@@ -21,7 +21,6 @@ import { WeixinUtil } from 'src/utils/weixin.util';
 import { IFace } from '../face/interfaces/face.interfaces';
 import { RoleService } from '../role/role.service';
 import { RoleDTO } from '../role/dto/role.dto';
-import { IRole } from '../role/interfaces/role.interfaces';
 
 @Injectable()
 export class ResidentService {
@@ -45,7 +44,7 @@ export class ResidentService {
   }
   // 业主存在确认
   async getOwner(address: string) {
-    return await this.residentModel.findOne({ address, isDelete: false, checkResult: 2 })
+    return await this.residentModel.findOne({ address, isDelete: false, checkResult: 2, type: 'owner' })
   }
   // 是否是业主本人
   async isOwner(address: string, user: string) {
@@ -259,7 +258,6 @@ export class ResidentService {
   async addToDevice(zone: IZone, user: IUser, resident: string, expire?: Date) {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
-    console.log(devices, 'dd')
     await Promise.all(devices.map(async device => {
       const result: any = await this.cameraUtil.addOnePic(device, user, 2)
       if (!result) {
@@ -574,6 +572,11 @@ export class ResidentService {
         .exec()
       return { address, users }
     }))
+  }
+
+  // 出租
+  async rent(owner: string, tenant: IUser, address: IZone) {
+
   }
 
   // 根据用户id查询住客列表

@@ -18,6 +18,8 @@ import { UserRoles } from 'src/common/decorator/roles.decorator';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
 import { CreateBlackDTO } from 'src/module/black/dto/black.dto';
 import { BlackService } from 'src/module/black/black.service';
+import { CreateRentDTO } from 'src/module/rent/dto/rent.dto';
+import { RentService } from 'src/module/rent/rent.service';
 
 
 @ApiUseTags('zones')
@@ -28,6 +30,7 @@ export class ZoneController {
   constructor(
     @Inject(ZoneService) private zoneService: ZoneService,
     @Inject(BlackService) private blackService: BlackService,
+    @Inject(RentService) private rentService: RentService,
   ) { }
 
   @ApiOkResponse({
@@ -68,7 +71,7 @@ export class ZoneController {
     return { statusCode: 200, data, };
   }
 
-  @Post('/:id/black')
+  @Post('/:id/blacks')
   @ApiOkResponse({
     description: '申请添加黑名单',
   })
@@ -83,4 +86,33 @@ export class ZoneController {
     return { statusCode: 200, msg: '申请成功成功' };
   }
 
+  @Get('/:id/blacks')
+  @ApiOkResponse({
+    description: '小区黑名单列表',
+  })
+  @ApiCreatedResponse({ description: '小区黑名单列表' })
+  @ApiOperation({ title: '小区黑名单列表', description: '小区黑名单列表' })
+  async blacks(
+    @Query() pagination: Pagination,
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any
+  ) {
+    return await this.blackService.findByZone(pagination, id, req.user._id);
+  }
+
+  @Post('/:id/rent')
+  @ApiOkResponse({
+    description: '申请添加黑名单',
+  })
+  @ApiCreatedResponse({ description: '申请添加黑名单' })
+  @ApiOperation({ title: '申请添加黑名单', description: '申请添加黑名单' })
+  async rent(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Body() rent: CreateRentDTO,
+    @Request() req: any
+  ) {
+    const address: IZone = await this.zoneService.findById(id);
+    await this.rentService.rent(req.user._id, address, rent);
+    return { statusCode: 200, msg: '申请成功成功' };
+  }
 }

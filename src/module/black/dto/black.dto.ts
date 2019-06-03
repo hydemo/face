@@ -48,11 +48,6 @@ export class BlackDTO {
 }
 
 export class CreateBlackDTO {
-  @IsMongoId()
-  @Type(() => String)
-  @ApiModelProperty({ description: '申请小区' })
-  readonly zone: string;
-
   @IsNumber()
   @IsEnum([1, 2, 3])
   @Type(() => Number)

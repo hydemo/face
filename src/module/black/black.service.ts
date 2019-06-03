@@ -8,20 +8,27 @@ import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
 import { CameraUtil } from 'src/utils/camera.util';
 import { IUser } from '../users/interfaces/user.interfaces';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class BlackService {
   constructor(
     @Inject('BlackModelToken') private readonly blackModel: Model<IBlack>,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
+    @Inject(RoleService) private readonly roleService: RoleService,
   ) { }
 
   async addToZone(user: string, zone: string, createBlack: CreateBlackDTO): Promise<IBlack> {
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 1, user, zone })
+    if (!canActive) {
+      throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
+    }
     const black: BlackDTO = {
       ...createBlack,
       applicant: user,
       applicationTime: new Date(),
       checkResult: 1,
+      zone,
     }
     return await this.blackModel.create(black);
   }
@@ -55,33 +62,22 @@ export class BlackService {
     return { list, total };
   }
 
-  // 用户列表
-  async findByZone(pagination: Pagination, zone: string): Promise<IList<IBlack>> {
-    const search: any = [];
-    const condition: any = {
-      // zone: { $in: zone }
-    };
-    if (pagination.search) {
-      const sea = JSON.parse(pagination.search);
-      for (const key in sea) {
-        if (key === 'base' && sea[key]) {
-          const username: RegExp = new RegExp(sea[key], 'i');
-          search.push({ username });
-        } else if (sea[key] === 0 || sea[key]) {
-          condition[key] = sea[key];
-        }
-      }
-      if (search.length) {
-        condition.$or = search;
-      }
+  // 黑名单列表
+  async findByZone(pagination: Pagination, zone: string, user: string): Promise<IList<IBlack>> {
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 1, user, zone })
+    if (!canActive) {
+      throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
     }
+    const condition: any = {
+      zone,
+      isDelete: false,
+    };
     const list = await this.blackModel
       .find(condition)
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
-      .sort({ status: 1 })
+      .sort({ checkResult: 1 })
       .populate({ path: 'user', model: 'user' })
-      .populate({ path: 'device', model: 'device', populate: { path: 'zone', model: 'zone' } })
       .lean()
       .exec();
     const total = await this.blackModel.countDocuments(condition);

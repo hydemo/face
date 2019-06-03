@@ -1,11 +1,11 @@
 import { Connection } from 'mongoose';
 // 引入schema
-import { BlackSchema } from './schemas/rent.shema';
+import { RentSchema } from './schemas/rent.shema';
 
-export const blacksProviders = [
+export const rentsProviders = [
   {
-    provide: 'BlackModelToken',
-    useFactory: (connection: Connection) => connection.model('black', BlackSchema),
+    provide: 'RentModelToken',
+    useFactory: (connection: Connection) => connection.model('rent', RentSchema),
     inject: ['MongoDBConnection'],
   },
 ];
