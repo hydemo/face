@@ -40,7 +40,10 @@ export class RoleService {
     if (!role) {
       return null
     }
-    const exist = await this.roleModel.findOne({ zone: role.zone, user: userId, isDelete: false })
+    if (role.role === 1) {
+      throw new ApiException('物业无法删除', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const exist = await this.roleModel.findOne({ zone: role.zone, user: userId, isDelete: false, role: 1 })
     if (!exist) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -67,7 +70,7 @@ export class RoleService {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     const condition = { isDelete: false, zone, role: { $lt: 4 } }
-    const workers: IRole[] = await this.roleModel
+    const list: IRole[] = await this.roleModel
       .find(condition)
       .sort({ role: 1 })
       .limit(pagination.limit)
@@ -75,7 +78,6 @@ export class RoleService {
       .populate({ path: 'user', model: 'user', select: 'username faceUrl phone' })
       .lean()
       .exec()
-    const list: IUser[] = workers.map(worker => worker.user)
     const total = await this.roleModel.countDocuments(condition);
     return { list, total };
 
