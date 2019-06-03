@@ -24,6 +24,7 @@ export class InitService {
     //     phone: '12121212'
     //   }
     //   await this.adminService.create(admin)
+
     // }
   }
 

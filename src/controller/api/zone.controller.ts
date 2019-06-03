@@ -100,12 +100,26 @@ export class ZoneController {
     return await this.blackService.findByZone(pagination, id, req.user._id);
   }
 
-  @Post('/:id/rent')
+  @Get('/:id/rents')
   @ApiOkResponse({
-    description: '申请添加黑名单',
+    description: '房屋出租',
   })
-  @ApiCreatedResponse({ description: '申请添加黑名单' })
-  @ApiOperation({ title: '申请添加黑名单', description: '申请添加黑名单' })
+  @ApiCreatedResponse({ description: '房屋出租' })
+  @ApiOperation({ title: '房屋出租', description: '房屋出租' })
+  async myRents(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Query() pagination: Pagination,
+    @Request() req: any
+  ) {
+    return await this.rentService.findMyRent(pagination, req.user._id, id);
+  }
+
+  @Post('/:id/rents')
+  @ApiOkResponse({
+    description: '房屋出租',
+  })
+  @ApiCreatedResponse({ description: '房屋出租' })
+  @ApiOperation({ title: '房屋出租', description: '房屋出租' })
   async rent(
     @Param('id', new MongodIdPipe()) id: string,
     @Body() rent: CreateRentDTO,
@@ -113,6 +127,22 @@ export class ZoneController {
   ) {
     const address: IZone = await this.zoneService.findById(id);
     await this.rentService.rent(req.user._id, address, rent);
-    return { statusCode: 200, msg: '申请成功成功' };
+    return { statusCode: 200, msg: '房屋出租成功' };
+  }
+
+  @Delete('/:id/rents')
+  @ApiOkResponse({
+    description: '房屋回收',
+  })
+  @ApiCreatedResponse({ description: '房屋回收' })
+  @ApiOperation({ title: '房屋回收', description: '房屋回收' })
+  async rentRecyle(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Body() rent: CreateRentDTO,
+    @Request() req: any
+  ) {
+    const address: IZone = await this.zoneService.findById(id);
+    await this.rentService.recyle(req.user._id, address);
+    return { statusCode: 200, msg: '房屋回收成功' };
   }
 }

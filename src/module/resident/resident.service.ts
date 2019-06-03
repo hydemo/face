@@ -270,7 +270,7 @@ export class ResidentService {
         libIndex: result.LibIndex,
         flieIndex: result.FlieIndex,
         pic: result.pic,
-        resident,
+        bondToObjectId: resident,
         zone: zone.zoneId,
       }
       if (expire) {
@@ -576,7 +576,39 @@ export class ResidentService {
 
   // 出租
   async rent(owner: string, tenant: IUser, address: IZone) {
+    const residents: IResident[] = await this.residentModel.find({ address: address._id, isDelete: false })
+    await Promise.all(residents.map(async resident => {
+      if (resident.type !== 'owner') {
+        const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident._id })
+        faces.map(face => this.faceService.delete(face._id))
+      }
+      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: false })
+    }))
+    const createResident: ResidentDTO = {
+      zone: address.zoneId,
+      address: address._id,
+      user: tenant._id,
+      checkResult: 2,
+      applicationTime: new Date(),
+      isMonitor: false,
+      isPush: true,
+      type: 'owner',
+      addTime: new Date(),
+      checkTime: new Date(),
+    }
+    const resident: IResident = await this.residentModel.create(createResident)
+    await this.addToDevice(address, tenant, resident._id)
+  }
 
+  // 出租
+  async rentRecyle(address: IZone) {
+    const residents: IResident[] = await this.residentModel.find({ address: address._id, isDelete: false })
+    await Promise.all(residents.map(async resident => {
+      const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident._id })
+      faces.map(face => this.faceService.delete(face._id))
+      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: false })
+    }))
+    await this.residentModel.findOneAndUpdate({ isDelete: true, type: 'owner', address: address._id, user: address.owner }, { isDelete: false })
   }
 
   // 根据用户id查询住客列表

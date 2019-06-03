@@ -101,6 +101,17 @@ export class FaceService {
       await this.faceModel.findByIdAndUpdate(face._id, update)
     }))
   }
+
+  // 根据id删除
+  async delete(id: string) {
+    const face: IFace | null = await this.faceModel.findById(id).populate({ path: 'device', model: 'device' })
+    if (!face) {
+      return
+    }
+    await this.cameraUtil.deleteOnePic(face)
+    await this.faceModel.findByIdAndUpdate(id, { isDelete: false })
+  }
+
   async updateByCondition(condition: any, update: any) {
     return await this.faceModel.updateMany(condition, update)
   }

@@ -6,7 +6,7 @@ export const RentSchema = new mongoose.Schema(
   {
     // 业主
     owner: ObjectId,
-    //出租时间
+    // 出租时间
     rentTime: Date,
     // 租客
     tenant: ObjectId,
@@ -16,6 +16,10 @@ export const RentSchema = new mongoose.Schema(
     zone: ObjectId,
     // 类型 1:监控 2:报警
     address: ObjectId,
+    // 是否回收
+    isRecyle: { type: Boolean, default: false },
+    // 回收时间
+    recyleTime: Date,
   },
   { collection: 'rent', versionKey: false, timestamps: true },
 );

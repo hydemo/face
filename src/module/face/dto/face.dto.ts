@@ -21,7 +21,7 @@ export class CreateFaceDTO {
   @IsMongoId()
   @Type(() => String)
   @ApiModelProperty({ description: '绑定id' })
-  readonly resident: string;
+  readonly bondToObjectId: string;
 
   @IsNumber()
   @IsEnum([1, 2, 3])

@@ -10,6 +10,7 @@ import { CameraUtil } from 'src/utils/camera.util';
 import { IUser } from '../users/interfaces/user.interfaces';
 import { IZone } from '../zone/interfaces/zone.interfaces';
 import { WeixinUtil } from 'src/utils/weixin.util';
+import { ResidentService } from '../resident/resident.service';
 
 @Injectable()
 export class RentService {
@@ -17,11 +18,12 @@ export class RentService {
     @Inject('RentModelToken') private readonly rentModel: Model<IRent>,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+    @Inject(ResidentService) private readonly residentService: ResidentService,
   ) { }
 
   async rent(user: string, address: IZone, createRent: CreateRentDTO): Promise<IRent> {
     const tenant: IUser = await this.weixinUtil.scan(createRent.key)
-    if (address.owner !== tenant._id) {
+    if (address.owner !== user) {
       throw new ApiException('无权限操作', ApiErrorCode.INTERNAL_ERROR, 500);
     }
     const rent: RentDTO = {
@@ -31,7 +33,16 @@ export class RentService {
       address: address._id,
       zone: address.zoneId,
     }
+    await this.residentService.rent(user, tenant, address);
     return await this.rentModel.create(rent);
+  }
+
+  async recyle(user: string, address: IZone) {
+    if (address.owner !== user) {
+      throw new ApiException('无权限操作', ApiErrorCode.INTERNAL_ERROR, 500);
+    }
+    await this.rentModel.update({ address: address._id }, { isRecyle: true, recyleTime: Date.now() })
+    return await this.residentService.rentRecyle(address);
   }
 
   // 查询全部数据
@@ -64,17 +75,13 @@ export class RentService {
   }
 
   // 用户列表
-  async findByZone(pagination: Pagination, zone: string): Promise<IList<IRent>> {
+  async findMyRent(pagination: Pagination, user: string, address: string): Promise<IList<IRent>> {
     const search: any = [];
-    const condition: any = {
-      // zone: { $in: zone }
-    };
+    const condition: any = { address, owner: user };
     if (pagination.search) {
       const sea = JSON.parse(pagination.search);
       for (const key in sea) {
         if (key === 'base' && sea[key]) {
-          const username: RegExp = new RegExp(sea[key], 'i');
-          search.push({ username });
         } else if (sea[key] === 0 || sea[key]) {
           condition[key] = sea[key];
         }
@@ -88,8 +95,7 @@ export class RentService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ status: 1 })
-      .populate({ path: 'user', model: 'user' })
-      .populate({ path: 'device', model: 'device', populate: { path: 'zone', model: 'zone' } })
+      .populate({ path: 'tenant', model: 'user' })
       .lean()
       .exec();
     const total = await this.rentModel.countDocuments(condition);

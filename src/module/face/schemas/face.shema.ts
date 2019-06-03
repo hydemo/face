@@ -19,7 +19,7 @@ export const FaceSchema = new mongoose.Schema(
     // 过期时间
     expire: Date,
     // 绑定id
-    resident: ObjectId,
+    bondToObjectId: ObjectId,
     // 区域
     zone: ObjectId,
   },
