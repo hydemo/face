@@ -30,7 +30,7 @@ export class PhoneUtil {
       //发送短信
       smsClient.sendSMS({
         PhoneNumbers: `${phone}`,
-        SignName: '欧阳旭靖',
+        SignName: '小门神',
         TemplateCode: 'SMS_134125398',
         TemplateParam: `{ "code": "${code}" }`
       }).then((res) => {

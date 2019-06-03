@@ -51,6 +51,19 @@ export class ResidentController {
   }
 
   @ApiOkResponse({
+    description: '业主审核列表',
+    isArray: true,
+  })
+  @Get('/applications/ownerReview')
+  @ApiOperation({ title: '业主审核列表', description: '业主审核列表' })
+  ownerReviews(
+    @Query() pagination: Pagination,
+    @Request() req: any
+  ) {
+    return this.residentService.ownerReviews(pagination, req.user._id);
+  }
+
+  @ApiOkResponse({
     description: '访客申请列表',
     isArray: true,
   })
@@ -229,6 +242,32 @@ export class ResidentController {
   ) {
     await this.residentService.agreeFamily(id, req.user, family);
     return { statusCode: 200, msg: '接受常住人申请成功' };
+  }
+
+  @Put('/applications/:id/agree-owner')
+  @ApiOkResponse({
+    description: '接受业主申请',
+  })
+  @ApiOperation({ title: '接受业主申请', description: '接受业主申请' })
+  async agreeOwnerByManagement(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
+  ) {
+    await this.residentService.agreeOwnerByManagement(id, req.user._id);
+    return { statusCode: 200, msg: '审核成功' };
+  }
+
+  @Put('/applications/:id/reject-owner')
+  @ApiOkResponse({
+    description: '拒绝业主申请',
+  })
+  @ApiOperation({ title: '拒绝业主申请', description: '拒绝业主申请' })
+  async rejectOwnerByManagement(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
+  ) {
+    await this.residentService.rejectOwnerByManagement(id, req.user._id);
+    return { statusCode: 200, msg: '拒绝成功' };
   }
 
   @Put('/applications/:id/agree-visitor')

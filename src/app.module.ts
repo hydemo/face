@@ -40,6 +40,7 @@ import { MessageModule } from './module/message/message.module';
 import { MessageController } from './controller/api/message.controller';
 import { RoleModule } from './module/role/role.module';
 import { RoleController } from './controller/api/role.controller';
+import { BlackModule } from './module/black/black.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { RoleController } from './controller/api/role.controller';
     ResidentModule,
     MessageModule,
     RoleModule,
+    BlackModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => configService.redis,

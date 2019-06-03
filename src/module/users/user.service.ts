@@ -53,7 +53,9 @@ export class UserService {
       for (const key in sea) {
         if (key === 'base' && sea[key]) {
           const username: RegExp = new RegExp(sea[key], 'i');
+          const phone: RegExp = new RegExp(sea[key], 'i');
           search.push({ username });
+          search.push({ phone });
         } else if (sea[key] === 0 || sea[key]) {
           condition[key] = sea[key];
         }

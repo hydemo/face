@@ -179,6 +179,7 @@ export class CameraUtil {
         }
       }
     });
+    console.log(result.data)
     if (result.data.Result === 'ok') {
       return result.data.AddOnePic;
     }

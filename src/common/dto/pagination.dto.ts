@@ -1,5 +1,5 @@
 import { ApiModelPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsPositive, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsPositive, IsOptional, IsString, IsMongoId } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class Pagination {
@@ -30,4 +30,10 @@ export class Pagination {
   @IsOptional()
   @ApiModelPropertyOptional({ description: '区域类型' })
   readonly type?: number;
+
+  @IsMongoId()
+  @Type(() => String)
+  @IsOptional()
+  @ApiModelPropertyOptional({ description: '区域id' })
+  readonly zone?: string;
 }

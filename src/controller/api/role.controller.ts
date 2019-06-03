@@ -11,7 +11,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { RoleService } from 'src/module/role/role.service';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
-import { CreateRoleDTO, RoleDTO, CreateRoleByScanDTO } from 'src/module/role/dto/role.dto';
+import { CreateRoleByScanDTO } from 'src/module/role/dto/role.dto';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
 import { UserRoles } from 'src/common/decorator/roles.decorator';
 
@@ -32,10 +32,12 @@ export class RoleController {
   @Get('/')
   @UserRoles(1)
   @ApiOperation({ title: '管理人员列表', description: '管理人员列表' })
-  managements(
+  async managements(
+    @Query() pagination: Pagination,
     @Request() req: any,
   ) {
-    return this.roleService.findByManagement(req.user._id);
+    const data = await this.roleService.findByManagement(pagination, req.user._id);
+    return { statusCode: 200, data };
   }
 
   @ApiOkResponse({

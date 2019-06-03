@@ -13,7 +13,7 @@ export const ResidentSchema = new mongoose.Schema(
     // 审核情况 1:待审核 2:通过 3:拒绝
     checkResult: { type: Number, enum: [1, 2, 3] },
     // 住客类型 1:业主 2 租客 3 常住人
-    type: { type: String, enum: ['owner', 'tenant', 'family', 'visitor'] },
+    type: { type: String, enum: ['owner', 'family', 'visitor'] },
     // 添加时间
     addTime: Date,
     // 申请时间

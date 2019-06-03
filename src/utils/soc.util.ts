@@ -55,10 +55,10 @@ export class SOCUtil {
       ],
       pages: [
         {
-          "psize": "15",
-          "tcount": "20",
-          "pno": "3",
-          "tsize": "2",
+          "psize": "20",
+          "tcount": "",
+          "pno": "2",
+          "tsize": "",
         }
       ]
     }

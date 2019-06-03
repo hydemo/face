@@ -6,7 +6,6 @@ import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
 import { CreateRoleByScanDTO, RoleDTO } from './dto/role.dto';
-import { IZone } from '../zone/interfaces/zone.interfaces';
 import { WeixinUtil } from 'src/utils/weixin.util';
 import { IUser } from '../users/interfaces/user.interfaces';
 
@@ -58,28 +57,28 @@ export class RoleService {
   }
 
   // 查询全部数据
-  async findByManagement(userId: string) {
-    const roles: IRole[] = await this.roleModel
-      .find({ user: userId, isDelete: false, role: 1 })
-      .populate({ model: 'zone', path: 'zone' })
+  async findByManagement(pagination: Pagination, user: string) {
+    if (!pagination.zone) {
+      return { list: [], total: 0 }
+    }
+    const zone = pagination.zone;
+    const canActive = await this.checkRoles({ isDelete: false, role: 1, user, zone })
+    if (!canActive) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const condition = { isDelete: false, zone, role: { $lt: 4 } }
+    const workers: IRole[] = await this.roleModel
+      .find(condition)
+      .sort({ role: 1 })
+      .limit(pagination.limit)
+      .skip((pagination.offset - 1) * pagination.limit)
+      .populate({ path: 'user', model: 'user', select: 'username faceUrl phone' })
+      .lean()
       .exec()
-    const zones: IZone[] = await roles.map(role => role.zone)
-    return await Promise.all(zones.map(async zone => {
-      const workers: IRole[] = await this.roleModel
-        .find({ isDelete: false, zone: zone._id, role: { $ne: 1 } })
-        .sort({ role: 1 })
-        .populate({ path: 'user', model: 'user', select: 'username faceUrl phone' })
-        .lean()
-        .exec()
-      const users = workers.map(worker => {
-        return {
-          ...worker.user,
-          role: worker.role,
-          description: worker.description,
-        }
-      })
-      return { zone, users }
-    }))
+    const list: IUser[] = workers.map(worker => worker.user)
+    const total = await this.roleModel.countDocuments(condition);
+    return { list, total };
+
   }
 
   // 查询全部数据
@@ -127,11 +126,11 @@ export class RoleService {
           break;
       }
     });
-
     return { owner, guard, management, worker }
   }
+
   async checkRoles(condition: any) {
-    return this.roleModel.countDocuments();
+    return this.roleModel.countDocuments(condition);
   }
 
   async findByZone(pagination: Pagination, zone: string) {
@@ -141,10 +140,14 @@ export class RoleService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ createdAt: -1 })
-      .populate({ path: 'user', model: 'user' })
+      .populate({ path: 'user', model: 'user', select: '-password' })
       .lean()
       .exec();
     const total = await this.roleModel.countDocuments(condition);
     return { list, total };
+  }
+
+  async findByCondition(condition: any) {
+    return this.roleModel.find(condition).populate({ path: 'zone', model: 'zones' }).lean().exec()
   }
 }

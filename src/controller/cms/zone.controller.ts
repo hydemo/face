@@ -15,6 +15,7 @@ import { CreateZoneDTO, ZoneDTO } from 'src/module/zone/dto/zone.dto';
 import { IZone } from 'src/module/zone/interfaces/zone.interfaces';
 import { FaceService } from 'src/module/face/face.service';
 import { RoleService } from 'src/module/role/role.service';
+import { CreateRoleDTO, RoleDTO } from 'src/module/role/dto/role.dto';
 
 
 @ApiUseTags('cms/zones')
@@ -61,6 +62,20 @@ export class CMSZoneController {
     @Param('id', new MongodIdPipe()) id: string,
   ) {
     return await this.roleService.findByZone(pagination, id);
+  }
+
+  @Post('/:id/roles')
+  @ApiOkResponse({
+    description: '获取区域成功',
+  })
+  @ApiCreatedResponse({ description: '获取区域' })
+  @ApiOperation({ title: '根据id获取区域信息', description: '根据id获取区域信息' })
+  async addManagement(
+    @Body() role: CreateRoleDTO,
+    @Param('id', new MongodIdPipe()) id: string,
+  ) {
+    const createRole: RoleDTO = { ...role, role: 1 }
+    return await this.roleService.create(createRole);
   }
 
   @Post('')

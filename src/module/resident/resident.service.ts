@@ -21,6 +21,7 @@ import { WeixinUtil } from 'src/utils/weixin.util';
 import { IFace } from '../face/interfaces/face.interfaces';
 import { RoleService } from '../role/role.service';
 import { RoleDTO } from '../role/dto/role.dto';
+import { IRole } from '../role/interfaces/role.interfaces';
 
 @Injectable()
 export class ResidentService {
@@ -37,7 +38,7 @@ export class ResidentService {
 
   // 申请重复确认
   async residentExist(address: string, user: string) {
-    const exist = await this.residentModel.findOne({ address, user, type: { $ne: 'visitor' }, isDelete: false })
+    const exist = await this.residentModel.findOne({ address, user, type: { $ne: 'visitor' }, isDelete: false, checkResult: { $lt: 3 } })
     if (exist) {
       throw new ApiException('已经在该房屋', ApiErrorCode.APPLICATION_EXIST, 406);
     }
@@ -87,6 +88,31 @@ export class ResidentService {
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ applicationTime: -1 })
       .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
+      .populate({ path: 'user', model: 'user' })
+      .lean()
+      .exec();
+    const total = await this.residentModel.countDocuments(condition);
+    return { list, total };
+  }
+
+  // 申请列表
+  async ownerReviews(pagination: Pagination, user: string) {
+    if (!pagination.zone) {
+      return { list: [], total: 0 }
+    }
+    const zone = pagination.zone;
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 1, user, zone })
+    if (!canActive) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const condition = { checkResult: 1, isDelete: false, zone }
+    const list: IResident[] = await this.residentModel
+      .find(condition)
+      .limit(pagination.limit)
+      .skip((pagination.offset - 1) * pagination.limit)
+      .sort({ applicationTime: -1 })
+      .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
+      .populate({ path: 'user', model: 'user' })
       .lean()
       .exec();
     const total = await this.residentModel.countDocuments(condition);
@@ -117,6 +143,7 @@ export class ResidentService {
     const creatResident = await this.residentModel.create(resident);
     return creatResident;
   }
+
   // 访客申请
   async visitorApplication(visitor: CreateResidentDTO, user: IUser): Promise<IResident> {
     if (!user.isVerify) {
@@ -254,6 +281,33 @@ export class ResidentService {
       await this.faceService.create(face);
     }))
   }
+
+  // 物业通过业主审核
+  async agreeOwnerByManagement(id: string, user: string) {
+    const resident: IResident = await this.findById(id)
+    if (resident.type !== 'owner') {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const canActive = await this.roleService.checkRoles({ user, isDelete: false, role: 1, zone: resident.zone })
+    if (!canActive) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    return await this.agreeOwner(id);
+  }
+
+  // 物业通过业主审核
+  async rejectOwnerByManagement(id: string, user: string) {
+    const resident: IResident = await this.findById(id)
+    if (resident.type !== 'owner') {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const canActive = await this.roleService.checkRoles({ user, isDelete: false, role: 1, zone: resident.zone })
+    if (!canActive) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    return await this.rejectOwner(id);
+  }
+
   // 业主审核通过
   async agreeOwner(id: string): Promise<boolean> {
     const resident: any = await this.residentModel
@@ -295,7 +349,30 @@ export class ResidentService {
   async agreeFamily(id: string, userId: string, agree: AgreeFamilyDTO): Promise<boolean> {
     const resident: any = await this.residentModel
       .findById(id)
-      .populate({ path: 'zone', model: 'zone' })
+      .populate({ path: 'address', model: 'zone' })
+      .populate({ path: 'user', model: 'user' })
+      .lean()
+      .exec()
+    if (resident.type !== 'family') {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    await this.isOwner(resident.address._id, userId)
+    await this.addToDevice(resident.address, resident.user, id)
+    await this.residentModel.findByIdAndUpdate(id, {
+      isPush: agree.isMonitor,
+      isMonitor: agree.isPush,
+      checkResult: 2,
+      addTime: new Date(),
+      checkTime: new Date(),
+    })
+    return true;
+  }
+
+  // 接受业主申请
+  async agree(id: string, userId: string, agree: AgreeFamilyDTO): Promise<boolean> {
+    const resident: any = await this.residentModel
+      .findById(id)
+      .populate({ path: 'address', model: 'zone' })
       .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
@@ -320,6 +397,10 @@ export class ResidentService {
       .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
+
+    if (resident.type !== 'visitor') {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
     await this.isOwner(resident.address._id, userId)
     await this.addToDevice(resident.address, resident.user, id, expireTime)
     await this.residentModel.findByIdAndUpdate(id, {
@@ -337,6 +418,9 @@ export class ResidentService {
       .findById(id)
       .lean()
       .exec()
+    if (resident.type === 'owner') {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
     await this.isOwner(resident.address, userId)
     await this.residentModel.findByIdAndUpdate(id, {
       checkResult: 3,

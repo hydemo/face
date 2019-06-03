@@ -31,7 +31,7 @@ export class ResidentDTO {
   readonly checkResult: number;
 
   @IsString()
-  @IsEnum(['owner', 'tenant', 'family'])
+  @IsEnum(['owner', 'visitor', 'family'])
   @Type(() => String)
   @ApiModelProperty({ description: '住客类型' })
   readonly type: string;
