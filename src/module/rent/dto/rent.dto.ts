@@ -30,16 +30,6 @@ export class RentDTO {
 }
 
 export class CreateRentDTO {
-  @IsMongoId()
-  @Type(() => String)
-  @ApiModelProperty({ description: '租客' })
-  readonly tenant: string;
-
-  @IsMongoId()
-  @Type(() => String)
-  @ApiModelProperty({ description: '地址' })
-  readonly address: string;
-
   @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '二维码' })
