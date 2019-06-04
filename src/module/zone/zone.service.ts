@@ -30,7 +30,7 @@ export class ZoneService {
   }
 
   async getVisitorQrcode(user: string, zoneId: string) {
-    const canActive = await this.roleService.checkRoles({ user, role: { $in: [1, 3] }, zoneId, isDelete: false })
+    const canActive = await this.roleService.checkRoles({ user, role: { $in: [1, 3] }, zone: zoneId, isDelete: false })
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
