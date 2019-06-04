@@ -35,7 +35,7 @@ export class RoleService {
   }
 
   // 删除数据
-  async delete(id: string, userId: string): Promise<IRole | null> {
+  async delete(id: string, userId: string, skip: number): Promise<IRole | null> {
     const role: IRole | null = await this.roleModel.findById(id)
     if (!role) {
       return null
@@ -80,6 +80,29 @@ export class RoleService {
       .exec()
     const total = await this.roleModel.countDocuments(condition);
     return { list, total };
+
+  }
+
+  // 查询全部数据
+  async getTail(skip: number, zone: string, user: string): Promise<IRole | null> {
+    const canActive = await this.checkRoles({ isDelete: false, role: 1, user, zone })
+    if (!canActive) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const condition = { isDelete: false, zone, role: { $lt: 4 } }
+    const roles: IRole[] = await this.roleModel
+      .find(condition)
+      .sort({ role: 1 })
+      .limit(1)
+      .skip(skip - 1)
+      .populate({ path: 'user', model: 'user', select: 'username faceUrl phone' })
+      .lean()
+      .exec()
+    if (roles.length) {
+      return roles[0]
+    } else {
+      return null
+    }
 
   }
 

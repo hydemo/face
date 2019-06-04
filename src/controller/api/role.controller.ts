@@ -39,6 +39,19 @@ export class RoleController {
     return await this.roleService.findByManagement(pagination, req.user._id);
   }
 
+  @Get('/tail')
+  @UserRoles(1)
+  @ApiOperation({ title: '尾部补全', description: '尾部补全' })
+  async getTail(
+    @Query('skip') skip: number,
+    @Query('zone') zone: string,
+    @Request() req: any,
+  ) {
+    const data = await this.roleService.getTail(skip, zone, req.user._id);
+    return { statusCode: 200, data };
+
+  }
+
   @ApiOkResponse({
     description: '删除工作人员',
   })
@@ -47,8 +60,9 @@ export class RoleController {
   async deleteManagement(
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any,
+    @Body() body: { skip: number },
   ) {
-    await this.roleService.delete(id, req.user._id);
+    await this.roleService.delete(id, req.user._id, body.skip);
     return { statusCode: 200, msg: '删除工作人员成功' };
 
   }
