@@ -24,6 +24,7 @@ import { RentService } from 'src/module/rent/rent.service';
 
 @ApiUseTags('zones')
 @ApiBearerAuth()
+@UseGuards(AuthGuard())
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/zones')
 export class ZoneController {
