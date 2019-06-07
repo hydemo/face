@@ -23,8 +23,8 @@ export class RentService {
 
   async rent(user: string, address: IZone, createRent: CreateRentDTO): Promise<IRent> {
     const tenant: IUser = await this.weixinUtil.scan(createRent.key)
-    if (address.owner !== user) {
-      throw new ApiException('无权限操作', ApiErrorCode.INTERNAL_ERROR, 500);
+    if (String(address.owner) !== String(user)) {
+      throw new ApiException('无权限操作', ApiErrorCode.INTERNAL_ERROR, 403);
     }
     const rent: RentDTO = {
       tenant: tenant._id,
