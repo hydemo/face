@@ -23,4 +23,6 @@ export interface IBlack extends Document {
   readonly cardNumber: string;
   // 申请理由
   readonly reason: string;
+  // 人脸图片
+  readonly faceUrl: string;
 }

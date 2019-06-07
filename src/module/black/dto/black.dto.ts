@@ -45,6 +45,11 @@ export class BlackDTO {
   @Type(() => String)
   @ApiModelProperty({ description: '申请理由' })
   readonly reason: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '人脸' })
+  readonly faceUrl: string;
 }
 
 export class CreateBlackDTO {
@@ -68,4 +73,9 @@ export class CreateBlackDTO {
   @Type(() => String)
   @ApiModelProperty({ description: '申请理由' })
   readonly reason: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '人脸' })
+  readonly faceUrl: string;
 }

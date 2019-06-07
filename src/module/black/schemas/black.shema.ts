@@ -26,6 +26,8 @@ export const BlackSchema = new mongoose.Schema(
     cardNumber: String,
     // 申请理由
     reason: String,
+    // 人脸图片
+    faceUrl: String,
   },
   { collection: 'black', versionKey: false, timestamps: true },
 );
