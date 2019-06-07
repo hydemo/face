@@ -9,6 +9,8 @@ export interface IDevice extends Document {
   readonly deviceUUID: string;
   // 设备类型 1 枪机 2 门禁机
   readonly deviceType: number;
+  // 通过类型 1 进入 2 离开
+  readonly passType: number,
   // 算法版本
   readonly algorithmVersion: string;
   // 模型版本

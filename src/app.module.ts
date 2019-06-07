@@ -42,6 +42,7 @@ import { RoleModule } from './module/role/role.module';
 import { RoleController } from './controller/api/role.controller';
 import { BlackModule } from './module/black/black.module';
 import { RentModule } from './module/rent/rent.module';
+import { TaskController } from './controller/api/task.controller';
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { RentModule } from './module/rent/rent.module';
     WeixinController,
     MessageController,
     RoleController,
+    TaskController,
   ]
 })
 export class AppModule { }

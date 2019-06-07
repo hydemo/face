@@ -24,6 +24,12 @@ export class CreateDeviceDTO {
   @ApiModelPropertyOptional({ description: '设备类型' })
   readonly deviceType: number;
 
+  @IsNumber()
+  @IsEnum([1, 2])
+  @Type(() => Number)
+  @ApiModelPropertyOptional({ description: '通行类型' })
+  readonly passType: number;
+
   @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '算法版本' })

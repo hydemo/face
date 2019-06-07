@@ -32,7 +32,10 @@ export class CallbackService {
       return;
     }
     const img: string = await this.qiniuUtil.uploadB64(body.img)
-
+    let imgex: any = null;
+    if (body.imgex) {
+      imgex = await this.qiniuUtil.uploadB64(body.imgex)
+    }
     const { Attribute } = body
     const attribute: CreatAttributeDTO = {
       age: Attribute.Age,
@@ -50,7 +53,7 @@ export class CallbackService {
       faceQuality: body.FaceQuality,
       faceFeature: body.FaceFeature,
       imgUrl: img,
-      // imgexUrl: imgex,
+      imgexUrl: imgex,
       visitCount: body.VisitCount,
       attribute,
     }

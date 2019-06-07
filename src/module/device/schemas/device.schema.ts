@@ -12,6 +12,8 @@ export const DeviceSchema = new mongoose.Schema(
     deviceUUID: { type: String, unique: true },
     // 设备类型 1 枪机 2 门禁机
     deviceType: { type: Number, enum: [1, 2] },
+    // 通过类型 1 进入 2 离开
+    passType: { type: Number, enum: [1, 2] },
     // 算法版本
     algorithmVersion: String,
     // 模型版本

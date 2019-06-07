@@ -84,6 +84,22 @@ export class TaskService {
     return { list, total };
   }
 
+  // 查询全部数据
+  async findByUser(pagination: Pagination, installer: string): Promise<IList<ITask>> {
+    const condition: any = { installer }
+    const list = await this.taskModel
+      .find(condition)
+      .limit(pagination.limit)
+      .skip((pagination.offset - 1) * pagination.limit)
+      .sort({ isDone: -1 })
+      .populate({ path: 'zone', model: 'zone' })
+      .populate({ path: 'position', model: 'zone' })
+      .lean()
+      .exec();
+    const total = await this.taskModel.countDocuments(condition);
+    return { list, total };
+  }
+
   // 根据id删除
   async deleteById(id: string): Promise<ITask> {
     return await this.taskModel.findByIdAndDelete(id).lean().exec();

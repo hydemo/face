@@ -46,7 +46,7 @@ export class MessageService {
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ createdAt: -1 })
       .populate({ path: 'sender', model: 'user' })
-      .populate({ path: 'orbit', model: 'orbit' })
+      .populate({ path: 'orbit', model: 'orbit', populate: { path: 'zone', model: 'zone' } })
       .lean()
       .exec();
     const total = await this.messageModel.countDocuments(condition);
@@ -74,7 +74,7 @@ export class MessageService {
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ createdAt: -1 })
       .populate({ path: 'sender', model: 'user' })
-      .populate({ path: 'orbit', model: 'orbit' })
+      .populate({ path: 'orbit', model: 'orbit', populate: { path: 'zone  ', model: 'zone' } })
       .lean()
       .exec();
     const total = await this.messageModel.countDocuments(condition);

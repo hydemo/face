@@ -28,5 +28,5 @@ export interface IZone extends Document {
   // 业主
   readonly owner: string,
   //门牌号
-  readonly houseNumber: string;
+  houseNumber: string;
 }

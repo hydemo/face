@@ -23,9 +23,10 @@ export class ZoneService {
 
     const zone: ZoneDTO = { ...createZoneDTO, zoneLayer: 0, parent: null, houseNumber: '' }
 
-    const creatZone: IZone = new this.zoneModel(zone);
-    creatZone.zoneId = creatZone._id
-    await creatZone.save();
+    const createZone: IZone = new this.zoneModel(zone);
+    createZone.zoneId = createZone._id;
+    createZone.houseNumber = createZone.name;
+    await createZone.save();
     return true;
   }
 
@@ -128,7 +129,7 @@ export class ZoneService {
     if (!parentZone) {
       throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
     }
-    const houseNumber = parentZone.houseNumber ? `${parentZone.name}-${zone.name}` : zone.name
+    const houseNumber = `${parentZone.houseNumber}-${zone.name}`
     const create: ZoneDTO = {
       ...zone,
       parent,
