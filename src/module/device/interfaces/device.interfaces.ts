@@ -22,7 +22,7 @@ export interface IDevice extends Document {
   // sim卡ID
   readonly simId: string;
   // 安装位置
-  readonly position: string;
+  readonly position: any;
   // 安装区域
   readonly zone: string;
   // 是否绑定

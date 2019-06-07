@@ -73,7 +73,11 @@ export class DeviceService {
 
   // 根据uuid查找设备
   async findByUUID(deviceUUID: string): Promise<IDevice | null> {
-    return await this.deviceModel.findOne({ deviceUUID }).lean().exec()
+    return await this.deviceModel
+      .findOne({ deviceUUID })
+      .populate({ path: 'position', model: 'zone' })
+      .lean()
+      .exec()
   }
 
   // 根据uuid查找设备

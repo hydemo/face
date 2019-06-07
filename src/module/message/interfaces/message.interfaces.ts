@@ -17,6 +17,12 @@ export interface IMessage extends Document {
   readonly title: string;
   // 比对结果
   readonly isRead: number;
+  // 通过类型 1 进入 2 离开
+  readonly passType: number,
+  // 小区
+  readonly zone: string;
+  // 位置
+  readonly position: string;
 }
 
 export interface IContent extends Document {

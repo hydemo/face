@@ -15,6 +15,11 @@ import { ResidentService } from '../resident/resident.service';
 import { IResident } from '../resident/interfaces/resident.interfaces';
 import { CreateOrbitMessageDTO } from '../message/dto/message.dto';
 
+interface IReceiver {
+  id: string;
+  type: string;
+}
+
 @Injectable()
 export class CallbackService {
   constructor(
@@ -67,28 +72,31 @@ export class CallbackService {
       }
       const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, ...stranger }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
-      await this.sendMessage(createOrbit, user, device.zone)
+      await this.sendMessage(createOrbit, user, device)
     }
     return
   }
 
   // 发送消息
-  async sendMessage(orbit: IOrbit, user: IUser, zone: string) {
-    const receivers: string[] = await this.receivers(orbit, user, zone)
+  async sendMessage(orbit: IOrbit, user: IUser, device: IDevice) {
+    const receivers: IReceiver[] = await this.receivers(user, device.zone)
     return await Promise.all(receivers.map(async receiver => {
       const message: CreateOrbitMessageDTO = {
         sender: user._id,
-        receiver,
-        type: 'orbit',
-        orbit: orbit._id
+        receiver: receiver.id,
+        type: receiver.type,
+        orbit: orbit._id,
+        passType: device.passType,
+        zone: device.zone,
+        position: `${device.position.houseNumber}-${device.description}`
       }
       await this.messageService.createOrbitMessage(message)
     }))
   }
 
   // 发送消息
-  async receivers(orbit: IOrbit, user: IUser, zone: string): Promise<string[]> {
-    const receivers: string[] = []
+  async receivers(user: IUser, zone: string): Promise<IReceiver[]> {
+    const receivers: IReceiver[] = []
     const residents: IResident[] = await this.residentService.findByCondition({
       isDelete: false, user: user._id, checkResult: 2
     });
@@ -103,7 +111,7 @@ export class CallbackService {
   }
 
   // 访客推送人
-  async visitorReceivers(resident: IResident, zone: string, receivers: string[]) {
+  async visitorReceivers(resident: IResident, zone: string, receivers: IReceiver[]): Promise<IReceiver[]> {
     const residents: IResident[] = await this.residentService.findByCondition({
       zone,
       isDelete: false,
@@ -111,17 +119,19 @@ export class CallbackService {
       address: resident.address,
       checkResult: 2
     })
-    return residents.map(resid => receivers.push(resid.user))
+    residents.map(resid => receivers.push({ id: resid.user, type: 'visitor' }))
+    return receivers
   }
 
   // 访客推送人
-  async familyReceivers(resident: IResident, receivers: string[]) {
+  async familyReceivers(resident: IResident, receivers: IReceiver[]): Promise<IReceiver[]> {
     const residents: IResident[] = await this.residentService.findByCondition({
       isDelete: false,
       isPush: true,
       address: resident.address,
       checkResult: 2
     })
-    return residents.map(resid => receivers.push(resid.user))
+    residents.map(resid => receivers.push({ id: resid.user, type: 'family' }))
+    return receivers
   }
 }

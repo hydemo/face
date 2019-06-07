@@ -16,6 +16,8 @@ export const MessageSchema = new mongoose.Schema(
     zone: String,
     // 位置
     position: String,
+    // 通过类型 1 进入 2 离开
+    passType: { type: Number, enum: [1, 2] },
     // 标题
     title: String,
     // 内容

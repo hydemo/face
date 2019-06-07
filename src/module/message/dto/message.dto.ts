@@ -1,5 +1,5 @@
 import { ApiModelProperty } from '@nestjs/swagger';
-import { IsString, IsMongoId, ValidateNested, IsBoolean } from 'class-validator';
+import { IsString, IsMongoId, ValidateNested, IsBoolean, IsNumber, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ContentDTO {
@@ -34,6 +34,23 @@ export class CreateOrbitMessageDTO {
   @Type(() => String)
   @ApiModelProperty({ description: '轨迹' })
   readonly orbit: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '消息类型' })
+  readonly zone: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '消息类型' })
+  readonly position: string;
+
+  @IsNumber()
+  @IsEnum([1, 2])
+  @Type(() => Number)
+  @ApiModelProperty({ description: '通行类型' })
+  readonly passType: number;
+
 }
 
 export class CreateSystemMessageDTO {
