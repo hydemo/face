@@ -35,6 +35,18 @@ export class MessageController {
     return this.messageService.findAll(pagination, req.user._id);
   }
 
+
+  @Get('/tail')
+  @ApiOperation({ title: '尾部补全', description: '尾部补全' })
+  async getTail(
+    @Query('skip') skip: number,
+    @Request() req: any,
+  ) {
+    const data = await this.messageService.getTail(skip, req.user._id);
+    return { statusCode: 200, data };
+
+  }
+
   @Get('/id')
   @ApiOperation({ title: '获取消息历史列表', description: '获取消息历史列表' })
   messageRecord(

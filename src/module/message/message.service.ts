@@ -53,6 +53,26 @@ export class MessageService {
     return { list, total };
   }
 
+  // 滚动补全
+  async getTail(skip: number, receiver: string): Promise<IMessage | null> {
+    const condition = { isDelete: false, receiver };
+    const list = await this.messageModel
+      .find(condition)
+      .limit(1)
+      .skip(skip - 1)
+      .sort({ createdAt: -1 })
+      .populate({ path: 'sender', model: 'user' })
+      .populate({ path: 'orbit', model: 'orbit', populate: { path: 'zone', model: 'zone' } })
+      .lean()
+      .exec();
+    if (list.length) {
+      return list[0]
+    } else {
+      return null
+    }
+
+  }
+
   // 查询全部数据
   async findMessagesById(pagination: Pagination, id: string, userId: string): Promise<IList<IMessage>> {
     const message: IMessage | null = await this.messageModel.findByIdAndUpdate(id, { isRead: true })

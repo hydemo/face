@@ -7,7 +7,6 @@ import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
 import { CameraUtil } from 'src/utils/camera.util';
-import { IUser } from '../users/interfaces/user.interfaces';
 import { RoleService } from '../role/role.service';
 
 @Injectable()
@@ -33,6 +32,35 @@ export class BlackService {
     return await this.blackModel.create(black);
   }
 
+
+  // 查询全部数据
+  async getTail(skip: number, zone: string, user: string): Promise<IBlack | null> {
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 1, user, zone })
+    if (!canActive) {
+      throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const condition: any = {
+      zone,
+      isDelete: false,
+    };
+    const list = await this.blackModel
+      .find(condition)
+      .sort({ role: 1 })
+      .limit(1)
+      .skip(skip - 1)
+      .sort({ applicationTime: -1 })
+      .populate({ path: 'user', model: 'user' })
+      .populate({ path: 'device', model: 'device', populate: { path: 'zone', model: 'zone' } })
+      .lean()
+      .exec();
+    if (list.length) {
+      return list[0]
+    } else {
+      return null
+    }
+
+  }
+
   // 查询全部数据
   async findAll(pagination: Pagination): Promise<IList<IBlack>> {
     const search: any = [];
@@ -53,7 +81,7 @@ export class BlackService {
       .find(condition)
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
-      .sort({ status: 1 })
+      .sort({ applicationTime: -1 })
       .populate({ path: 'user', model: 'user' })
       .populate({ path: 'device', model: 'device', populate: { path: 'zone', model: 'zone' } })
       .lean()

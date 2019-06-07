@@ -77,6 +77,27 @@ export class OrbitService {
     return { list, total };
   }
 
+
+  // 滚动补全
+  async getTail(skip: number, user: string): Promise<IOrbit | null> {
+    const condition: any = { user: user, isDelete: false };
+    const list = await this.orbitModel
+      .find(condition)
+      .sort({ passTime: -1 })
+      .limit(1)
+      .skip(skip - 1)
+      .populate({ path: 'device', model: 'device' })
+      .populate({ path: 'zone', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
+      .lean()
+      .exec()
+    if (list.length) {
+      return list[0]
+    } else {
+      return null
+    }
+
+  }
+
   // 根据id删除
   async delete(id: string, userId: string) {
     await this.canActive(id, userId);

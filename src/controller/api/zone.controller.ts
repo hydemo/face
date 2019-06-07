@@ -101,6 +101,19 @@ export class ZoneController {
     return await this.blackService.findByZone(pagination, id, req.user._id);
   }
 
+  @Get('/:id/blacks/tail')
+  @UserRoles(1)
+  @ApiOperation({ title: '尾部补全', description: '尾部补全' })
+  async getTail(
+    @Query('skip') skip: number,
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
+  ) {
+    const data = await this.blackService.getTail(skip, id, req.user._id);
+    return { statusCode: 200, data };
+
+  }
+
   @Get('/:id/rents')
   @ApiOkResponse({
     description: '房屋出租',

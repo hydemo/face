@@ -35,6 +35,17 @@ export class OrbitController {
     return this.orbitService.myOrbits(pagination, req.user._id);
   }
 
+  @Get('/tail')
+  @ApiOperation({ title: '尾部补全', description: '尾部补全' })
+  async getTail(
+    @Query('skip') skip: number,
+    @Request() req: any,
+  ) {
+    const data = await this.orbitService.getTail(skip, req.user._id);
+    return { statusCode: 200, data };
+
+  }
+
   @ApiOkResponse({
     description: '删除轨迹',
   })
@@ -46,5 +57,7 @@ export class OrbitController {
   ) {
     return this.orbitService.delete(id, req.user._id);
   }
+
+
 
 }
