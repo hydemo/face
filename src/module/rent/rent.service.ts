@@ -76,7 +76,7 @@ export class RentService {
 
   // 用户列表
   async findMyRent(pagination: Pagination, user: string, address: string): Promise<IList<IRent>> {
-    const condition: any = { address, owner: user, isRecyle: false };
+    const condition: any = { address, owner: user };
     const list = await this.rentModel
       .find(condition)
       .limit(pagination.limit)
