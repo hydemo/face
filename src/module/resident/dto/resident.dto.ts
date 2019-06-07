@@ -104,7 +104,7 @@ export class CreateFamilyByScanDTO {
 
   @IsBoolean()
   @Type(() => Boolean)
-  @ApiModelProperty({ description: '是否监控' })
+  @ApiModelProperty({ description: '是否推送' })
   readonly isPush: boolean;
 
   @IsString()

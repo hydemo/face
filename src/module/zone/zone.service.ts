@@ -117,6 +117,11 @@ export class ZoneService {
     return await this.zoneModel.findByIdAndDelete(id).lean().exec();
   }
 
+  // 更新业主
+  async updateOwner(id: string, owner: string) {
+    return await this.zoneModel.findByIdAndUpdate(id, { owner })
+  }
+
   // 设备数变动
   async incDeviceCount(id: string, inc: number): Promise<boolean> {
     await this.zoneModel.findByIdAndUpdate(id, { $inc: { deviceCount: inc } })

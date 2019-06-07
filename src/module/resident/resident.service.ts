@@ -330,6 +330,7 @@ export class ResidentService {
       user: resident.user._id,
       zone: resident.address._id,
     }
+    await this.zoneService.updateOwner(resident.address._id, resident.user._id)
     await this.roleService.create(role)
     return true;
   }
