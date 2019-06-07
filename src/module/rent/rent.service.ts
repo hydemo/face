@@ -22,8 +22,6 @@ export class RentService {
   ) { }
 
   async rent(user: string, address: IZone, createRent: CreateRentDTO): Promise<IRent> {
-    console.log(user, 'user')
-    console.log(address, 'address')
     const tenant: IUser = await this.weixinUtil.scan(createRent.key)
     if (String(address.owner) !== String(user)) {
       throw new ApiException('无权限操作', ApiErrorCode.INTERNAL_ERROR, 403);
@@ -40,7 +38,7 @@ export class RentService {
   }
 
   async recyle(user: string, address: IZone) {
-    if (address.owner !== user) {
+    if (String(address.owner) !== String(user)) {
       throw new ApiException('无权限操作', ApiErrorCode.INTERNAL_ERROR, 500);
     }
     await this.rentModel.update({ address: address._id }, { isRecyle: true, recyleTime: Date.now() })
@@ -78,20 +76,7 @@ export class RentService {
 
   // 用户列表
   async findMyRent(pagination: Pagination, user: string, address: string): Promise<IList<IRent>> {
-    const search: any = [];
     const condition: any = { address, owner: user };
-    if (pagination.search) {
-      const sea = JSON.parse(pagination.search);
-      for (const key in sea) {
-        if (key === 'base' && sea[key]) {
-        } else if (sea[key] === 0 || sea[key]) {
-          condition[key] = sea[key];
-        }
-      }
-      if (search.length) {
-        condition.$or = search;
-      }
-    }
     const list = await this.rentModel
       .find(condition)
       .limit(pagination.limit)
@@ -103,20 +88,4 @@ export class RentService {
     const total = await this.rentModel.countDocuments(condition);
     return { list, total };
   }
-  // // 根据条件更新
-  // async updatePic(condition: any, user: IUser) {
-  //   const rents: IRent[] = await this.rentModel.find(condition).populate({ path: 'device', model: 'device' })
-  //   return await Promise.all(rents.map(async rent => {
-  //     const result = await this.cameraUtil.updateOnePic(rent, user)
-  //     const update = {
-  //       libIndex: result.LibIndex,
-  //       flieIndex: result.FlieIndex,
-  //       pic: result.pic,
-  //     }
-  //     await this.rentModel.findByIdAndUpdate(rent._id, update)
-  //   }))
-  // }
-  // async updateByCondition(condition: any, update: any) {
-  //   return await this.rentModel.updateMany(condition, update)
-  // }
 }

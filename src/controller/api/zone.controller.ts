@@ -139,7 +139,6 @@ export class ZoneController {
   @ApiOperation({ title: '房屋回收', description: '房屋回收' })
   async rentRecyle(
     @Param('id', new MongodIdPipe()) id: string,
-    @Body() rent: CreateRentDTO,
     @Request() req: any
   ) {
     const address: IZone = await this.zoneService.findById(id);
