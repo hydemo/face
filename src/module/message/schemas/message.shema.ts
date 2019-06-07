@@ -12,6 +12,10 @@ export const MessageSchema = new mongoose.Schema(
     receiver: ObjectId,
     // 轨迹
     orbit: ObjectId,
+    // 小区
+    zone: String,
+    // 位置
+    position: String,
     // 标题
     title: String,
     // 内容

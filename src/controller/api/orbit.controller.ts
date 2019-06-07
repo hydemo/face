@@ -51,11 +51,13 @@ export class OrbitController {
   })
   @Delete('/:id')
   @ApiOperation({ title: '删除轨迹', description: '删除轨迹' })
-  deleteOrbit(
+  async deleteOrbit(
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any,
   ) {
-    return this.orbitService.delete(id, req.user._id);
+    await this.orbitService.delete(id, req.user._id);
+    return { statusCode: 200, msg: '删除成功' };
+
   }
 
 

@@ -62,11 +62,12 @@ export class MessageController {
   })
   @Delete('/:id')
   @ApiOperation({ title: '删除消息', description: '删除消息' })
-  deleteMessage(
+  async deleteMessage(
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any,
   ) {
-    return this.messageService.delete(id, req.user._id);
+    await this.messageService.delete(id, req.user._id);
+    return { statusCode: 200, msg: '删除成功' };
   }
 
 }

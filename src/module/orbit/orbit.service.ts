@@ -101,6 +101,6 @@ export class OrbitService {
   // 根据id删除
   async delete(id: string, userId: string) {
     await this.canActive(id, userId);
-    await this.orbitModel.findByIdAndUpdate(id, { isDelete: true })
+    return await this.orbitModel.findByIdAndUpdate(id, { isDelete: true })
   }
 }
