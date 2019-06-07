@@ -21,7 +21,7 @@ export const BlackSchema = new mongoose.Schema(
     // 类型 1:监控 2:报警
     type: { type: Number, enum: [1, 2] },
     // 姓名
-    usename: String,
+    username: String,
     // 身份证
     cardNumber: String,
     // 申请理由

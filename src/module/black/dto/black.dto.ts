@@ -34,7 +34,7 @@ export class BlackDTO {
   @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '姓名' })
-  readonly usename: string;
+  readonly username: string;
 
   @IsString()
   @Type(() => String)
@@ -57,7 +57,7 @@ export class CreateBlackDTO {
   @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '姓名' })
-  readonly usename: string;
+  readonly username: string;
 
   @IsString()
   @Type(() => String)

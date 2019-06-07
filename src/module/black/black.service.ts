@@ -77,7 +77,6 @@ export class BlackService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ checkResult: 1 })
-      .populate({ path: 'user', model: 'user' })
       .lean()
       .exec();
     const total = await this.blackModel.countDocuments(condition);

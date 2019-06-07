@@ -18,7 +18,7 @@ export interface IBlack extends Document {
   // 类型 1:监控 2:报警
   readonly type: number;
   // 姓名
-  readonly usename: string;
+  readonly username: string;
   // 身份证
   readonly cardNumber: string;
   // 申请理由
