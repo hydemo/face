@@ -26,6 +26,10 @@ export class FaceService {
   async findByCondition(condition: any): Promise<IFace[]> {
     return await this.faceModel.find(condition).lean().exec();
   }
+  // 根据条件查询
+  async findOne(condition: any): Promise<IFace | null> {
+    return await this.faceModel.findOne(condition).lean().exec();
+  }
 
   // 查询全部数据
   async findAll(pagination: Pagination): Promise<IList<IFace>> {

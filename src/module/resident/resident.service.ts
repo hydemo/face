@@ -51,7 +51,7 @@ export class ResidentService {
   async residentExist(address: string, user: string) {
     const exist = await this.residentModel.findOne({ address, user, type: { $ne: 'visitor' }, isDelete: false, checkResult: { $lt: 3 } })
     if (exist) {
-      throw new ApiException('已经在该房屋', ApiErrorCode.APPLICATION_EXIST, 406);
+      throw new ApiException('已经在该房屋或已有该房屋的申请', ApiErrorCode.APPLICATION_EXIST, 406);
     }
   }
   // 业主存在确认
@@ -271,6 +271,10 @@ export class ResidentService {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
     await Promise.all(devices.map(async device => {
+      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id })
+      if (faceExist) {
+        return
+      }
       const result: any = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode)
       if (!result) {
         throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
@@ -597,7 +601,7 @@ export class ResidentService {
         const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident._id })
         faces.map(face => this.faceService.delete(face._id))
       }
-      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: false })
+      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
     }))
     const createResident: ResidentDTO = {
       zone: address.zoneId,
