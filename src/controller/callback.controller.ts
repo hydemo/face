@@ -28,7 +28,6 @@ export class CallbackController {
 
   @ApiOperation({ title: '人脸识别回调', description: '人脸识别回调' })
   async faceInfo(@Request() req) {
-    console.log(222)
     await this.callbackService.callback(req.body)
     return { status: 200 }
   }

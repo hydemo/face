@@ -52,7 +52,7 @@ export class CallbackService {
     }
     const stranger: CreateStrangerDTO = {
       device: device._id,
-      zone: device.zone,
+      zone: device.position,
       passTime: body.CaptureTime,
       compareResult: body.CompareResult,
       faceQuality: body.FaceQuality,
@@ -88,6 +88,9 @@ export class CallbackService {
         orbit: orbit._id,
         passType: device.passType,
         zone: device.zone,
+        imgUrl: orbit.imgUrl,
+        imgexUrl: orbit.imgexUrl,
+        compareResult: orbit.compareResult,
         position: `${device.position.houseNumber}-${device.description}`
       }
       await this.messageService.createOrbitMessage(message)

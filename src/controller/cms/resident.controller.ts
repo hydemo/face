@@ -17,6 +17,7 @@ import { Put } from '_@nestjs_common@5.7.4@@nestjs/common';
 
 
 @ApiUseTags('cms/residents')
+@UseGuards(AuthGuard(), RolesGuard)
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('cms/residents')
 export class CMSResidentController {
@@ -52,9 +53,10 @@ export class CMSResidentController {
   })
   @ApiOperation({ title: '同意业主申请', description: '同意业主申请' })
   async agreeOwnerApplication(
-    @Param('id', new MongodIdPipe()) id: string
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
   ) {
-    await this.residentService.agreeOwner(id);
+    await this.residentService.agreeOwner(id, req.user._id);
     return { statusCode: 200, msg: '申请成功' };
   }
 
@@ -64,9 +66,10 @@ export class CMSResidentController {
   })
   @ApiOperation({ title: '同意业主申请', description: '同意业主申请' })
   async rejectOwnerApplication(
-    @Param('id', new MongodIdPipe()) id: string
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
   ) {
-    await this.residentService.rejectOwner(id);
+    await this.residentService.rejectOwner(id, req.user._id);
     return { statusCode: 200, msg: '申请成功' };
   }
 

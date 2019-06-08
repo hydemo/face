@@ -20,7 +20,7 @@ import { CreateRoleDTO, RoleDTO } from 'src/module/role/dto/role.dto';
 
 @ApiUseTags('cms/zones')
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-// @UseGuards(AuthGuard(), RolesGuard)
+@UseGuards(AuthGuard(), RolesGuard)
 @Controller('cms/zones')
 export class CMSZoneController {
   constructor(

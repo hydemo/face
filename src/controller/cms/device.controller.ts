@@ -16,6 +16,7 @@ import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 
 
 @ApiUseTags('devices')
+@UseGuards(AuthGuard(), RolesGuard)
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('cms/devices')
 export class CMSDeviceController {

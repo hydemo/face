@@ -17,7 +17,7 @@ import { IFace } from 'src/module/face/interfaces/face.interfaces';
 
 @ApiUseTags('faces')
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-// @UseGuards(AuthGuard(), RolesGuard)
+@UseGuards(AuthGuard(), RolesGuard)
 @Controller('cms/faces')
 export class CMSFaceController {
   constructor(

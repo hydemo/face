@@ -18,7 +18,6 @@ export class SOCUtil {
   async socRequest(data: any, serviceId: string): Promise<any> {
     const currdate: string = moment().format('YYYYMMDD');
     const jsonData = JSON.stringify(data)
-    console.log(JSON.stringify(jsonData))
     const key = new Buffer(this.config.socAESSecret, 'hex');
     const json = await this.cryptoUtil.encText(jsonData, key, null);
     const md: string = md5(this.config.socAppId + this.config.socAppSecret + currdate + json.replace(/\r\n/g, ''));

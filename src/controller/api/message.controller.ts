@@ -12,7 +12,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { MessageService } from 'src/module/message/message.service';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 
-@ApiUseTags('messages')
+@ApiUseTags('message')
 @ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @UseGuards(AuthGuard())
@@ -47,14 +47,14 @@ export class MessageController {
 
   }
 
-  @Get('/id')
+  @Get('/:id')
   @ApiOperation({ title: '获取消息历史列表', description: '获取消息历史列表' })
-  messageRecord(
+  async messageRecord(
     @Param('id', new MongodIdPipe()) id: string,
     @Query() pagination: Pagination,
     @Request() req: any,
   ) {
-    return this.messageService.findMessagesById(pagination, id, req.user._id);
+    return await this.messageService.findMessagesById(pagination, id, req.user._id);
   }
 
   @ApiOkResponse({

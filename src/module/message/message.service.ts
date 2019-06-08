@@ -46,7 +46,6 @@ export class MessageService {
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ createdAt: -1 })
       .populate({ path: 'sender', model: 'user' })
-      .populate({ path: 'orbit', model: 'orbit', populate: { path: 'zone', model: 'zone' } })
       .lean()
       .exec();
     const total = await this.messageModel.countDocuments(condition);
@@ -61,8 +60,6 @@ export class MessageService {
       .limit(1)
       .skip(skip - 1)
       .sort({ createdAt: -1 })
-      .populate({ path: 'sender', model: 'user' })
-      .populate({ path: 'orbit', model: 'orbit', populate: { path: 'zone', model: 'zone' } })
       .lean()
       .exec();
     if (list.length) {
@@ -75,7 +72,7 @@ export class MessageService {
 
   // 查询全部数据
   async findMessagesById(pagination: Pagination, id: string, userId: string): Promise<IList<IMessage>> {
-    const message: IMessage | null = await this.messageModel.findByIdAndUpdate(id, { isRead: true })
+    const message: IMessage | null = await this.messageModel.findById(id)
     if (!message) {
       throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
     }
@@ -93,11 +90,10 @@ export class MessageService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ createdAt: -1 })
-      .populate({ path: 'sender', model: 'user' })
-      .populate({ path: 'orbit', model: 'orbit', populate: { path: 'zone  ', model: 'zone' } })
       .lean()
       .exec();
     const total = await this.messageModel.countDocuments(condition);
+    await this.messageModel.update({ sender: message.sender, receiver: message.receiver, type: message.type }, { isRead: true })
     return { list, total };
   }
 

@@ -81,6 +81,12 @@ export class ConfigService {
 
       WEIXIN_APPSECRET: Joi.string().required(),
 
+      BLACK_MODE: Joi.number().default(1),
+
+      WHITE_MODE: Joi.number().default(2),
+
+      VIP_MODE: Joi.number().default(3),
+
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -189,5 +195,18 @@ export class ConfigService {
 
   get weixinAppSecret(): string {
     return this.envConfig.WEIXIN_APPSECRET
+  }
+
+  get blackMode(): number {
+    return Number(this.envConfig.BLACK_MODE);
+  }
+
+
+  get whiteMode(): number {
+    return Number(this.envConfig.WHITE_MODE);
+  }
+
+  get vipMode(): number {
+    return Number(this.envConfig.VIP_MODE);
   }
 }

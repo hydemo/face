@@ -14,6 +14,12 @@ export const MessageSchema = new mongoose.Schema(
     orbit: ObjectId,
     // 小区
     zone: String,
+    // 抓拍头像
+    imgUrl: String,
+    // 抓拍原图
+    imgexUrl: String,
+    // 比对结果
+    compareResult: { type: Number },
     // 位置
     position: String,
     // 通过类型 1 进入 2 离开

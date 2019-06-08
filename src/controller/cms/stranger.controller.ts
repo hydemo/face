@@ -16,7 +16,7 @@ import { CreateStrangerDTO } from 'src/module/stranger/dto/stranger.dto';
 
 @ApiUseTags('strangers')
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-// @UseGuards(AuthGuard(), RolesGuard)
+@UseGuards(AuthGuard(), RolesGuard)
 @Controller('cms/strangers')
 export class CMSStrangerController {
   constructor(

@@ -19,10 +19,16 @@ export interface IMessage extends Document {
   readonly isRead: number;
   // 通过类型 1 进入 2 离开
   readonly passType: number,
+  // 比对结果
+  readonly compareResult: number;
   // 小区
   readonly zone: string;
   // 位置
   readonly position: string;
+  // 抓拍头像
+  readonly imgUrl: string;
+  // 抓拍原图
+  readonly imgexUrl: string;
 }
 
 export interface IContent extends Document {

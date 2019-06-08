@@ -2,7 +2,17 @@ import { Model } from 'mongoose';
 import * as moment from 'moment';
 import { Inject, Injectable } from '@nestjs/common';
 import { IResident } from './interfaces/resident.interfaces';
-import { CreateResidentDTO, ResidentDTO, CreateFamilyDTO, CreateFamilyByScanDTO, CreateVisitorByScanDTO, AgreeFamilyDTO, UpdateFamilyDTO, AgreeVisitorDTO, CreateVisitorByOwnerDTO } from './dto/resident.dto';
+import {
+  CreateResidentDTO,
+  ResidentDTO,
+  CreateFamilyDTO,
+  CreateFamilyByScanDTO,
+  CreateVisitorByScanDTO,
+  AgreeFamilyDTO,
+  UpdateFamilyDTO,
+  AgreeVisitorDTO,
+  CreateVisitorByOwnerDTO
+} from './dto/resident.dto';
 import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
@@ -21,6 +31,7 @@ import { WeixinUtil } from 'src/utils/weixin.util';
 import { IFace } from '../face/interfaces/face.interfaces';
 import { RoleService } from '../role/role.service';
 import { RoleDTO } from '../role/dto/role.dto';
+import { ConfigService } from 'src/config/config.service';
 
 @Injectable()
 export class ResidentService {
@@ -33,6 +44,7 @@ export class ResidentService {
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
     @Inject(RoleService) private readonly roleService: RoleService,
+    @Inject(ConfigService) private readonly config: ConfigService,
   ) { }
 
   // 申请重复确认
@@ -259,7 +271,7 @@ export class ResidentService {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
     await Promise.all(devices.map(async device => {
-      const result: any = await this.cameraUtil.addOnePic(device, user, 2)
+      const result: any = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode)
       if (!result) {
         throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
       }
@@ -290,7 +302,7 @@ export class ResidentService {
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    return await this.agreeOwner(id);
+    return await this.agreeOwner(id, user);
   }
 
   // 物业通过业主审核
@@ -303,11 +315,11 @@ export class ResidentService {
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    return await this.rejectOwner(id);
+    return await this.rejectOwner(id, user);
   }
 
   // 业主审核通过
-  async agreeOwner(id: string): Promise<boolean> {
+  async agreeOwner(id: string, reviewer: string): Promise<boolean> {
     const resident: any = await this.residentModel
       .findById(id)
       .populate({ path: 'address', model: 'zone' })
@@ -323,6 +335,7 @@ export class ResidentService {
       checkResult: 2,
       addTime: new Date(),
       checkTime: new Date(),
+      reviewer,
     })
     const role: RoleDTO = {
       role: 4,
@@ -336,10 +349,11 @@ export class ResidentService {
   }
 
   // 业主审核不通过
-  async rejectOwner(id: string): Promise<boolean> {
+  async rejectOwner(id: string, reviewer: string): Promise<boolean> {
     await this.residentModel.findByIdAndUpdate(id, {
       checkResult: 3,
       checkTime: new Date(),
+      reviewer,
     })
     return true;
   }

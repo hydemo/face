@@ -45,11 +45,26 @@ export class CreateOrbitMessageDTO {
   @ApiModelProperty({ description: '消息类型' })
   readonly position: string;
 
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '抓拍头像' })
+  readonly imgUrl: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '抓拍原图' })
+  readonly imgexUrl: string;
+
   @IsNumber()
   @IsEnum([1, 2])
   @Type(() => Number)
   @ApiModelProperty({ description: '通行类型' })
   readonly passType: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @ApiModelProperty({ description: '比对结果' })
+  readonly compareResult: number;
 
 }
 

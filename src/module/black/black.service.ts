@@ -8,6 +8,11 @@ import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
 import { CameraUtil } from 'src/utils/camera.util';
 import { RoleService } from '../role/role.service';
+import { DeviceService } from '../device/device.service';
+import { IDevice } from '../device/interfaces/device.interfaces';
+import { ConfigService } from 'src/config/config.service';
+import { CreateFaceDTO } from '../face/dto/face.dto';
+import { FaceService } from '../face/face.service';
 
 @Injectable()
 export class BlackService {
@@ -15,8 +20,12 @@ export class BlackService {
     @Inject('BlackModelToken') private readonly blackModel: Model<IBlack>,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
     @Inject(RoleService) private readonly roleService: RoleService,
-  ) { }
+    @Inject(DeviceService) private readonly deviceService: DeviceService,
+    @Inject(ConfigService) private readonly config: ConfigService,
+    @Inject(FaceService) private readonly faceService: FaceService,
+  ) {
 
+  }
   async addToZone(user: string, zone: string, createBlack: CreateBlackDTO): Promise<IBlack> {
     const canActive = await this.roleService.checkRoles({ isDelete: false, role: 1, user, zone })
     if (!canActive) {
@@ -49,8 +58,8 @@ export class BlackService {
       .limit(1)
       .skip(skip - 1)
       .sort({ applicationTime: -1 })
-      .populate({ path: 'user', model: 'user' })
-      .populate({ path: 'device', model: 'device', populate: { path: 'zone', model: 'zone' } })
+      .populate({ path: 'applicant', model: 'user' })
+      .populate({ path: 'zone', model: 'zone' })
       .lean()
       .exec();
     if (list.length) {
@@ -62,28 +71,15 @@ export class BlackService {
   }
 
   // 查询全部数据
-  async findAll(pagination: Pagination): Promise<IList<IBlack>> {
-    const search: any = [];
-    const condition: any = {};
-    if (pagination.search) {
-      const sea = JSON.parse(pagination.search);
-      for (const key in sea) {
-        if (key === 'base' && sea[key]) {
-        } else if (sea[key] === 0 || sea[key]) {
-          condition[key] = sea[key];
-        }
-      }
-      if (search.length) {
-        condition.$or = search;
-      }
-    }
+  async findAll(pagination: Pagination, checkResult: number): Promise<IList<IBlack>> {
+    const condition: any = { checkResult };
     const list = await this.blackModel
       .find(condition)
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ applicationTime: -1 })
-      .populate({ path: 'user', model: 'user' })
-      .populate({ path: 'device', model: 'device', populate: { path: 'zone', model: 'zone' } })
+      .populate({ path: 'applicant', model: 'user' })
+      .populate({ path: 'zone', model: 'zone' })
       .lean()
       .exec();
     const total = await this.blackModel.countDocuments(condition);
@@ -110,20 +106,59 @@ export class BlackService {
     const total = await this.blackModel.countDocuments(condition);
     return { list, total };
   }
-  // // 根据条件更新
-  // async updatePic(condition: any, user: IUser) {
-  //   const blacks: IBlack[] = await this.blackModel.find(condition).populate({ path: 'device', model: 'device' })
-  //   return await Promise.all(blacks.map(async black => {
-  //     const result = await this.cameraUtil.updateOnePic(black, user)
-  //     const update = {
-  //       libIndex: result.LibIndex,
-  //       flieIndex: result.FlieIndex,
-  //       pic: result.pic,
-  //     }
-  //     await this.blackModel.findByIdAndUpdate(black._id, update)
-  //   }))
-  // }
-  // async updateByCondition(condition: any, update: any) {
-  //   return await this.blackModel.updateMany(condition, update)
-  // }
+
+
+  // 根据id查询
+  async findById(id: string): Promise<IBlack | null> {
+    return await this.blackModel
+      .findById(id)
+      .populate({ path: 'applicant', model: 'user' })
+      .populate({ path: 'zone', model: 'zone' })
+      .lean()
+      .lean()
+      .exec();
+  }
+
+  // 接受黑名单申请
+  async agree(id: string, userId: string) {
+    const black: IBlack = await this.blackModel
+      .findById(id)
+      .lean()
+      .exec()
+    const devices: IDevice[] = await this.deviceService.findByZoneId(black.zone)
+    devices.map(async device => {
+      const result: any = await this.cameraUtil.addOnePic(device, black, this.config.blackMode)
+      if (!result) {
+        throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
+      }
+      const face: CreateFaceDTO = {
+        device: device._id,
+        user: black._id,
+        mode: 2,
+        libIndex: result.LibIndex,
+        flieIndex: result.FlieIndex,
+        pic: result.pic,
+        bondToObjectId: black._id,
+        zone: black.zone,
+      }
+
+      await this.faceService.create(face);
+    })
+    await this.blackModel.findByIdAndUpdate(id, {
+      checkResult: 2,
+      checkTime: new Date(),
+      reviewer: userId,
+    })
+    return true;
+  }
+
+  // 黑名单审核不通过
+  async reject(id: string, reviewer: string): Promise<boolean> {
+    await this.blackModel.findByIdAndUpdate(id, {
+      checkResult: 3,
+      checkTime: new Date(),
+      reviewer,
+    })
+    return true;
+  }
 }

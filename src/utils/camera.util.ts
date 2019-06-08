@@ -8,6 +8,7 @@ import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 import { IFace } from 'src/module/face/interfaces/face.interfaces';
 import { IUser } from 'src/module/users/interfaces/user.interfaces';
 import { config } from 'rxjs';
+import { IPic } from 'src/common/interface/pic.interface';
 
 @Injectable()
 export class CameraUtil {
@@ -121,9 +122,9 @@ export class CameraUtil {
    * 
    * @param face 名单信息
    */
-  async updateOnePic(face: IFace, user: IUser) {
+  async updateOnePic(face: IFace, pic: IPic) {
     await this.deleteOnePic(face)
-    return await this.addOnePic(face.device, user, face.mode)
+    return await this.addOnePic(face.device, pic, face.mode)
   }
 
   /**
@@ -155,7 +156,7 @@ export class CameraUtil {
   * @param user 用户信息
   * @param face 名单信息
   */
-  async addOnePic(device: IDevice, user: any, Mode: number) {
+  async addOnePic(device: IDevice, user: IPic, Mode: number) {
     const { username, password, deviceUUID } = device
     const Img = await this.getImg(`${this.config.qiniuLink}/${user.faceUrl}`);
     const ImgName = user.username;
@@ -179,7 +180,6 @@ export class CameraUtil {
         }
       }
     });
-    console.log(result.data)
     if (result.data.Result === 'ok') {
       return result.data.AddOnePic;
     }
@@ -191,7 +191,7 @@ export class CameraUtil {
    * @param url 图片地址
    */
   async getImg(url: string): Promise<string> {
-    const result: any = await axios.get(`${url}?imageView2/1/w/800/h/800/format/jpg/q/76|imageslim`, { responseType: 'arraybuffer' })
+    const result: any = await axios.get(`${url}?imageView2/1/w/1024/h/1024/format/jpg/q/76|imageslim`, { responseType: 'arraybuffer' })
     const img = new Buffer(result.data, 'binary').toString('base64')
     return img
   }

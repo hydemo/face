@@ -43,6 +43,7 @@ import { RoleController } from './controller/api/role.controller';
 import { BlackModule } from './module/black/black.module';
 import { RentModule } from './module/rent/rent.module';
 import { TaskController } from './controller/api/task.controller';
+import { CMSBlackController } from './controller/cms/black.controller';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { TaskController } from './controller/api/task.controller';
     CMSOrbitController,
     CMSStrangerController,
     CMSResidentController,
+    CMSBlackController,
     ZoneController,
     UserController,
     ResidentController,

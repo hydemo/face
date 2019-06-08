@@ -41,7 +41,6 @@ export class PhoneUtil {
           return resolve(true)
         }
       }, (err) => {
-        console.log(err, 'err')
         throw new ApiException('验证码发送失败', ApiErrorCode.INTERNAL_ERROR, 500);
       })
     });

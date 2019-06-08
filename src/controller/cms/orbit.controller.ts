@@ -16,7 +16,7 @@ import { CreateOrbitDTO } from 'src/module/orbit/dto/orbit.dto';
 
 @ApiUseTags('cms/orbits')
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-// @UseGuards(AuthGuard(), RolesGuard)
+@UseGuards(AuthGuard(), RolesGuard)
 @Controller('cms/orbits')
 export class CMSOrbitController {
   constructor(

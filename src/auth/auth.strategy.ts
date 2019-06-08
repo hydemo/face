@@ -27,7 +27,6 @@ export class AuthStrategy extends PassportStrategy(Strategy) {
      */
     async validate(payload: { type: string, id: string }) {
         if (!payload) {
-            console.log(22)
             throw new UnauthorizedException()
         }
         const user = await this.authService.validateUser(payload);
