@@ -135,7 +135,7 @@ export class RoleService {
       { $lookup: { from: 'zone', localField: 'zones', foreignField: '_id', as: 'zones' } },
     ])
     if (!roles.length) {
-      return null
+      return { owner, guard, management, worker }
     }
     roles.map(role => {
       switch (role._id) {

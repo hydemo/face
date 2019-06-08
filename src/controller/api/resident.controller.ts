@@ -226,7 +226,7 @@ export class ResidentController {
     @Body() visitor: CreateVisitorByScanDTO,
     @Request() req: any
   ) {
-    await this.residentService.scanToVisitor(visitor, req.user._id);
+    await this.residentService.scanToVisitor(visitor, req.user);
     return { statusCode: 200, msg: '扫码访问' };
   }
 
