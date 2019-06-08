@@ -129,13 +129,14 @@ export class RoleService {
     let guard = [];
     let management = [];
     let worker = [];
+    let rent = [];
     const roles: any = await this.roleModel.aggregate([
       { $match: cond },
       { $group: { _id: '$role', zones: { $push: '$zone' } } },
       { $lookup: { from: 'zone', localField: 'zones', foreignField: '_id', as: 'zones' } },
     ])
     if (!roles.length) {
-      return { owner, guard, management, worker }
+      return { owner, guard, management, worker, rent }
     }
     roles.map(role => {
       switch (role._id) {
@@ -147,15 +148,17 @@ export class RoleService {
           break;
         case 4: owner = role.zones || [];
           break;
+        case 5: rent = role.zones || [];
+          break;
         default:
           break;
       }
     });
-    return { owner, guard, management, worker }
+    return { owner, guard, management, worker, rent }
   }
 
   async checkRoles(condition: any) {
-    return this.roleModel.countDocuments(condition);
+    return await this.roleModel.countDocuments(condition);
   }
 
   async findByZone(pagination: Pagination, zone: string) {
@@ -173,6 +176,11 @@ export class RoleService {
   }
 
   async findByCondition(condition: any) {
-    return this.roleModel.find(condition).populate({ path: 'zone', model: 'zones' }).lean().exec()
+    return await this.roleModel.find(condition).populate({ path: 'zone', model: 'zones' }).lean().exec()
   }
+
+  async findOneAndDelete(condition: any) {
+    return await this.roleModel.findOneAndDelete(condition)
+  }
+
 }

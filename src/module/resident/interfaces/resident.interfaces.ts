@@ -19,6 +19,8 @@ export interface IResident extends Document {
   readonly isMonitor: boolean;
   // 是否删除
   readonly isDelete: boolean;
+  // 是否删除
+  readonly isDisable: boolean;
   // 审核时间
   readonly checkTime: Date;
   // 有效期

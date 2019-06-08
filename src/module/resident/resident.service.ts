@@ -49,9 +49,15 @@ export class ResidentService {
 
   // 申请重复确认
   async residentExist(address: string, user: string) {
-    const exist = await this.residentModel.findOne({ address, user, type: { $ne: 'visitor' }, isDelete: false, checkResult: { $lt: 3 } })
+    const exist = await this.residentModel.findOne({
+      address,
+      user,
+      isDelete: false,
+      checkResult: { $lt: 3 },
+      isDisable: false,
+    })
     if (exist) {
-      throw new ApiException('已经在该房屋或已有该房屋的申请', ApiErrorCode.APPLICATION_EXIST, 406);
+      throw new ApiException('已在或已申请该房屋', ApiErrorCode.APPLICATION_EXIST, 406);
     }
   }
   // 业主存在确认
@@ -92,7 +98,7 @@ export class ResidentService {
 
   // 申请列表
   async myApplications(pagination: Pagination, reviewer: string): Promise<IList<IResident>> {
-    const condition: any = { reviewer, isDelete: false, checkResult: 1 };
+    const condition: any = { reviewer, isDelete: false };
     const list: IResident[] = await this.residentModel
       .find(condition)
       .limit(pagination.limit)
@@ -116,12 +122,12 @@ export class ResidentService {
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    const condition = { checkResult: 1, isDelete: false, zone }
+    const condition = { isDelete: false, zone }
     const list: IResident[] = await this.residentModel
       .find(condition)
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
-      .sort({ applicationTime: -1 })
+      .sort({ checkResult: 1, applicationTime: -1 })
       .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
       .populate({ path: 'user', model: 'user' })
       .lean()
@@ -199,11 +205,20 @@ export class ResidentService {
     const zone: IZone = await this.zoneService.findById(family.address)
     await this.isOwner(zone._id, userId)
     const user = await this.weixinUtil.scan(family.key)
-    return await this.addFamily(family.isMonitor, false, user, zone, userId)
+    return await this.addFamily(family.isMonitor, family.isPush, user, zone, userId)
   }
 
   async scanToVisitor(visitor: CreateVisitorByScanDTO, user: IUser) {
     const zone = await this.weixinUtil.scan(visitor.key)
+    const exist: IResident | null = await this.residentModel.findOne({
+      user: user._id,
+      zone: zone._id,
+      isDelete: false,
+      checkResult: { $lt: 3 },
+    })
+    if (exist) {
+      throw new ApiException('已在或已申请该小区', ApiErrorCode.APPLICATION_EXIST, 406);
+    }
     const expireTime: Date = moment().add(1, 'd').toDate()
 
     const resident: ResidentDTO = {
@@ -228,6 +243,7 @@ export class ResidentService {
     const zone: IZone = await this.zoneService.findById(visitor.address)
     const expireTime = moment().add(visitor.expireTime, 'd').toDate()
     await this.isOwner(zone._id, userId)
+    await this.residentExist(visitor.address, userId)
     const user = await this.weixinUtil.scan(visitor.key)
     const resident: ResidentDTO = {
       zone: zone.zoneId,
@@ -306,7 +322,13 @@ export class ResidentService {
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    return await this.agreeOwner(id, user);
+    await this.agreeOwner(id, user);
+    const otherApplications: IResident[] = await this.residentModel.find({
+      checkResult: 1,
+      isDelete: false,
+      type: 'owner',
+    })
+    return await Promise.all(otherApplications.map(async application => await this.rejectOwner(application.id, user)))
   }
 
   // 物业通过业主审核
@@ -385,7 +407,7 @@ export class ResidentService {
     return true;
   }
 
-  // 接受业主申请
+  // 接受常住人申请
   async agree(id: string, userId: string, agree: AgreeFamilyDTO): Promise<boolean> {
     const resident: any = await this.residentModel
       .findById(id)
@@ -393,6 +415,9 @@ export class ResidentService {
       .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
+    if (resident.type !== 'family') {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
     await this.isOwner(resident.address._id, userId)
     await this.addToDevice(resident.address, resident.user, id)
     await this.residentModel.findByIdAndUpdate(id, {
@@ -405,7 +430,7 @@ export class ResidentService {
     return true;
   }
 
-  // 接受常住人申请
+  // 接受常访客申请
   async agreeVisitor(id: string, userId: string, expire: number): Promise<boolean> {
     const expireTime = moment().add(expire, 'd').toDate()
     const resident: any = await this.residentModel
@@ -533,7 +558,7 @@ export class ResidentService {
         throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
       }
       if (resident.user.faceUrl) {
-        await this.faceService.updatePic({ resident: id }, user)
+        await this.faceService.updatePic({ bondToObjectId: id }, user)
       }
 
     }
@@ -542,13 +567,13 @@ export class ResidentService {
 
   async updateVisitorById(id: string, update: AgreeVisitorDTO) {
     const resident: IResident = await this.findById(id)
-    const expireTime = moment(resident.expireTime).add(update.expireTime, 'd')
     if (resident.type !== 'visitor') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    if (moment().diff(expireTime, 'd', true) > 7) {
+    if (update.expireTime > 7) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
+    const expireTime = moment().add(update.expireTime, 'd')
     await this.faceService.updateByCondition({ resident: resident._id }, { expireTime })
     return await this.residentModel.findByIdAndUpdate(id, { expireTime })
   }
@@ -565,7 +590,7 @@ export class ResidentService {
     return await Promise.all(owners.map(async owner => {
       const address = owner.address;
       const users = await this.residentModel
-        .find({ address: address._id, isDelete: false, checkResult: 2, type: 'family' })
+        .find({ address: address._id, isDelete: false, isDisable: false, checkResult: 2, type: 'family' })
         .populate({ path: 'user', model: 'user', select: '-password' })
         .lean()
         .exec()
@@ -585,7 +610,7 @@ export class ResidentService {
     return await Promise.all(owners.map(async owner => {
       const address = owner.address;
       const users = await this.residentModel
-        .find({ address: address._id, isDelete: false, checkResult: 2, type: 'visitor' })
+        .find({ address: address._id, isDelete: false, isDisable: false, checkResult: 2, type: 'visitor' })
         .populate({ path: 'user', model: 'user', select: '-password' })
         .lean()
         .exec()
@@ -594,14 +619,15 @@ export class ResidentService {
   }
 
   // 出租
-  async rent(owner: string, tenant: IUser, address: IZone) {
+  async rent(tenant: IUser, address: IZone) {
     const residents: IResident[] = await this.residentModel.find({ address: address._id, isDelete: false })
     await Promise.all(residents.map(async resident => {
-      if (resident.type !== 'owner') {
+      if (resident.type === 'visitor') {
         const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident._id })
         faces.map(face => this.faceService.delete(face._id))
+        return await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
       }
-      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
+      return await this.residentModel.findByIdAndUpdate(resident._id, { isDisable: true })
     }))
     const createResident: ResidentDTO = {
       zone: address.zoneId,
@@ -616,18 +642,31 @@ export class ResidentService {
       checkTime: new Date(),
     }
     const resident: IResident = await this.residentModel.create(createResident)
-    await this.addToDevice(address, tenant, resident._id)
+    const role: RoleDTO = {
+      role: 5,
+      description: '租客',
+      user: resident.user._id,
+      zone: resident.address._id,
+    }
+    await this.roleService.create(role)
+    return await this.addToDevice(address, tenant, resident._id)
   }
 
-  // 出租
+  // 退租
   async rentRecyle(address: IZone) {
     const residents: IResident[] = await this.residentModel.find({ address: address._id, isDelete: false })
     await Promise.all(residents.map(async resident => {
       const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident._id })
       faces.map(face => this.faceService.delete(face._id))
-      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: false })
+      if (resident.type === 'owner') {
+        await this.roleService.findOneAndDelete({ role: 5, user: resident.user, zone: resident.address })
+      }
+      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
+
     }))
     await this.residentModel.findOneAndUpdate({ isDelete: true, type: 'owner', address: address._id, user: address.owner }, { isDelete: false })
+    await this.residentModel.update({ reviewer: address.owner }, { isDisable: false })
+    return
   }
 
   // 根据用户id查询住客列表

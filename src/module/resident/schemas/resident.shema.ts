@@ -22,6 +22,8 @@ export const ResidentSchema = new mongoose.Schema(
     isMonitor: { type: Boolean, default: false },
     // 是否删除
     isDelete: { type: Boolean, default: false },
+    // 是否删除
+    isDisable: { type: Boolean, default: false },
     // 审核时间
     checkTime: Date,
     // 审核人

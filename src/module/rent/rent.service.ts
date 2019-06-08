@@ -33,13 +33,13 @@ export class RentService {
       address: address._id,
       zone: address.zoneId,
     }
-    await this.residentService.rent(user, tenant, address);
+    await this.residentService.rent(tenant, address);
     return await this.rentModel.create(rent);
   }
 
   async recyle(user: string, address: IZone) {
     if (String(address.owner) !== String(user)) {
-      throw new ApiException('无权限操作', ApiErrorCode.INTERNAL_ERROR, 500);
+      throw new ApiException('无权限操作', ApiErrorCode.INTERNAL_ERROR, 403);
     }
     await this.rentModel.update({ address: address._id }, { isRecyle: true, recyleTime: Date.now() })
     return await this.residentService.rentRecyle(address);

@@ -370,7 +370,7 @@ export class UserService {
       faceUrl: user.faceUrl,
       cardNumber: user.cardNumber,
     }
-    client.set(key, JSON.stringify(value), 'EX', 60 * 2);
+    client.set(key, JSON.stringify(value), 'EX', 60 * 5);
     return key
   }
 }
