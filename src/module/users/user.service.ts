@@ -243,13 +243,10 @@ export class UserService {
         lastLoginTime: Date.now(),
         lastLoginIp: ip,
       });
-
-      const accessToken = await this.jwtService.sign({ id: user._id, type: 'user' });
-      if (!user || !accessToken) {
-        throw new ApiException('登录失败', ApiErrorCode.LOGIN_ERROR, 406);
-      }
-      user.accessToken = accessToken;
+      console.log(user, 'user')
+      user.accessToken = await this.jwtService.sign({ id: user._id, type: 'user' });
       delete user.password;
+      delete user.openId
       return user;
     }
     return null

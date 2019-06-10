@@ -12,7 +12,7 @@ export interface IUser extends Document {
   // 手机
   readonly phone: string;
   // 微信id
-  readonly weixinOpenid: string;
+  openId: string;
   // 头像
   readonly avatar: string;
   // 性别
