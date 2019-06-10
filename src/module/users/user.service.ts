@@ -148,7 +148,6 @@ export class UserService {
 
   // 忘记密码
   async forgetPassword(forgetPassword: ForgetPasswordDTO) {
-    console.log(forgetPassword, 'for')
     await this.phoneUtil.codeCheck(forgetPassword.phone, forgetPassword.code)
     const password = this.cryptoUtil.encryptPassword(forgetPassword.password);
     return await this.userModel.findOneAndUpdate({ phone: forgetPassword.phone }, { password }).exec();
@@ -324,6 +323,8 @@ export class UserService {
       phone: user.phone,
       faceUrl: user.faceUrl,
       cardNumber: user.cardNumber,
+      isPhoneVerify: user.isPhoneVerify,
+      type: 'user',
     }
     client.set(key, JSON.stringify(value), 'EX', 60 * 5);
     return key

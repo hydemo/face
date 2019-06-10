@@ -205,12 +205,18 @@ export class ResidentService {
     const zone: IZone = await this.zoneService.findById(family.address)
     await this.isOwner(zone._id, userId)
     const user = await this.weixinUtil.scan(family.key)
+    if (user.type !== 'user') {
+      throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
+    }
     await this.residentExist(family.address, user._id)
     return await this.addFamily(family.isMonitor, family.isPush, user, zone, userId)
   }
 
   async scanToVisitor(visitor: CreateVisitorByScanDTO, user: IUser) {
     const zone = await this.weixinUtil.scan(visitor.key)
+    if (zone.type !== 'zone') {
+      throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
+    }
     const exist: IResident | null = await this.residentModel.findOne({
       user: user._id,
       zone: zone._id,
@@ -246,6 +252,9 @@ export class ResidentService {
     const expireTime = moment().add(visitor.expireTime, 'd').toDate()
     await this.isOwner(zone._id, userId)
     const user = await this.weixinUtil.scan(visitor.key)
+    if (user.type !== 'user') {
+      throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
+    }
     await this.residentExist(visitor.address, user._id)
 
     const resident: ResidentDTO = {

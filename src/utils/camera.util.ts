@@ -47,7 +47,6 @@ export class CameraUtil {
         UUID: deviceUUID,
       }
     });
-    console.log(result, 'result')
     return result.data.GetList.List
   }
 
@@ -177,7 +176,6 @@ export class CameraUtil {
         ImgNum,
       }
     }
-    console.log(data, 'data')
     const result: any = await axios({
       method: 'post',
       url: this.config.p2pUrl,
