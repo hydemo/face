@@ -676,6 +676,7 @@ export class ResidentService {
       addTime: new Date(),
       checkTime: new Date(),
       isRent: true,
+      reviewer: address.owner,
     }
     const resident: IResident = await this.residentModel.create(createResident)
     const role: RoleDTO = {
@@ -690,11 +691,11 @@ export class ResidentService {
 
   // 退租
   async rentRecyle(address: IZone) {
-    const residents: IResident[] = await this.residentModel.find({ address: address._id, isDelete: false })
+    const residents: IResident[] = await this.residentModel.find({ address: address._id, checkResult: 2, isDelete: false })
     await Promise.all(residents.map(async resident => {
-      await this.deleteById(resident._id, resident.user)
       if (resident.type === 'owner') {
         await this.roleService.findOneAndDelete({ role: 5, user: resident.user, zone: resident.address })
+        await this.deleteById(resident._id, resident.reviewer)
       }
       await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
 
