@@ -139,20 +139,16 @@ export class UserService {
   // 绑定手机号
   async bindPhone(user: IUser, bind: BindPhoneDTO) {
     await this.phoneUtil.codeCheck(bind.phone, bind.code)
-    return await this.userModel.findByIdAndUpdate(user._id, { phone: bind.phone, isPhoneVerify: true }).exec();
-  }
-
-  async upload(userId: string, filename: string) {
-    const user = await this.userModel.findByIdAndUpdate(userId, { avatar: filename });
-    if (!user) {
-      throw new ApiException('账号错误', ApiErrorCode.ACCOUNT_INVALID, 406);
+    const existing = await this.userModel.findOne({ _id: { $ne: user._id }, phone: user.phone });
+    if (existing) {
+      throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
     }
-    delete user.password;
-    return;
+    return await this.userModel.findByIdAndUpdate(user._id, { phone: bind.phone, isPhoneVerify: true }).exec();
   }
 
   // 忘记密码
   async forgetPassword(forgetPassword: ForgetPasswordDTO) {
+    console.log(forgetPassword, 'for')
     await this.phoneUtil.codeCheck(forgetPassword.phone, forgetPassword.code)
     const password = this.cryptoUtil.encryptPassword(forgetPassword.password);
     return await this.userModel.findOneAndUpdate({ phone: forgetPassword.phone }, { password }).exec();
@@ -167,45 +163,6 @@ export class UserService {
     }
     return await this.userModel.findByIdAndUpdate(_id, user).exec();
   }
-
-  // async loginByWeixin(code: string, ip: string, fullUserInfo: LoginInfoDTO): Promise<UserDTO> {
-  //   // 解释用户数据
-  //   const userInfo = await this.weixinUtil.login(code, fullUserInfo);
-  //   if (!userInfo || !userInfo.unionId) {
-  //     throw new ApiException('登录失败', ApiErrorCode.LOGIN_ERROR, 406);
-  //   }
-
-  //   // 根据openid查找用户是否已经注册
-  //   let user: IUser = await this.userModel.findOne({ unionId: userInfo.unionId }).lean().exec();
-  //   if (!user) {
-  //     // 注册
-  //     user = await this.userModel.create({
-  //       username: '微信用户' + uuid(),
-  //       password: '',
-  //       registerTime: Date.now(),
-  //       registerIp: ip,
-  //       phone: '',
-  //       weixinOpenid: userInfo.openId,
-  //       avatar: userInfo.avatarUrl || '',
-  //       gender: userInfo.gender || 0, // 性别 0：未知、1：男、2：女
-  //       nickname: userInfo.nickName,
-  //       unionId: userInfo.unionId,
-  //     });
-  //   }
-  //   // 更新登录信息
-  //   await this.userModel.findByIdAndUpdate(user._id, {
-  //     lastLoginTime: Date.now(),
-  //     lastLoginIp: ip,
-  //   });
-
-  //   const accessToken = await this.jwtService.sign({ id: user._id, type: 'user' });
-  //   if (!user || !accessToken) {
-  //     throw new ApiException('登录失败', ApiErrorCode.LOGIN_ERROR, 406);
-  //   }
-  //   user.accessToken = accessToken;
-  //   delete user.password;
-  //   return user;
-  // }
 
   async block(id: string, admin: string) {
     return await this.userModel.findByIdAndUpdate(id, {
@@ -257,6 +214,10 @@ export class UserService {
   async createByAdmin(createUserDto: CreateUserDTO, ip: string): Promise<IUser> {
     if (!createUserDto.password) {
       throw new ApiException('密码不能为空', ApiErrorCode.INPUT_ERROR, 406);
+    }
+    const existing = await this.userModel.findOne({ phone: createUserDto.phone });
+    if (existing) {
+      throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
     }
     const createUser: CreateUserDTO = {
       ...createUserDto,
@@ -333,12 +294,18 @@ export class UserService {
 
   // 实名认证
   async verify(verify: VerifyUserDTO, user: IUser): Promise<null> {
+    let isPhoneVerify = false
     if (!user.isPhoneVerify && (!verify.phone || !verify.code)) {
       throw new ApiException('手机号未绑定', ApiErrorCode.INPUT_ERROR, 406);
     } else if (!user.isPhoneVerify && verify.phone && verify.code) {
       await this.phoneUtil.codeCheck(verify.phone, verify.code)
+      isPhoneVerify = true
     }
-    await this.userModel.findByIdAndUpdate(user._id, { ...verify, isVerify: true }).lean().exec()
+    const existing = await this.userModel.findOne({ _id: { $ne: user._id }, phone: user.phone });
+    if (existing) {
+      throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
+    }
+    await this.userModel.findByIdAndUpdate(user._id, { ...verify, isVerify: true, isPhoneVerify }).lean().exec()
     return null
   }
 

@@ -144,6 +144,8 @@ export class RoleService {
     }
     roles.map(role => {
       switch (role._id) {
+        case 0: management = role.zones || [];
+          break;
         case 1: management = role.zones || [];
           break;
         case 2: worker = role.zones || [];

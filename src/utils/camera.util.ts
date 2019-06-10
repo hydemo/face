@@ -29,10 +29,10 @@ export class CameraUtil {
    * 获取设备白名单
    *
    * @param device 设备信息
-   * @param Mode 模式
+   * @param Mode 模式 device: IDevice, Mode: numbers
    */
-  async getList(device: IDevice, Mode: number): Promise<any> {
-    const { username, password, deviceUUID } = device
+  async getList(): Promise<any> {
+    const { username = 'admin', password = 'admin123', deviceUUID = 'umettw42g7iu' } = {}
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const result = await axios({
@@ -42,11 +42,12 @@ export class CameraUtil {
         Name: 'WBListInfoREQ',
         TimeStamp: timeStamp,
         Sign: sign,
-        Mode,
+        Mode: 1,
         Action: 'GetList',
         UUID: deviceUUID,
       }
     });
+    console.log(result, 'result')
     return result.data.GetList.List
   }
 
@@ -163,22 +164,24 @@ export class CameraUtil {
     const ImgNum = user._id;
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
+    const data = {
+      Name: 'WBListInfoREQ',
+      TimeStamp: timeStamp,
+      Sign: sign,
+      Mode,
+      Action: 'AddOnePic',
+      UUID: deviceUUID,
+      AddOnePic: {
+        Img,
+        ImgName,
+        ImgNum,
+      }
+    }
+    console.log(data, 'data')
     const result: any = await axios({
       method: 'post',
       url: this.config.p2pUrl,
-      data: {
-        Name: 'WBListInfoREQ',
-        TimeStamp: timeStamp,
-        Sign: sign,
-        Mode,
-        Action: 'AddOnePic',
-        UUID: deviceUUID,
-        AddOnePic: {
-          Img,
-          ImgName,
-          ImgNum,
-        }
-      }
+      data,
     })
     if (result.data.Result === 'ok') {
       return result.data.AddOnePic;
