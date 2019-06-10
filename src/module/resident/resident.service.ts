@@ -686,6 +686,7 @@ export class ResidentService {
       zone: resident.address._id,
     }
     await this.roleService.create(role)
+    await this.roleService.findOneAndDelete({ role: 4, user: address.owner, zone: address._id })
     return await this.addToDevice(address, tenant, resident._id)
   }
 
