@@ -58,9 +58,10 @@ export class ResidentController {
   @ApiOperation({ title: '业主审核列表', description: '业主审核列表' })
   ownerReviews(
     @Query() pagination: Pagination,
+    @Query('checkResult') checkResult: string,
     @Request() req: any
   ) {
-    return this.residentService.ownerReviews(pagination, req.user._id);
+    return this.residentService.ownerReviews(pagination, req.user._id, checkResult);
   }
 
   @ApiOkResponse({
@@ -96,8 +97,9 @@ export class ResidentController {
   @ApiOperation({ title: '删除常住人/访客', description: '删除常住人/访客' })
   async deleteResident(
     @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
   ) {
-    await this.residentService.deleteById(id);
+    await this.residentService.deleteById(id, req.user._id);
     return { statusCode: 200, msg: '删除成功' };
   }
 
@@ -109,8 +111,9 @@ export class ResidentController {
   async updateFamily(
     @Param('id', new MongodIdPipe()) id: string,
     @Body() update: UpdateFamilyDTO,
+    @Request() req: any,
   ) {
-    await this.residentService.updateFamilyById(id, update);
+    await this.residentService.updateFamilyById(id, update, req.user._id);
     return { statusCode: 200, msg: '修改成功' };
   }
 
@@ -122,8 +125,9 @@ export class ResidentController {
   async updateVisitor(
     @Param('id', new MongodIdPipe()) id: string,
     @Body() update: AgreeVisitorDTO,
+    @Request() req: any,
   ) {
-    await this.residentService.updateVisitorById(id, update);
+    await this.residentService.updateVisitorById(id, update, req.user._id);
     return { statusCode: 200, msg: '修改成功' };
   }
 
@@ -180,9 +184,9 @@ export class ResidentController {
 
   @Post('/visitor/scan')
   @ApiOkResponse({
-    description: '添加访客',
+    description: '扫码添加访客',
   })
-  @ApiOperation({ title: '添加访客', description: '添加访客' })
+  @ApiOperation({ title: '扫码添加访客', description: '扫码添加访客' })
   async addVisitorByScan(
     @Body() visitor: CreateVisitorByOwnerDTO,
     @Request() req: any

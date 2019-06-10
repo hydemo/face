@@ -11,7 +11,7 @@ export const UserSchema = new mongoose.Schema(
     // 手机
     phone: { type: String },
     // 微信id
-    weixinOpenid: { type: String },
+    openId: { type: String },
     // 头像
     avatar: String,
     // 性别

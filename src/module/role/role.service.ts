@@ -25,6 +25,10 @@ export class RoleService {
   // 创建数据
   async createByScan(role: CreateRoleByScanDTO): Promise<IRole> {
     const user: IUser = await this.weixinUtil.scan(role.key)
+    const exist: number = await this.roleModel.countDocuments({ user: user._id, role: role.role, zone: role.zone })
+    if (exist) {
+      throw new ApiException('已有该角色', ApiErrorCode.APPLICATION_EXIST, 406);
+    }
     const createRole: RoleDTO = {
       user: user._id,
       zone: role.zone,
@@ -180,7 +184,7 @@ export class RoleService {
   }
 
   async findOneAndDelete(condition: any) {
-    return await this.roleModel.findOneAndDelete(condition)
+    return await this.roleModel.findOneAndUpdate(condition, { isDelete: true })
   }
 
 }

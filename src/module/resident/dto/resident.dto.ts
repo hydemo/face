@@ -56,6 +56,11 @@ export class ResidentDTO {
   @ApiModelProperty({ description: '是否监控' })
   readonly isMonitor: boolean;
 
+  @IsBoolean()
+  @Type(() => Boolean)
+  @ApiModelProperty({ description: '是否出租' })
+  readonly isRent?: boolean;
+
   @IsDate()
   @Type(() => Date)
   @ApiModelProperty({ description: '申请时间' })

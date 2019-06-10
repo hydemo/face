@@ -41,8 +41,8 @@ export class RentService {
     if (String(address.owner) !== String(user)) {
       throw new ApiException('无权限操作', ApiErrorCode.INTERNAL_ERROR, 403);
     }
-    await this.rentModel.update({ address: address._id }, { isRecyle: true, recyleTime: Date.now() })
-    return await this.residentService.rentRecyle(address);
+    await this.residentService.rentRecyle(address);
+    return await this.rentModel.update({ address: address._id, isRecyle: false }, { isRecyle: true, recyleTime: Date.now() })
   }
 
   // 查询全部数据

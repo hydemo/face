@@ -163,7 +163,7 @@ export class CameraUtil {
     const ImgNum = user._id;
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
-    const result = await axios({
+    const result: any = await axios({
       method: 'post',
       url: this.config.p2pUrl,
       data: {
@@ -179,7 +179,7 @@ export class CameraUtil {
           ImgNum,
         }
       }
-    });
+    })
     if (result.data.Result === 'ok') {
       return result.data.AddOnePic;
     }

@@ -112,6 +112,19 @@ export class ZoneService {
     return { list, total };
   }
 
+  async noOwnerZones(pagination: Pagination, zone): Promise<IList<IZone>> {
+    const condition: any = { zoneLayer: 2, zoneId: zone, owner: { $exists: false }, isDelete: false };
+    const list = await this.zoneModel
+      .find(condition)
+      .limit(pagination.limit)
+      .skip((pagination.offset - 1) * pagination.limit)
+      .sort({ name: 1 })
+      .lean()
+      .exec();
+    const total = await this.zoneModel.countDocuments(condition);
+    return { list, total };
+  }
+
   // 根据id删除
   async deleteById(id: string): Promise<IZone> {
     return await this.zoneModel.findByIdAndDelete(id).lean().exec();

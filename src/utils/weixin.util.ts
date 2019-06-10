@@ -103,6 +103,24 @@ export class WeixinUtil {
         }
         return JSON.parse(data)
     }
+    // 授权登录
+    async oauth(code: string): Promise<string | null> {
+        const result = await axios({
+            method: 'get',
+            url: 'https://api.weixin.qq.com/cgi-bin/ticket/getticket',
+            params: {
+                appid: this.config.weixinAppid,
+                secret: this.config.weixinAppSecret,
+                code,
+                grant_type: this.config.grantType,
+            },
+        });
+        console.log(result, 'rel')
+        if (result && result.data && result.data.access_token) {
+            return result.data.openid;
+        }
+        return null
+    }
 }
 
 

@@ -30,6 +30,8 @@ export const ResidentSchema = new mongoose.Schema(
     reviewer: ObjectId,
     // 有效期
     expireTime: Date,
+    // 是否出租
+    isRent: Boolean,
     // 是否推送
     isPush: { type: Boolean, default: false }
   },

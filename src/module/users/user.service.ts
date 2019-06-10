@@ -19,6 +19,7 @@ import { CreateFaceDTO } from '../face/dto/face.dto';
 import { FaceService } from '../face/face.service';
 import { PhoneUtil } from 'src/utils/phone.util';
 import { RedisService } from 'nestjs-redis';
+import { WeixinUtil } from 'src/utils/weixin.util';
 
 @Injectable()
 export class UserService {
@@ -32,6 +33,7 @@ export class UserService {
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(PhoneUtil) private readonly phoneUtil: PhoneUtil,
+    @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
     private readonly redis: RedisService,
   ) { }
 
@@ -221,49 +223,37 @@ export class UserService {
     })
   }
 
-  // async OAuth(code: string, ip: string) {
-  //   // 解释用户数据
-  //   const client = new OAuth(this.configService.pcAppid, this.configService.pcSecret);
-  //   const token = await client.getAccessToken(code);
-  //   // const accessToken = token.data.access_token;
-  //   const openid = token.data.openid;
-  //   const userInfo = await client.getUser(openid)
-  //   if (!userInfo) {
-  //     throw new ApiException('登录失败', ApiErrorCode.LOGIN_ERROR, 406);
-  //   }
-  //   console.log(userInfo, ' userinfo')
-  //   // 根据openid查找用户是否已经注册
-  //   let user: IUser = await this.userModel.findOne({ unionId: userInfo.unionid }).lean().exec();
-  //   if (!user) {
-  //     // 注册
-  //     user = await this.userModel.create({
-  //       username: '微信用户' + uuid(),
-  //       password: '',
-  //       registerTime: Date.now(),
-  //       registerIp: ip,
-  //       phone: '',
-  //       // weixinOpenid: userInfo.openId,
-  //       avatar: userInfo.headimgurl || '',
-  //       gender: userInfo.sex || 0, // 性别 0：未知、1：男、2：女
-  //       nickname: userInfo.nickname,
-  //       unionId: userInfo.unionid || null,
-  //     });
-  //   }
+  async OAuth(code: string, ip: string): Promise<IUser | null> {
+    // 解释用户数据
+    const openId = await this.weixinUtil.oauth(code)
+    // const accessToken = token.data.access_token;
+    if (openId) {
+      // 根据openid查找用户是否已经注册
+      let user: IUser | null = await this.userModel.findOne({ openId }).lean().exec();
+      if (!user) {
+        // 注册
+        user = await this.userModel.create({
+          registerTime: Date.now(),
+          registerIp: ip,
+          openId,
+        });
+      }
+      // 更新登录信息
+      await this.userModel.findByIdAndUpdate(user._id, {
+        lastLoginTime: Date.now(),
+        lastLoginIp: ip,
+      });
 
-  //   // 更新登录信息
-  //   await this.userModel.findByIdAndUpdate(user._id, {
-  //     lastLoginTime: Date.now(),
-  //     lastLoginIp: ip,
-  //   });
-
-  //   const accessToken = await this.jwtService.sign({ id: user._id, type: 'user' });
-  //   if (!user || !accessToken) {
-  //     throw new ApiException('登录失败', ApiErrorCode.LOGIN_ERROR, 406);
-  //   }
-  //   user.accessToken = accessToken;
-  //   delete user.password;
-  //   return user;
-  // }
+      const accessToken = await this.jwtService.sign({ id: user._id, type: 'user' });
+      if (!user || !accessToken) {
+        throw new ApiException('登录失败', ApiErrorCode.LOGIN_ERROR, 406);
+      }
+      user.accessToken = accessToken;
+      delete user.password;
+      return user;
+    }
+    return null
+  }
 
   // 管理员新增账号
   async createByAdmin(createUserDto: CreateUserDTO, ip: string): Promise<IUser> {

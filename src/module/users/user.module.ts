@@ -10,6 +10,7 @@ import { CameraUtil } from 'src/utils/camera.util';
 import { DeviceModule } from '../device/device.module';
 import { FaceModule } from '../face/face.module';
 import { PhoneUtil } from 'src/utils/phone.util';
+import { WeixinUtil } from 'src/utils/weixin.util';
 
 
 @Module({
@@ -18,6 +19,7 @@ import { PhoneUtil } from 'src/utils/phone.util';
     CryptoUtil,
     CameraUtil,
     PhoneUtil,
+    WeixinUtil,
     ...usersProviders,
   ],
   exports: [UserService],

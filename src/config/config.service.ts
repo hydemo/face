@@ -87,6 +87,10 @@ export class ConfigService {
 
       VIP_MODE: Joi.number().default(3),
 
+      WEIXIN_OAUTH_URL: Joi.string().required(),
+
+      WEIXiN_GRANT_TYPE: Joi.string().required(),
+
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -208,5 +212,13 @@ export class ConfigService {
 
   get vipMode(): number {
     return Number(this.envConfig.VIP_MODE);
+  }
+
+  get oauthUrl(): string {
+    return this.envConfig.WEIXIN_OAUTH_URL;
+  }
+
+  get grantType(): string {
+    return this.envConfig.WEIXiN_GRANT_TYPE;
   }
 }

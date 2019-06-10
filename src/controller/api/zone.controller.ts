@@ -45,6 +45,20 @@ export class ZoneController {
     return this.zoneService.findAll(pagination);
   }
 
+  @ApiOkResponse({
+    description: '待申请房屋列表',
+    type: CreateZoneDTO,
+    isArray: true,
+  })
+  @Get('/:id/no-owner')
+  @ApiOperation({ title: '待申请房屋列表', description: '待申请房屋列表' })
+  noOwnerZones(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Query() pagination: Pagination,
+  ) {
+    return this.zoneService.noOwnerZones(pagination, id);
+  }
+
   @Get('/:id')
   @ApiOkResponse({
     description: '获取区域成功',

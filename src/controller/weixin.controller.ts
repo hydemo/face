@@ -14,6 +14,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { WeixinUtil } from 'src/utils/weixin.util';
+import { UserService } from 'src/module/users/user.service';
 
 @ApiUseTags('weixin')
 @ApiBearerAuth()
@@ -22,6 +23,7 @@ import { WeixinUtil } from 'src/utils/weixin.util';
 export class WeixinController {
   constructor(
     private readonly weixinUtil: WeixinUtil,
+    private readonly userService: UserService,
   ) { }
 
   @ApiOkResponse({
@@ -48,5 +50,22 @@ export class WeixinController {
   ) {
     const data = await this.weixinUtil.scan(key)
     return { status: 200, data }
+  }
+
+  @ApiOkResponse({
+    description: '微信签名',
+  })
+  @Get('/oauth')
+  @ApiOperation({ title: '微信签名', description: '微信签名' })
+  async OAuth(
+    @Query('code') code: string,
+    @Request() req: any
+  ) {
+    const clientIp = req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip.replace(/::ffff:/, '');
+    const data = await this.userService.OAuth(code, clientIp);
+    if (data) {
+      return { status: 200, data }
+    }
+    return { status: 400, msg: '授权失败' }
   }
 }
