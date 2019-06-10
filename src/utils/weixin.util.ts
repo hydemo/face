@@ -107,7 +107,7 @@ export class WeixinUtil {
     async oauth(code: string): Promise<string | null> {
         const result = await axios({
             method: 'get',
-            url: 'https://api.weixin.qq.com/cgi-bin/ticket/getticket',
+            url: 'https://api.weixin.qq.com/sns/oauth2/access_token',
             params: {
                 appid: this.config.weixinAppid,
                 secret: this.config.weixinAppSecret,
@@ -115,7 +115,6 @@ export class WeixinUtil {
                 grant_type: this.config.grantType,
             },
         });
-        console.log(result, 'rel')
         if (result && result.data && result.data.access_token) {
             return result.data.openid;
         }
