@@ -691,12 +691,12 @@ export class ResidentService {
 
   // 退租
   async rentRecyle(address: IZone) {
-    const residents: IResident[] = await this.residentModel.find({ address: address._id, checkResult: 2, isDelete: false })
+    const residents: IResident[] = await this.residentModel.find({ address: address._id, checkResult: 2, isDelete: false, isDisable: false })
     await Promise.all(residents.map(async resident => {
       if (resident.type === 'owner') {
         await this.roleService.findOneAndDelete({ role: 5, user: resident.user, zone: resident.address })
-        await this.deleteById(resident._id, resident.reviewer)
       }
+      await this.deleteById(resident._id, resident.reviewer)
       await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
 
     }))
