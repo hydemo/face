@@ -231,19 +231,19 @@ export class UserService {
       // 根据openid查找用户是否已经注册
       let user: IUser | null = await this.userModel.findOne({ openId }).lean().exec();
       if (!user) {
-        // 注册
-        user = await this.userModel.create({
+        user = new this.userModel({
           registerTime: Date.now(),
           registerIp: ip,
           openId,
-        });
+        })
+        // 注册
+        await user.save()
       }
       // 更新登录信息
       await this.userModel.findByIdAndUpdate(user._id, {
         lastLoginTime: Date.now(),
         lastLoginIp: ip,
       });
-      console.log(user, 'user')
       user.accessToken = await this.jwtService.sign({ id: user._id, type: 'user' });
       delete user.password;
       delete user.openId
