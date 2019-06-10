@@ -238,7 +238,7 @@ export class ResidentService {
       applicationTime: new Date(),
       isMonitor: false,
       type: 'visitor',
-      reviewer: zone.reviewer,
+      reviewer: key.reviewer,
       expireTime,
       addTime: new Date(),
       checkTime: new Date(),
