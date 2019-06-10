@@ -21,7 +21,7 @@ export class ZoneService {
   // 创建数据
   async create(createZoneDTO: CreateZoneDTO): Promise<boolean> {
 
-    const zone: ZoneDTO = { ...createZoneDTO, zoneLayer: 0, parent: null, houseNumber: '' }
+    const zone: ZoneDTO = { ...createZoneDTO, zoneLayer: 0, parent: null, houseNumber: '', ancestor: [] }
 
     const createZone: IZone = new this.zoneModel(zone);
     createZone.zoneId = createZone._id;

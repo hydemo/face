@@ -293,7 +293,7 @@ export class UserService {
 
   // 实名认证
   async verify(verify: VerifyUserDTO, user: IUser): Promise<null> {
-    let isPhoneVerify = false
+    let isPhoneVerify = user.isPhoneVerify;
     if (!user.isPhoneVerify && (!verify.phone || !verify.code)) {
       throw new ApiException('手机号未绑定', ApiErrorCode.INPUT_ERROR, 406);
     } else if (!user.isPhoneVerify && verify.phone && verify.code) {

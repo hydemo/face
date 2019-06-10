@@ -213,10 +213,11 @@ export class ResidentService {
   }
 
   async scanToVisitor(visitor: CreateVisitorByScanDTO, user: IUser) {
-    const zone = await this.weixinUtil.scan(visitor.key)
-    if (zone.type !== 'zone') {
+    const key = await this.weixinUtil.scan(visitor.key)
+    if (key.type !== 'zone') {
       throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
     }
+    const zone: IZone = await this.zoneService.findById(key._id)
     const exist: IResident | null = await this.residentModel.findOne({
       user: user._id,
       zone: zone._id,
