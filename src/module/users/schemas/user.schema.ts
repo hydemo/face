@@ -54,3 +54,25 @@ UserSchema.post('find', function (results: any) {
     }
   })
 })
+
+UserSchema.post('findById', function (results: any) {
+  results.map(result => {
+    if (result.cardNumber) {
+      const number = result.cardNumber;
+      const replaceStr = number.substring(2, 13);
+      const str = '*'.repeat(replaceStr.length)
+      result.cardNumber = number.replace(replaceStr, str);
+    }
+  })
+})
+
+UserSchema.post('findByOne', function (results: any) {
+  results.map(result => {
+    if (result.cardNumber) {
+      const number = result.cardNumber;
+      const replaceStr = number.substring(2, 13);
+      const str = '*'.repeat(replaceStr.length)
+      result.cardNumber = number.replace(replaceStr, str);
+    }
+  })
+})

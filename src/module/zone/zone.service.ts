@@ -41,7 +41,7 @@ export class ZoneService {
     }
     const key = uuid()
     const client = this.redis.getClient()
-    const value = { zone, type: 'zone' };
+    const value = { name: zone.houseNumber, _id: zone._id, type: 'zone' };
     await client.set(key, JSON.stringify(value), 'EX', 60 * 5);
     return key
   }
