@@ -63,7 +63,6 @@ export class WeixinController {
   ) {
     const clientIp = req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip.replace(/::ffff:/, '');
     const data = await this.userService.OAuth(code, clientIp);
-    console.log(data, 'data')
     if (data) {
       return { status: 200, data }
     }

@@ -139,7 +139,7 @@ export class UserService {
   // 绑定手机号
   async bindPhone(user: IUser, bind: BindPhoneDTO) {
     await this.phoneUtil.codeCheck(bind.phone, bind.code)
-    const existing = await this.userModel.findOne({ _id: { $ne: user._id }, phone: user.phone });
+    const existing = await this.userModel.findOne({ _id: { $ne: user._id }, phone: bind.phone });
     if (existing) {
       throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
     }
@@ -301,7 +301,7 @@ export class UserService {
       await this.phoneUtil.codeCheck(verify.phone, verify.code)
       isPhoneVerify = true
     }
-    const existing = await this.userModel.findOne({ _id: { $ne: user._id }, phone: user.phone });
+    const existing = await this.userModel.findOne({ _id: { $ne: user._id }, phone: verify.phone });
     if (existing) {
       throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
     }
