@@ -49,14 +49,14 @@ export class SOCUtil {
     const data = {
       datas: [
         {
-          DZBM: '1D0075DB-8677-41E2-E054-90E2BA548A34',
+          DZBM: '1A814683-14F8-6129-E054-90E2BA548A34',
         }
       ],
       pages: [
         {
-          "psize": "20",
+          "psize": "15",
           "tcount": "",
-          "pno": "2",
+          "pno": "1",
           "tsize": "",
         }
       ]

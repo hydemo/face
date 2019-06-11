@@ -15,17 +15,17 @@ export class InitService {
   async init() {
     // const data = await this.socUtil.qrcodeAddress('')
     // console.log(data, 'data')
-    // const adminExist = await this.adminService.countByCondition({ role: 0 })
-    // if (!adminExist) {
-    //   const admin: CreateAdminDTO = {
-    //     nickname: '超级管理员',
-    //     role: '0',
-    //     password: md5('111111'),
-    //     phone: '12121212'
-    //   }
-    //   await this.adminService.create(admin)
+    const adminExist = await this.adminService.countByCondition({ role: 0 })
+    if (!adminExist) {
+      const admin: CreateAdminDTO = {
+        nickname: '超级管理员',
+        role: '0',
+        password: md5('111111'),
+        phone: '12121212'
+      }
+      await this.adminService.create(admin)
 
-    // }
+    }
   }
 
 }

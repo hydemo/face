@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, Inject, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards, Inject, Request, Put } from '@nestjs/common';
 import {
   ApiUseTags,
   ApiOkResponse,
@@ -13,6 +13,8 @@ import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { UserService } from 'src/module/users/user.service';
 import { CreateUserDTO } from 'src/module/users/dto/users.dto';
 import { IUser } from 'src/module/users/interfaces/user.interfaces';
+import { RoleService } from 'src/module/role/role.service';
+import { RoleDTO } from 'src/module/role/dto/role.dto';
 
 
 
@@ -23,6 +25,7 @@ import { IUser } from 'src/module/users/interfaces/user.interfaces';
 export class CMSUserController {
   constructor(
     @Inject(UserService) private userService: UserService,
+    @Inject(RoleService) private roleService: RoleService,
   ) { }
 
   @ApiOkResponse({
@@ -46,6 +49,23 @@ export class CMSUserController {
     const data: IUser | null = await this.userService.findById(id);
     return { statusCode: 200, msg: '获取用户成功', data };
   }
+
+  @Put('/:id/admin')
+  @ApiOkResponse({
+    description: '设为管理员',
+  })
+  @ApiCreatedResponse({ description: '设为管理员' })
+  @ApiOperation({ title: '设为管理员', description: '设为管理员' })
+  async setAdmin(@Param('id', new MongodIdPipe()) id: string) {
+    const role: RoleDTO = {
+      user: id,
+      description: '管理员',
+      role: 0,
+    }
+    await this.roleService.create(role);
+    return { statusCode: 200, msg: '设置成功' };
+  }
+
 
   @Post('')
   @ApiOkResponse({

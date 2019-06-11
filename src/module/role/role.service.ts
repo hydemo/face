@@ -134,17 +134,18 @@ export class RoleService {
     let management = [];
     let worker = [];
     let rent = [];
+    let isAdmin = false;
     const roles: any = await this.roleModel.aggregate([
       { $match: cond },
       { $group: { _id: '$role', zones: { $push: '$zone' } } },
       { $lookup: { from: 'zone', localField: 'zones', foreignField: '_id', as: 'zones' } },
     ])
     if (!roles.length) {
-      return { owner, guard, management, worker, rent }
+      return { owner, guard, management, worker, rent, isAdmin }
     }
     roles.map(role => {
       switch (role._id) {
-        case 0: management = role.zones || [];
+        case 0: isAdmin = true;
           break;
         case 1: management = role.zones || [];
           break;
@@ -160,7 +161,7 @@ export class RoleService {
           break;
       }
     });
-    return { owner, guard, management, worker, rent }
+    return { owner, guard, management, worker, rent, isAdmin }
   }
 
   async checkRoles(condition: any) {
