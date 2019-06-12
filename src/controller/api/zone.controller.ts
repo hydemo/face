@@ -124,7 +124,7 @@ export class ZoneController {
         isDisable: false,
         checkResult: { $lt: 3 }
       })
-      zones = residents.map(resident => resident.zone)
+      zones = residents.map(resident => resident.address)
     }
     return await this.zoneService.findSubZone(id, type, zones);
   }
