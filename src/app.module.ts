@@ -44,6 +44,7 @@ import { BlackModule } from './module/black/black.module';
 import { RentModule } from './module/rent/rent.module';
 import { TaskController } from './controller/api/task.controller';
 import { CMSBlackController } from './controller/cms/black.controller';
+import { SOCUtil } from './utils/soc.util';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { CMSBlackController } from './controller/cms/black.controller';
     CameraUtil,
     CryptoUtil,
     WeixinUtil,
+    SOCUtil,
   ],
   controllers: [
     CallbackController,

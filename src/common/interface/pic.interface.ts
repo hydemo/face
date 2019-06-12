@@ -6,3 +6,4 @@ export interface IPic {
   // 头像
   readonly faceUrl: string;
 }
+

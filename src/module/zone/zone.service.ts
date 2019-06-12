@@ -2,33 +2,38 @@ import { Model } from 'mongoose';
 import * as uuid from 'uuid/v4';
 import { Inject, Injectable } from '@nestjs/common';
 import { IZone } from './interfaces/zone.interfaces';
-import { CreateZoneDTO, ZoneDTO } from './dto/zone.dto';
+import { CreateZoneDTO, ZoneDTO, CreateZoneByScanDTO } from './dto/zone.dto';
 import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
 import { RoleService } from '../role/role.service';
 import { RedisService } from 'nestjs-redis';
+import { SOCUtil } from 'src/utils/soc.util';
+import { IZoneProfile } from 'src/module/zone/interfaces/zonePrifile.interface';
+import { ZoneProfileDTO } from './dto/zonePrifile.dto';
+import { IChildren } from './interfaces/children.interface';
 
 @Injectable()
 export class ZoneService {
   constructor(
     @Inject('ZoneModelToken') private readonly zoneModel: Model<IZone>,
     @Inject(RoleService) private readonly roleService: RoleService,
+    @Inject(SOCUtil) private socUtil: SOCUtil,
     private readonly redis: RedisService,
   ) { }
 
   // 创建数据
-  async create(createZoneDTO: CreateZoneDTO): Promise<boolean> {
+  // async create(createZoneDTO: CreateZoneDTO): Promise<boolean> {
 
-    const zone: ZoneDTO = { ...createZoneDTO, zoneLayer: 0, parent: null, houseNumber: '', ancestor: [] }
+  //   const zone: ZoneDTO = { ...createZoneDTO, zoneLayer: 0, parent: null, houseNumber: '', ancestor: [] }
 
-    const createZone: IZone = new this.zoneModel(zone);
-    createZone.zoneId = createZone._id;
-    createZone.houseNumber = createZone.name;
-    await createZone.save();
-    return true;
-  }
+  //   const createZone: IZone = new this.zoneModel(zone);
+  //   createZone.zoneId = createZone._id;
+  //   createZone.houseNumber = createZone.name;
+  //   await createZone.save();
+  //   return true;
+  // }
 
   async getVisitorQrcode(user: string, zoneId: string) {
     const canActive = await this.roleService.checkRoles({ user, role: 3, zone: zoneId, isDelete: false })
@@ -66,10 +71,10 @@ export class ZoneService {
     const zone: IZone | null = await this.zoneModel
       .findById(id)
       .populate({
-        path: 'children', model: 'zone', sort: 'name',
+        path: 'children', model: 'zone', sort: { name: 1 },
         populate: {
-          path: 'children', model: 'zone', sort: 'name',
-          populate: { path: 'children', model: 'zone', sort: 'name' }
+          path: 'children', model: 'zone', sort: { name: 1 },
+          populate: { path: 'children', model: 'zone', sort: { name: 1 } }
         }
       })
       .lean()
@@ -140,58 +145,156 @@ export class ZoneService {
     await this.zoneModel.findByIdAndUpdate(id, { $inc: { deviceCount: inc } })
     return true
   }
-
-  // 新增下级区域
-  async createSubZone(zone: CreateZoneDTO, parent: string): Promise<IZone> {
-    const parentZone: any | null = await this.zoneModel.findById(parent);
-    if (!parentZone) {
-      throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
-    }
-    const houseNumber = `${parentZone.houseNumber}-${zone.name}`
-    const create: ZoneDTO = {
-      ...zone,
-      parent,
-      zoneId: parentZone.zoneId,
-      location: parentZone.location,
-      ancestor: [...parentZone.ancestor, parent],
-      zoneLayer: parentZone.zoneLayer + 1,
-      zoneType: parentZone.zoneType,
-      houseNumber,
-    }
-    const createZone: IZone = await this.zoneModel.create(create);
-    await this.zoneModel.findByIdAndUpdate(parent, { hasChildren: true, $addToSet: { children: createZone._id } })
-    parentZone.children.push(createZone)
-
-    return await this.findTreeById(parentZone.zoneId);
+  // 二维码获取小区信息
+  async qrcode(code: string): Promise<IZoneProfile> {
+    const { list } = await this.socUtil.qrcodeAddress(code, '1')
+    return list[0]
+  }
+  // 处理分区
+  async partition(parent: string) {
+    const partitions: IZone[] = await this.zoneModel.find({ parent, buildingType: '61' }).sort({ name: 1 })
+    await Promise.all(partitions.map(async (partition, index) => {
+      const name: RegExp = new RegExp(partition.name, 'i')
+      await this.zoneModel.update({ name }, { partition: partition._id, partitionSort: index })
+      // const children: IZone[] = await this.zoneModel.find({ name })
+      // children.map(child => {
+      //   if (String(child._id) === String(partition._id)) {
+      //     this.zoneModel.findByIdAndUpdate(partition._id, { partition: partition._id, partitionSort: index })
+      //   } else {
+      //     this.zoneModel.findByIdAndUpdate(partition._id, {
+      //       partition: partition._id,
+      //       partitionSort: index,
+      //       name: child.name.replace(partition.name, '')
+      //     })
+      //   }
+      // })
+    }))
   }
 
-  // async getHouseNumber(id: string): Promise<string> {
-  //   const zone: any | null = await this.zoneModel
-  //     .findById(id)
-  //     .populate({
-  //       path: 'ancestor', model: 'zone', select: 'name',
-  //       populate: {
-  //         path: 'ancestor', model: 'zone', select: 'name',
-  //         populate: { path: 'ancestor', model: 'zone', select: 'name' }
-  //       }
-  //     })
-  //     .lean()
-  //     .exec();
-  //   if (!zone) {
-  //     throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
-  //   }
-  //   let ancestor: string = ''
-  //   zone.ancestor.map(ances => {
-  //     if (ancestor) {
-  //       ancestor = `${ancestor}-${ances.name}`
-  //     } else {
-  //       ancestor = ances.name
-  //     }
-  //   })
-  //   if (ancestor) {
-  //     return `${ancestor}-${zone.name}`
-  //   } else {
-  //     return zone.name
-  //   }
-  // }
+  // 创建区域对象
+  async createSubZone(profile: ZoneProfileDTO, parent: IZone): Promise<IZone> {
+    const name = profile.dzqc.replace(parent.profile.dzqc, '')
+    const houseNumber = `${parent.houseNumber}-${name}`
+    const create: ZoneDTO = {
+      name,
+      nameLength: name.length,
+      location: parent.location,
+      zoneLayer: parent.zoneLayer + 1,
+      zoneType: parent.zoneType,
+      parent: parent._id,
+      profile,
+      zoneId: parent.zoneId,
+      ancestor: [...parent.ancestor, parent._id],
+      houseNumber,
+      buildingType: profile.dzsx
+    }
+    return await this.zoneModel.create(create);
+  }
+  // 获取子集
+  async getChildren(children: IChildren, parent: IZone, pno: number, code: string): Promise<IChildren> {
+    const result: any = await this.socUtil.qrcodeAddress(code, String(pno))
+    const list: IZoneProfile[] = result.list
+    const page = result.page
+    const totalPage = page.tsize
+    await Promise.all(list.map(async child => {
+      if (child.dzbm === parent.profile.dzbm) {
+        return;
+      }
+      if (child.dzsx === '61') {
+        children.hasPartition = true
+      }
+      const subZone: IZone = await this.createSubZone(child, parent)
+      children.children.push(String(subZone._id))
+      let subChildren: IChildren = { children: [], hasPartition: false }
+      if (parent.zoneLayer < 1) {
+        subChildren = await this.getChildren(subChildren, subZone, 1, child.dzbm)
+      }
+      if (subChildren.hasPartition) {
+        await this.partition(subZone._id)
+      }
+      subZone.children = subChildren.children;
+      subZone.hasChildren = subChildren.children.length > 0
+      subZone.hasPartition = subChildren.hasPartition
+      await subZone.save()
+    }))
+    if (Number(totalPage) > pno) {
+      return this.getChildren(children, parent, pno + 1, code)
+    }
+    return children
+  }
+
+  // 二维码添加小区
+  async addByQrcode(createZone: CreateZoneByScanDTO) {
+    const result: any = await this.socUtil.qrcodeAddress(createZone.code, '1')
+    const list: IZoneProfile[] = result.list
+    const page = result.page
+    const count = Number(page.tcount)
+    const parentProfile: IZoneProfile = list[0];
+    const parent: ZoneDTO = {
+      name: createZone.name,
+      nameLength: createZone.name.length,
+      location: `${parentProfile.qxmc}${parentProfile.sqjcwhmc}`,
+      zoneLayer: 0,
+      zoneType: createZone.zoneType,
+      parent: null,
+      ancestor: [],
+      hasChildren: count > 1,
+      houseNumber: createZone.name,
+      profile: parentProfile,
+      buildingType: parentProfile.dzsx
+    }
+    const createParent: IZone = await new this.zoneModel(parent);
+    createParent.zoneId = createParent._id;
+    const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, 1, createZone.code)
+    createParent.children = children.children
+    createParent.hasPartition = children.hasPartition
+    await createParent.save()
+  }
+  //获取子集
+  async findSubZone(parent: string, type: string, zones: string[]): Promise<IList<IZone>> {
+    let condition: any = {};
+    switch (type) {
+      case 'owner': condition = await this.findOwnerSubZone(parent)
+        break;
+      case 'family': condition = await this.findFamilySubZone(parent, zones)
+        break;
+      case 'show': condition = await this.findShowSubZone(parent)
+        break;
+      default: condition = { parent, isDelete: false, buildingType: { $ne: '61' } }
+        break;
+    }
+    const list = await this.zoneModel
+      .find(condition)
+      .sort({ partitionSort: 1, nameLength: 1, name: 1 })
+    const total = await this.zoneModel
+      .countDocuments(condition)
+      .exec()
+    return { list, total };
+  }
+  // 获取常住人子集
+  async findFamilySubZone(parent: string, zones: string[]): Promise<any> {
+    return {
+      buildingType: { $ne: '61' },
+      parent,
+      isDelete: false,
+      _id: { $nin: zones }
+    }
+  }
+  // 获取业主子集
+  async findOwnerSubZone(parent: string): Promise<any> {
+    return {
+      buildingType: { $ne: '61' },
+      parent,
+      isDelete: false,
+      owner: { $exists: false },
+    }
+  }
+  // 获取显示子集
+  async findShowSubZone(parent: string): Promise<any> {
+    return {
+      buildingType: { $ne: '61' },
+      parent,
+      isDelete: false,
+    }
+  }
 }

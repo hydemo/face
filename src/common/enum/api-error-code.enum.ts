@@ -17,4 +17,5 @@ export enum ApiErrorCode {
   NO_VERIFY = 10017,
   APPLICATION_EXIST = 10018,
   QRCODE_ERROR = 10019,
+  RENT_ALREADY = 10020,
 }

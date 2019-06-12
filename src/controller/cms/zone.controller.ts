@@ -78,15 +78,15 @@ export class CMSZoneController {
     return await this.roleService.create(createRole);
   }
 
-  @Post('')
-  @ApiOkResponse({
-    description: '添加区域成功',
-  })
-  @ApiOperation({ title: '添加区域', description: '添加区域' })
-  async create(@Body() creatZoneDTO: CreateZoneDTO) {
-    await this.zoneService.create(creatZoneDTO);
-    return { statusCode: 200, msg: '添加区域成功' };
-  }
+  // @Post('')
+  // @ApiOkResponse({
+  //   description: '添加区域成功',
+  // })
+  // @ApiOperation({ title: '添加区域', description: '添加区域' })
+  // async create(@Body() creatZoneDTO: CreateZoneDTO) {
+  //   await this.zoneService.create(creatZoneDTO);
+  //   return { statusCode: 200, msg: '添加区域成功' };
+  // }
 
   @Delete('/:id')
   @ApiOkResponse({
@@ -98,18 +98,18 @@ export class CMSZoneController {
     return { statusCode: 200, msg: '删除区域成功' };
   }
 
-  @Post('/:id/subZones')
-  @ApiOkResponse({
-    description: '添加区域成功',
-  })
-  @ApiOperation({ title: '添加区域', description: '添加区域' })
-  async createSubZone(
-    @Body() zone: CreateZoneDTO,
-    @Param('id', new MongodIdPipe()) id: string
-  ) {
-    const data = await this.zoneService.createSubZone(zone, id);
-    return { statusCode: 200, msg: '添加区域成功', data };
-  }
+  // @Post('/:id/subZones')
+  // @ApiOkResponse({
+  //   description: '添加区域成功',
+  // })
+  // @ApiOperation({ title: '添加区域', description: '添加区域' })
+  // async createSubZone(
+  //   @Body() zone: CreateZoneDTO,
+  //   @Param('id', new MongodIdPipe()) id: string
+  // ) {
+  //   const data = await this.zoneService.createSubZone(zone, id);
+  //   return { statusCode: 200, msg: '添加区域成功', data };
+  // }
 
   @ApiOkResponse({
     description: '区域人脸名单',

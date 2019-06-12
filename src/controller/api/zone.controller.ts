@@ -12,7 +12,7 @@ import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { ZoneService } from 'src/module/zone/zone.service';
-import { CreateZoneDTO } from 'src/module/zone/dto/zone.dto';
+import { CreateZoneDTO, CreateZoneByScanDTO } from 'src/module/zone/dto/zone.dto';
 import { IZone } from 'src/module/zone/interfaces/zone.interfaces';
 import { UserRoles } from 'src/common/decorator/roles.decorator';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
@@ -20,11 +20,13 @@ import { CreateBlackDTO } from 'src/module/black/dto/black.dto';
 import { BlackService } from 'src/module/black/black.service';
 import { CreateRentDTO } from 'src/module/rent/dto/rent.dto';
 import { RentService } from 'src/module/rent/rent.service';
+import { ResidentService } from 'src/module/resident/resident.service';
+import { IResident } from 'src/module/resident/interfaces/resident.interfaces';
 
 
 @ApiUseTags('zones')
 @ApiBearerAuth()
-@UseGuards(AuthGuard())
+@UseGuards(AuthGuard(), UserRolesGuard)
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/zones')
 export class ZoneController {
@@ -32,6 +34,8 @@ export class ZoneController {
     @Inject(ZoneService) private zoneService: ZoneService,
     @Inject(BlackService) private blackService: BlackService,
     @Inject(RentService) private rentService: RentService,
+    @Inject(ResidentService) private residentService: ResidentService,
+
   ) { }
 
   @ApiOkResponse({
@@ -43,6 +47,37 @@ export class ZoneController {
   @ApiOperation({ title: '获取区域列表', description: '获取区域列表' })
   zoneList(@Query() pagination: Pagination) {
     return this.zoneService.findAll(pagination);
+  }
+
+
+  @ApiOkResponse({
+    description: '二维码获取小区详情',
+    type: CreateZoneDTO,
+    isArray: true,
+  })
+  // @UserRoles(0)
+  @Get('/qrcode')
+  @ApiOperation({ title: '二维码获取小区详情', description: '二维码获取小区详情' })
+  async qrcode(
+    @Query('code') code: string,
+  ) {
+    const data = await this.zoneService.qrcode(code);
+    return { status: 200, data }
+  }
+
+  @ApiOkResponse({
+    description: '二维码添加小区',
+    type: CreateZoneDTO,
+    isArray: true,
+  })
+  @UserRoles(0)
+  @Post('/qrcode')
+  @ApiOperation({ title: '二维码添加小区', description: '二维码添加小区' })
+  async addByQrcode(
+    @Body() zone: CreateZoneByScanDTO,
+  ) {
+    await this.zoneService.addByQrcode(zone);
+    return { status: 200, msg: '添加成功' }
   }
 
   @ApiOkResponse({
@@ -66,8 +101,32 @@ export class ZoneController {
   @ApiCreatedResponse({ description: '获取区域' })
   @ApiOperation({ title: '根据id获取区域信息', description: '根据id获取区域信息' })
   async findById(@Param('id', new MongodIdPipe()) id: string) {
-    const data: IZone = await this.zoneService.findTreeById(id);
+    const data: IZone = await this.zoneService.findById(id);
     return { statusCode: 200, msg: '获取区域成功', data };
+  }
+
+  @Get('/:id/subZone')
+  @ApiOkResponse({
+    description: '获取子集',
+  })
+  @ApiCreatedResponse({ description: '获取子集' })
+  @ApiOperation({ title: '获取子集', description: '获取子集' })
+  async findSubZone(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Query('type') type: string,
+    @Request() req: any,
+  ) {
+    let zones: string[] = []
+    if (type === 'family') {
+      const residents: IResident[] = await this.residentService.findByCondition({
+        user: req.user._id,
+        isDelete: false,
+        isDisable: false,
+        checkResult: { $lt: 3 }
+      })
+      zones = residents.map(resident => resident.zone)
+    }
+    return await this.zoneService.findSubZone(id, type, zones);
   }
 
   @Get('/:id/qrcode')

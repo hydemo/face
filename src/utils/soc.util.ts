@@ -4,6 +4,7 @@ import * as md5 from 'md5';
 import { ConfigService } from 'src/config/config.service';
 import axios from 'axios'
 import { CryptoUtil } from './crypto.util';
+import { IZoneProfile } from 'src/module/zone/interfaces/zonePrifile.interface';
 
 @Injectable()
 export class SOCUtil {
@@ -37,7 +38,7 @@ export class SOCUtil {
       },
       data: json,
     });
-    return decodeURIComponent(result.data)
+    return JSON.parse(decodeURIComponent(result.data))
   }
 
   /**
@@ -45,23 +46,24 @@ export class SOCUtil {
    * 
    * @param code 图片数据
    */
-  async qrcodeAddress(code: string): Promise<any> {
+  async qrcodeAddress(code: string, pno: string): Promise<any> {
     const data = {
       datas: [
         {
-          DZBM: '1A814683-14F8-6129-E054-90E2BA548A34',
+          DZBM: code,
         }
       ],
       pages: [
         {
           "psize": "15",
           "tcount": "",
-          "pno": "1",
+          "pno": pno,
           "tsize": "",
         }
       ]
     }
-    return await this.socRequest(data, 'dzfwpt_qrcode')
+    const result = await this.socRequest(data, 'dzfwpt_qrcode')
+    return { list: result.datas, page: result.pages[0] }
   }
 }
 
