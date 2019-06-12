@@ -277,6 +277,7 @@ export class ZoneService {
       buildingType: { $ne: '61' },
       parent,
       isDelete: false,
+      owner: { $exists: true },
       _id: { $nin: zones }
     }
   }
