@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, Inject, Request } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, Inject, Put, Request } from '@nestjs/common';
 import {
   ApiUseTags,
   ApiOkResponse,
@@ -13,7 +13,6 @@ import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { BlackService } from 'src/module/black/black.service';
 import { CreateBlackDTO, BlackDTO } from 'src/module/black/dto/black.dto';
 import { IBlack } from 'src/module/black/interfaces/black.interfaces';
-import { Put } from '_@nestjs_common@5.7.4@@nestjs/common';
 
 
 @ApiUseTags('cms/blacks')

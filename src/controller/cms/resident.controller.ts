@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, Inject, Request } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, Inject, Request, Put } from '@nestjs/common';
 import {
   ApiUseTags,
   ApiOkResponse,
@@ -13,7 +13,6 @@ import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { ResidentService } from 'src/module/resident/resident.service';
 import { CreateResidentDTO, ResidentDTO } from 'src/module/resident/dto/resident.dto';
 import { IResident } from 'src/module/resident/interfaces/resident.interfaces';
-import { Put } from '_@nestjs_common@5.7.4@@nestjs/common';
 
 
 @ApiUseTags('cms/residents')
