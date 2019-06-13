@@ -296,13 +296,13 @@ export class UserService {
     let isPhoneVerify = user.isPhoneVerify;
     if (!user.isPhoneVerify && (!verify.phone || !verify.code)) {
       throw new ApiException('手机号未绑定', ApiErrorCode.INPUT_ERROR, 406);
-    } else if (!user.isPhoneVerify && verify.phone && verify.code) {
+    } else if (verify.phone && verify.code) {
+      const existing = await this.userModel.findOne({ _id: { $ne: user._id }, phone: verify.phone });
+      if (existing) {
+        throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
+      }
       await this.phoneUtil.codeCheck(verify.phone, verify.code)
       isPhoneVerify = true
-    }
-    const existing = await this.userModel.findOne({ _id: { $ne: user._id }, phone: verify.phone });
-    if (existing) {
-      throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
     }
     await this.userModel.findByIdAndUpdate(user._id, { ...verify, isVerify: true, isPhoneVerify }).lean().exec()
     return null
