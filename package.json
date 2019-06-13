@@ -1,5 +1,5 @@
 {
-  "name": "ship",
+  "name": "face",
   "version": "1.0.0",
   "description": "人脸识别",
   "author": "oy",
@@ -21,8 +21,6 @@
   },
   "dependencies": {
     "@alicloud/sms-sdk": "^1.1.6",
-    "@nestjs/common": "^5.4.0",
-    "@nestjs/core": "^5.4.0",
     "@nestjs/jwt": "^0.2.1",
     "@nestjs/mongoose": "^5.2.2",
     "@nestjs/passport": "^5.1.0",
