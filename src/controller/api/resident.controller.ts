@@ -197,9 +197,9 @@ export class ResidentController {
 
   @Get('/visitor/link')
   @ApiOkResponse({
-    description: '扫码添加访客',
+    description: '生成访客链接',
   })
-  @ApiOperation({ title: '扫码添加访客', description: '扫码添加访客' })
+  @ApiOperation({ title: '生成访客链接', description: '生成访客链接' })
   async getVisitorLink(
     @Query('address', new MongodIdPipe()) address: string,
     @Request() req: any
@@ -208,16 +208,16 @@ export class ResidentController {
     return { statusCode: 200, msg: '添加访客成功' };
   }
 
-  @Get('/visitor/link')
+  @Post('/visitor/link')
   @ApiOkResponse({
-    description: '扫码添加访客',
+    description: '链接访问',
   })
-  @ApiOperation({ title: '扫码添加访客', description: '扫码添加访客' })
+  @ApiOperation({ title: '链接访问', description: '链接访问' })
   async AddVisitorByLink(
-    @Query('key') key: string,
+    @Body() key: { key: string },
     @Request() req: any
   ) {
-    await this.residentService.addVisitorByLink(key, req.user);
+    await this.residentService.addVisitorByLink(key.key, req.user);
     return { statusCode: 200, msg: '添加访客成功' };
   }
 
