@@ -2,7 +2,7 @@
   exec_interpreter: "bash"
   name: face
   cwd: ./
-  exec_mode: cluster,
+  exec_mode: cluster
   watch_options: 
     followSymlinks: false
   error_file: ./log/ship-error.log
