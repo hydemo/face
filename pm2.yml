@@ -1,7 +1,8 @@
-- script: start.sh -i max
+- script: start.sh
   exec_interpreter: "bash"
   name: face
   cwd: ./
+  exec_mode: cluster_mode,
   watch_options: 
     followSymlinks: false
   error_file: ./log/ship-error.log
