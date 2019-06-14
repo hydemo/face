@@ -13,6 +13,8 @@ import {
   AgreeVisitorDTO,
   CreateVisitorByOwnerDTO
 } from './dto/resident.dto';
+import * as uuid from 'uuid/v4';
+import { RedisService } from 'nestjs-redis';
 import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
@@ -45,6 +47,7 @@ export class ResidentService {
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
     @Inject(RoleService) private readonly roleService: RoleService,
     @Inject(ConfigService) private readonly config: ConfigService,
+    private readonly redis: RedisService,
   ) { }
 
   // 申请重复确认
@@ -248,19 +251,11 @@ export class ResidentService {
     return
   }
 
-  async addVisitorByScan(visitor: CreateVisitorByOwnerDTO, userId: string) {
-    const zone: IZone = await this.zoneService.findById(visitor.address)
-    const expireTime = moment().add(visitor.expireTime, 'd').toDate()
-    await this.isOwner(zone._id, userId)
-    const user = await this.weixinUtil.scan(visitor.key)
-    if (user.type !== 'user') {
-      throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
-    }
-    await this.residentExist(visitor.address, user._id)
-
+  async addVisitor(address: IZone, user: IUser, reviewer: string, expireTime: Date) {
+    await this.residentExist(address._id, user._id)
     const resident: ResidentDTO = {
-      zone: zone.zoneId,
-      address: zone._id,
+      zone: address.zoneId,
+      address: address._id,
       user: user._id,
       checkResult: 2,
       isMonitor: true,
@@ -269,11 +264,49 @@ export class ResidentService {
       type: 'visitor',
       checkTime: new Date(),
       expireTime,
-      reviewer: userId,
+      reviewer,
     }
     const creatResident = await this.residentModel.create(resident);
-    await this.addToDevice(zone, user, creatResident._id, expireTime);
+    await this.addToDevice(address, user, creatResident._id, expireTime);
     return
+  }
+
+  async addVisitorByScan(visitor: CreateVisitorByOwnerDTO, userId: string) {
+    const zone: IZone = await this.zoneService.findById(visitor.address)
+    await this.isOwner(zone._id, userId)
+    const expireTime = moment().add(visitor.expireTime, 'd').toDate()
+    const user = await this.weixinUtil.scan(visitor.key)
+    if (user.type !== 'user') {
+      throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
+    }
+    return await this.addVisitor(zone, user, user._id, expireTime)
+  }
+
+  async addVisitorByLink(key: string, user: IUser) {
+    const link: any = await this.weixinUtil.scan(key);
+    const { address, type, reviewer } = link
+    const zone: IZone = await this.zoneService.findById(address)
+    const expireTime = moment().add(1, 'd').toDate()
+    if (type !== 'visitor') {
+      throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
+    }
+    return await this.addVisitor(zone, user, reviewer, expireTime)
+  }
+
+  async getVisitorQrCode(address: string, user: IUser) {
+    const zone: IZone = await this.zoneService.findById(address)
+    await this.isOwner(zone._id, user._id)
+    const key = uuid()
+    const client = this.redis.getClient()
+    const value = {
+      name: zone.houseNumber,
+      address: zone._id,
+      type: 'visitor',
+      username: user.username,
+      reviewer: user._id,
+    };
+    await client.set(key, JSON.stringify(value), 'EX', 60 * 60);
+    return key
   }
 
   async addFamily(isMonitor: boolean, isPush: boolean, user: IUser, zone: IZone, owner: string): Promise<IResident> {

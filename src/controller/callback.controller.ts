@@ -30,8 +30,9 @@ export class CallbackController {
 
   @ApiOperation({ title: '人脸识别回调', description: '人脸识别回调' })
   async faceInfo(@Request() req) {
-    // await this.callbackService.callback(req.body)
-    await this.camera.getList()
+    console.log(333)
+    await this.callbackService.callback(req.body)
+    // await this.camera.getList()
     return { status: 200 }
   }
 }

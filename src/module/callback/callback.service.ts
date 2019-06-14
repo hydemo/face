@@ -66,7 +66,9 @@ export class CallbackService {
       await this.strangerService.create(stranger);
     } else {
       const userId: string = body.PicName.split('_')[1].replace('.jpg', '')
+
       const user: IUser | null = await this.userService.findById(userId)
+      console.log(user, 'user')
       if (!user) {
         return
       }

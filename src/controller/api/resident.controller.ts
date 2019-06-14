@@ -195,6 +195,32 @@ export class ResidentController {
     return { statusCode: 200, msg: '添加访客成功' };
   }
 
+  @Get('/visitor/link')
+  @ApiOkResponse({
+    description: '扫码添加访客',
+  })
+  @ApiOperation({ title: '扫码添加访客', description: '扫码添加访客' })
+  async getVisitorLink(
+    @Query('address', new MongodIdPipe()) address: string,
+    @Request() req: any
+  ) {
+    await this.residentService.getVisitorQrCode(address, req.user);
+    return { statusCode: 200, msg: '添加访客成功' };
+  }
+
+  @Get('/visitor/link')
+  @ApiOkResponse({
+    description: '扫码添加访客',
+  })
+  @ApiOperation({ title: '扫码添加访客', description: '扫码添加访客' })
+  async AddVisitorByLink(
+    @Query('key') key: string,
+    @Request() req: any
+  ) {
+    await this.residentService.addVisitorByLink(key, req.user);
+    return { statusCode: 200, msg: '添加访客成功' };
+  }
+
   @Post('/applications/family')
   @ApiOkResponse({
     description: '申请常住人',
