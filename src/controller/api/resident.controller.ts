@@ -204,8 +204,8 @@ export class ResidentController {
     @Query('address', new MongodIdPipe()) address: string,
     @Request() req: any
   ) {
-    await this.residentService.getVisitorQrCode(address, req.user);
-    return { statusCode: 200, msg: '添加访客成功' };
+    const data = await this.residentService.getVisitorQrCode(address, req.user);
+    return { statusCode: 200, data };
   }
 
   @Post('/visitor/link')
