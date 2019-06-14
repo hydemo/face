@@ -1,4 +1,4 @@
-- script: start.sh
+- script: start.sh -i max
   exec_interpreter: "bash"
   name: face
   cwd: ./
