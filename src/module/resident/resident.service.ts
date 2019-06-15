@@ -34,7 +34,7 @@ import { IFace } from '../face/interfaces/face.interfaces';
 import { RoleService } from '../role/role.service';
 import { RoleDTO } from '../role/dto/role.dto';
 import { ConfigService } from 'src/config/config.service';
-import { VerifyMessageDTO } from 'src/common/dto/Message.dto';
+import { ApplicationDTO } from 'src/common/dto/Message.dto';
 
 @Injectable()
 export class ResidentService {
@@ -66,7 +66,10 @@ export class ResidentService {
   }
   // 业主存在确认
   async getOwner(address: string) {
-    return await this.residentModel.findOne({ address, isDelete: false, isDisable: false, checkResult: 2, type: 'owner' })
+    return await this.residentModel
+      .findOne({ address, isDelete: false, isDisable: false, checkResult: 2, type: 'owner' })
+      .populate({ path: 'user', model: 'user' })
+      .exec()
   }
   // 是否是业主本人
   async isOwner(address: string, user: string) {
@@ -162,6 +165,33 @@ export class ResidentService {
       reviewer: owner.user,
     }
     const creatResident = await this.residentModel.create(resident);
+    const message: ApplicationDTO = {
+      first: {
+        value: `您收到一条${zone.houseNumber}的家人申请`,
+        color: "#173177"
+      },
+      keyword1: {
+        value: user.username,
+        color: "#173177"
+      },
+      keyword2: {
+        value: user.phone,
+        color: "#173177"
+      },
+      keyword3: {
+        value: moment().format('YYYY:MM:DD HH:mm:ss'),
+        color: "#173177"
+      },
+      keyword4: {
+        value: zone.houseNumber,
+        color: "#173177"
+      },
+      remark: {
+        value: '请前往小门神智慧社区平台进行审核处理',
+        color: "#173177"
+      },
+    }
+    this.weixinUtil.sendVerifyMessage(owner.user.openId, message)
     return creatResident;
   }
 
@@ -187,6 +217,33 @@ export class ResidentService {
       reviewer: owner.user,
     }
     const creatResident = await this.residentModel.create(resident);
+    const message: ApplicationDTO = {
+      first: {
+        value: `您收到一条${zone.houseNumber}的家人申请`,
+        color: "#173177"
+      },
+      keyword1: {
+        value: user.username,
+        color: "#173177"
+      },
+      keyword2: {
+        value: user.phone,
+        color: "#173177"
+      },
+      keyword3: {
+        value: moment().format('YYYY:MM:DD HH:mm:ss'),
+        color: "#173177"
+      },
+      keyword4: {
+        value: zone.houseNumber,
+        color: "#173177"
+      },
+      remark: {
+        value: '请前往小门神智慧社区平台进行审核处理',
+        color: "#173177"
+      },
+    }
+    this.weixinUtil.sendVerifyMessage(owner.user.openId, message)
     return creatResident;
   }
 
@@ -420,7 +477,7 @@ export class ResidentService {
     }
     await this.zoneService.updateOwner(resident.address._id, resident.user._id)
     await this.roleService.create(role)
-    const message: VerifyMessageDTO = {
+    const message: ApplicationDTO = {
       first: {
         value: `您提交的${resident.address.houseNumber}业主申请已审核`,
         color: "#173177"
@@ -434,11 +491,11 @@ export class ResidentService {
         color: "#173177"
       },
       keyword3: {
-        value: '审核通过',
+        value: moment().format('YYYY:MM:DD HH:mm:ss'),
         color: "#173177"
       },
       keyword4: {
-        value: moment().format('YYYY:MM:DD HH:mm:ss'),
+        value: '无',
         color: "#173177"
       },
       remark: {
@@ -461,7 +518,7 @@ export class ResidentService {
   }
 
   // 接受常住人申请
-  async agreeFamily(id: string, userId: string, agree: AgreeFamilyDTO): Promise<boolean> {
+  async agreeFamily(id: string, user: IUser, agree: AgreeFamilyDTO): Promise<boolean> {
     const resident: any = await this.residentModel
       .findById(id)
       .populate({ path: 'address', model: 'zone' })
@@ -471,7 +528,7 @@ export class ResidentService {
     if (resident.type !== 'family') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    await this.isOwner(resident.address._id, userId)
+    await this.isOwner(resident.address._id, user._id)
     await this.addToDevice(resident.address, resident.user, id)
     await this.residentModel.findByIdAndUpdate(id, {
       isPush: agree.isMonitor,
@@ -480,6 +537,33 @@ export class ResidentService {
       addTime: new Date(),
       checkTime: new Date(),
     })
+    const message: ApplicationDTO = {
+      first: {
+        value: `您提交的${resident.address.houseNumber}家人申请已审核`,
+        color: "#173177"
+      },
+      keyword1: {
+        value: '审核通过',
+        color: "#173177"
+      },
+      keyword2: {
+        value: `${user.username}`,
+        color: "#173177"
+      },
+      keyword3: {
+        value: moment().format('YYYY:MM:DD HH:mm:ss'),
+        color: "#173177"
+      },
+      keyword4: {
+        value: '无',
+        color: "#173177"
+      },
+      remark: {
+        value: '您现在可以刷脸进出小区',
+        color: "#173177"
+      },
+    }
+    this.weixinUtil.sendVerifyMessage(resident.user.openId, message)
     return true;
   }
 
@@ -507,7 +591,7 @@ export class ResidentService {
   }
 
   // 接受常访客申请
-  async agreeVisitor(id: string, userId: string, expire: number): Promise<boolean> {
+  async agreeVisitor(id: string, user: IUser, expire: number): Promise<boolean> {
     const expireTime = moment().add(expire, 'd').toDate()
     const resident: any = await this.residentModel
       .findById(id)
@@ -519,7 +603,7 @@ export class ResidentService {
     if (resident.type !== 'visitor') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    await this.isOwner(resident.address._id, userId)
+    await this.isOwner(resident.address._id, user._id)
     await this.addToDevice(resident.address, resident.user, id, expireTime)
     await this.residentModel.findByIdAndUpdate(id, {
       expireTime,
@@ -527,23 +611,79 @@ export class ResidentService {
       addTime: new Date(),
       checkTime: new Date(),
     })
+    const message: ApplicationDTO = {
+      first: {
+        value: `您提交的${resident.address.houseNumber}访客申请已审核`,
+        color: "#173177"
+      },
+      keyword1: {
+        value: '审核通过',
+        color: "#173177"
+      },
+      keyword2: {
+        value: `${user.username}`,
+        color: "#173177"
+      },
+      keyword3: {
+        value: moment().format('YYYY:MM:DD HH:mm:ss'),
+        color: "#173177"
+      },
+      keyword4: {
+        value: '无',
+        color: "#173177"
+      },
+      remark: {
+        value: `您现在可以刷脸进出小区，有效期至${moment(expireTime).format('YYYY:MM:DD HH:mm:ss')}`,
+        color: "#173177"
+      },
+    }
+    this.weixinUtil.sendVerifyMessage(resident.user.openId, message)
     return true;
   }
 
   // 拒绝常住人申请
-  async rejectApplication(id: string, userId: string): Promise<boolean> {
+  async rejectApplication(id: string, user: IUser): Promise<boolean> {
     const resident: any = await this.residentModel
       .findById(id)
+      .populate({ path: 'address', model: 'zone' })
+      .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
     if (resident.type === 'owner') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    await this.isOwner(resident.address, userId)
+    await this.isOwner(resident.address, user._id)
     await this.residentModel.findByIdAndUpdate(id, {
       checkResult: 3,
       checkTime: new Date(),
     })
+    const message: ApplicationDTO = {
+      first: {
+        value: `您提交的${resident.address.houseNumber}${resident.tpye === 'family' ? '家人人' : '访客'}申请已审核`,
+        color: "#173177"
+      },
+      keyword1: {
+        value: '审核通过',
+        color: "#173177"
+      },
+      keyword2: {
+        value: `${user.username}`,
+        color: "#173177"
+      },
+      keyword3: {
+        value: moment().format('YYYY:MM:DD HH:mm:ss'),
+        color: "#173177"
+      },
+      keyword4: {
+        value: '无',
+        color: "#173177"
+      },
+      remark: {
+        value: `请核对提交信息是否准确，确定无误后可再发出申请`,
+        color: "#173177"
+      },
+    }
+    this.weixinUtil.sendVerifyMessage(resident.user.openId, message)
     return true;
   }
 

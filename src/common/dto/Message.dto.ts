@@ -2,7 +2,7 @@ export class BaseMessageDTO {
   readonly value: string;
   readonly color: string;
 }
-export class VerifyMessageDTO {
+export class ApplicationDTO {
   readonly first: BaseMessageDTO;
   readonly keyword1: BaseMessageDTO;
   readonly keyword2: BaseMessageDTO;

@@ -91,10 +91,11 @@ export class ConfigService {
 
       WEIXIN_OAUTH_URL: Joi.string().required(),
 
-      WEIXiN_GRANT_TYPE: Joi.string().required(),
+      WEIXIN_GRANT_TYPE: Joi.string().required(),
 
       WEINXIN_VERIFY_MODEL: Joi.string().required(),
 
+      WEIXIN_APPLICATION_MODEL: Joi.string().required(),
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -231,6 +232,10 @@ export class ConfigService {
   }
 
   get weixinVerifyModel(): string {
-    return this.envConfig.weixinVerifyModel
+    return this.envConfig.WEINXIN_VERIFY_MODEL
+  }
+
+  get weixinApplicationModel(): string {
+    return this.envConfig.WEIXIN_APPLICATION_MODEL
   }
 }
