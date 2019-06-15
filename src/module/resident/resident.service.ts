@@ -191,7 +191,7 @@ export class ResidentService {
         color: "#173177"
       },
     }
-    this.weixinUtil.sendVerifyMessage(owner.user.openId, message)
+    this.weixinUtil.sendApplicationMessage(owner.user.openId, message)
     return creatResident;
   }
 
@@ -243,7 +243,7 @@ export class ResidentService {
         color: "#173177"
       },
     }
-    this.weixinUtil.sendVerifyMessage(owner.user.openId, message)
+    this.weixinUtil.sendApplicationMessage(owner.user.openId, message)
     return creatResident;
   }
 
