@@ -34,6 +34,7 @@ import { IFace } from '../face/interfaces/face.interfaces';
 import { RoleService } from '../role/role.service';
 import { RoleDTO } from '../role/dto/role.dto';
 import { ConfigService } from 'src/config/config.service';
+import { VerifyMessageDTO } from 'src/common/dto/Message.dto';
 
 @Injectable()
 export class ResidentService {
@@ -419,6 +420,33 @@ export class ResidentService {
     }
     await this.zoneService.updateOwner(resident.address._id, resident.user._id)
     await this.roleService.create(role)
+    const message: VerifyMessageDTO = {
+      first: {
+        value: `您提交的${resident.address.houseNumber}业主申请已审核`,
+        color: "#173177"
+      },
+      keyword1: {
+        value: '审核通过',
+        color: "#173177"
+      },
+      keyword2: {
+        value: '物业',
+        color: "#173177"
+      },
+      keyword3: {
+        value: '审核通过',
+        color: "#173177"
+      },
+      keyword4: {
+        value: moment().format('YYYY:MM:DD HH:mm:ss'),
+        color: "#173177"
+      },
+      remark: {
+        value: '登录公众号可以邀请您的家人和访客，邀请完可刷脸进出小区',
+        color: "#173177"
+      },
+    }
+    this.weixinUtil.sendVerifyMessage(resident.user.openId, message)
     return true;
   }
 

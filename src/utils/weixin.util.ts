@@ -5,6 +5,7 @@ import { ConfigService } from 'src/config/config.service';
 import { RedisService } from 'nestjs-redis';
 import { ApiException } from 'src/common/expection/api.exception';
 import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
+import { VerifyMessageDTO } from 'src/common/dto/Message.dto';
 
 @Injectable()
 export class WeixinUtil {
@@ -17,6 +18,11 @@ export class WeixinUtil {
      * 获取微信access_token
      */
     async access_token(): Promise<string> {
+        const client = this.redis.getClient()
+        const access_token = await client.get('weixin_accessToken')
+        if (access_token) {
+            return access_token
+        }
         const result = await axios({
             method: 'get',
             url: 'https://api.weixin.qq.com/cgi-bin/token',
@@ -26,6 +32,8 @@ export class WeixinUtil {
                 secret: this.config.weixinAppSecret,
             },
         });
+        console.log(result.data, 'result')
+        await client.set('weixin_accessToken', result.data.access_token, 'EX', 60 * 60 * 1.5);
         return result.data.access_token
     }
 
@@ -119,6 +127,22 @@ export class WeixinUtil {
             return result.data.openid;
         }
         return null
+    }
+
+    async sendVerifyMessage(openId: string, data: VerifyMessageDTO) {
+        const token = await this.access_token()
+        const result = await axios({
+            method: 'post',
+            url: `https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${token}`,
+            data: {
+                touser: openId,
+                template_id: this.config.weixinVerifyModel,
+                url: this.config.url,
+                data,
+            }
+        });
+        // console.log(result, 'result')
+        return
     }
 }
 

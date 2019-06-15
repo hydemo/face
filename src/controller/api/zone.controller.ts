@@ -26,7 +26,7 @@ import { IResident } from 'src/module/resident/interfaces/resident.interfaces';
 
 @ApiUseTags('zones')
 @ApiBearerAuth()
-// @UseGuards(AuthGuard(), UserRolesGuard)
+@UseGuards(AuthGuard(), UserRolesGuard)
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/zones')
 export class ZoneController {

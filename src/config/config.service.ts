@@ -31,6 +31,8 @@ export class ConfigService {
 
       PORT: Joi.number().default(8000),
 
+      URL: Joi.string().required(),
+
       DATABASE_TYPE: Joi.string().default('mongodb'),
 
       DATABASE_HOST: Joi.string().default('localhost'),
@@ -91,6 +93,8 @@ export class ConfigService {
 
       WEIXiN_GRANT_TYPE: Joi.string().required(),
 
+      WEINXIN_VERIFY_MODEL: Joi.string().required(),
+
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -109,6 +113,10 @@ export class ConfigService {
 
   get port(): number {
     return Number(this.envConfig.PORT);
+  }
+
+  get url(): string {
+    return this.envConfig.URL;
   }
 
   get databaseType(): string {
@@ -220,5 +228,9 @@ export class ConfigService {
 
   get grantType(): string {
     return this.envConfig.WEIXiN_GRANT_TYPE;
+  }
+
+  get weixinVerifyModel(): string {
+    return this.envConfig.weixinVerifyModel
   }
 }
