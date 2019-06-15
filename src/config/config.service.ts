@@ -228,7 +228,7 @@ export class ConfigService {
   }
 
   get grantType(): string {
-    return this.envConfig.WEIXiN_GRANT_TYPE;
+    return this.envConfig.WEIXIN_GRANT_TYPE;
   }
 
   get weixinVerifyModel(): string {
