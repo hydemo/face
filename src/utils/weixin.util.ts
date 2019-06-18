@@ -150,7 +150,7 @@ export class WeixinUtil {
             data: {
                 touser: openId,
                 template_id: this.config.weixinApplicationModel,
-                url: `${this.config.url}/review`,
+                url: `${this.config.url}`,
                 data,
             }
         });
