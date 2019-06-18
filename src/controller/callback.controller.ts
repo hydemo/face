@@ -32,7 +32,9 @@ export class CallbackController {
 
   @ApiOperation({ title: '人脸识别回调', description: '人脸识别回调' })
   async faceInfo(@Request() req) {
-    await this.callbackService.callback(req.body)
+    // await this.callbackService.callback(req.body)
+    // await this.camera.getList()
+    await this.mediaWS.sendMessage('5d089fba19fbcb626a93a5f0', { type: '1', imgUrl: '543edbc2-e452-4b96-8e70-1d9dadb17e79.jpg' })
     return { status: 200 }
   }
 }

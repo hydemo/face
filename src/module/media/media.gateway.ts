@@ -37,8 +37,9 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) { }
 
   async handleConnection(client) {
+    console.log(111)
     const media: any = await this.jwtService.verify(
-      client.handshake.headers.Authorization.replace('Bearer ', ''),
+      client.handshake.query.token,
     )
     const mediaExist = await this.mediaService.findById(media.id)
     if (!mediaExist) {
@@ -54,8 +55,15 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('message')
   async sendMessage(id: string, message: IMessage) {
-    const client: any = this.connectedMedias.map(media => media.id === id)
-    if (!client) return
+    let client: any = null
+    this.connectedMedias.map(media => {
+      if (media.id === id) {
+        client = media.client
+      }
+    })
+    if (!client) {
+      return
+    }
     client.emit('message', message)
   }
 }
