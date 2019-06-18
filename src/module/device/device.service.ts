@@ -85,17 +85,12 @@ export class DeviceService {
     return await this.deviceModel.find({ zone }).lean().exec()
   }
 
-  // // 绑定旧sim卡
-  // async bindOldSim(_id: string, simId: string) {
-  //   const device = await this.deviceModel.findById(_id);
-  //   await this.deviceModel.findByIdAndUpdate(_id, { simId });
-  //   await this.simService.updateById(device.simId, { isBind: false });
-  //   return await this.simService.updateById(simId, { isBind: true });
-  // }
+  // 绑定旧sim卡
+  async bindMedia(_id: string, media: string) {
+    return await this.deviceModel.findByIdAndUpdate(_id, { media });
+  }
 
-  // async unbindSim(_id: string) {
-  //   const device = await this.deviceModel.findById(_id);
-  //   await this.deviceModel.findByIdAndUpdate(_id, { $unset: { simId: '' } });
-  //   return await this.simService.updateById(device.simId, { isBind: false });
-  // }
+  async unbindMedia(_id: string) {
+    return await this.deviceModel.findByIdAndUpdate(_id, { $unset: { media: 1 } });
+  }
 }

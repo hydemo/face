@@ -12,6 +12,7 @@ import {
 } from '@nestjs/swagger';
 import { CallbackService } from 'src/module/callback/callback.service';
 import { CameraUtil } from 'src/utils/camera.util';
+import { MediaGateway } from 'src/module/media/media.gateway';
 
 @ApiUseTags('callback')
 @ApiBearerAuth()
@@ -21,6 +22,7 @@ export class CallbackController {
   constructor(
     private readonly callbackService: CallbackService,
     private readonly camera: CameraUtil,
+    private readonly mediaWS: MediaGateway,
   ) { }
 
   @ApiOkResponse({
@@ -30,9 +32,7 @@ export class CallbackController {
 
   @ApiOperation({ title: '人脸识别回调', description: '人脸识别回调' })
   async faceInfo(@Request() req) {
-    console.log(333)
     await this.callbackService.callback(req.body)
-    // await this.camera.getList()
     return { status: 200 }
   }
 }

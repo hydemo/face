@@ -45,6 +45,10 @@ import { RentModule } from './module/rent/rent.module';
 import { TaskController } from './controller/api/task.controller';
 import { CMSBlackController } from './controller/cms/black.controller';
 import { SOCUtil } from './utils/soc.util';
+import { MediaModule } from './module/media/media.module';
+import { MediaGateway } from './module/media/media.gateway';
+import { CMSMediaController } from './controller/cms/media.controller';
+import { MediaController } from './controller/api/media.controller';
 
 @Module({
   imports: [
@@ -66,6 +70,7 @@ import { SOCUtil } from './utils/soc.util';
     RoleModule,
     BlackModule,
     RentModule,
+    MediaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => configService.redis,
@@ -92,6 +97,7 @@ import { SOCUtil } from './utils/soc.util';
     CMSStrangerController,
     CMSResidentController,
     CMSBlackController,
+    CMSMediaController,
     ZoneController,
     UserController,
     ResidentController,
@@ -100,6 +106,7 @@ import { SOCUtil } from './utils/soc.util';
     MessageController,
     RoleController,
     TaskController,
+    MediaController,
   ]
 })
 export class AppModule { }

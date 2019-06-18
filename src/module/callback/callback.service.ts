@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import * as moment from 'moment';
 import { UserService } from '../users/user.service';
 import { DeviceService } from '../device/device.service';
 import { CreatAttributeDTO } from '../orbit/dto/attribute.dto';
@@ -14,6 +15,9 @@ import { IOrbit } from '../orbit/interfaces/orbit.interfaces';
 import { ResidentService } from '../resident/resident.service';
 import { IResident } from '../resident/interfaces/resident.interfaces';
 import { CreateOrbitMessageDTO } from '../message/dto/message.dto';
+import { MediaGateway } from '../media/media.gateway';
+import { ApplicationDTO } from 'src/common/dto/Message.dto';
+import { WeixinUtil } from 'src/utils/weixin.util';
 
 interface IReceiver {
   id: string;
@@ -30,17 +34,25 @@ export class CallbackService {
     @Inject(MessageService) private readonly messageService: MessageService,
     @Inject(StrangerService) private readonly strangerService: StrangerService,
     @Inject(QiniuUtil) private readonly qiniuUtil: QiniuUtil,
+    @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+    private readonly mediaWs: MediaGateway,
   ) { }
   async callback(body: any) {
     const device: IDevice | null = await this.deviceService.findByUUID(body.DeviceUUID)
     if (!device) {
       return;
     }
+
     const img: string = await this.qiniuUtil.uploadB64(body.img)
+    if (device.media && Number(body.WBMode) !== 1) {
+      await this.mediaWs.sendMessage(String(device.media), { type: body.WBMode, imgUrl: img })
+    }
+
     let imgex: any = null;
     if (body.imgex) {
       imgex = await this.qiniuUtil.uploadB64(body.imgex)
     }
+
     const { Attribute } = body
     const attribute: CreatAttributeDTO = {
       age: Attribute.Age,
@@ -52,7 +64,7 @@ export class CallbackService {
     }
     const stranger: CreateStrangerDTO = {
       device: device._id,
-      zone: device.position,
+      zone: device.position._id,
       passTime: body.CaptureTime,
       compareResult: body.CompareResult,
       faceQuality: body.FaceQuality,
@@ -66,9 +78,7 @@ export class CallbackService {
       await this.strangerService.create(stranger);
     } else {
       const userId: string = body.PicName.split('_')[1].replace('.jpg', '')
-
       const user: IUser | null = await this.userService.findById(userId)
-      console.log(user, 'user')
       if (!user) {
         return
       }
@@ -96,6 +106,33 @@ export class CallbackService {
         position: `${device.position.houseNumber}-${device.description}`
       }
       await this.messageService.createOrbitMessage(message)
+      const application: ApplicationDTO = {
+        first: {
+          value: `您的${receiver.type === 'family' ? '家人' : '访客'}${user.username}${device.passType === 1 ? '进入' : '离开'}了${device.position.houseNumber}-${device.description}`,
+          color: "#173177"
+        },
+        keyword1: {
+          value: receiver.type === 'family' ? '家人' : '访客',
+          color: "#173177"
+        },
+        keyword2: {
+          value: device.passType === 1 ? '进入' : '离开',
+          color: "#173177"
+        },
+        keyword3: {
+          value: user.username,
+          color: "#173177"
+        },
+        keyword4: {
+          value: moment().format('YYYY:MM:DD HH:mm:ss'),
+          color: "#173177"
+        },
+        remark: {
+          value: '详情可查看进出图像',
+          color: "#173177"
+        },
+      }
+      this.weixinUtil.sendApplicationMessage(user.openId, application)
     }))
   }
 
@@ -124,7 +161,12 @@ export class CallbackService {
       address: resident.address,
       checkResult: 2
     })
-    residents.map(resid => receivers.push({ id: resid.user, type: 'visitor' }))
+    residents.map(resid => {
+      if (String(resid.user) === String(resident.user)) {
+        return
+      }
+      receivers.push({ id: resid.user, type: 'visitor' })
+    })
     return receivers
   }
 
@@ -136,7 +178,12 @@ export class CallbackService {
       address: resident.address,
       checkResult: 2
     })
-    residents.map(resid => receivers.push({ id: resid.user, type: 'family' }))
+    residents.map(resid => {
+      if (String(resid.user) === String(resident.user)) {
+        return
+      }
+      receivers.push({ id: resid.user, type: 'family' })
+    })
     return receivers
   }
 }

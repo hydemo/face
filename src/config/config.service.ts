@@ -96,6 +96,8 @@ export class ConfigService {
       WEINXIN_VERIFY_MODEL: Joi.string().required(),
 
       WEIXIN_APPLICATION_MODEL: Joi.string().required(),
+
+      WEIXIN_PASS_MODEL: Joi.string().required(),
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -237,5 +239,9 @@ export class ConfigService {
 
   get weixinApplicationModel(): string {
     return this.envConfig.WEIXIN_APPLICATION_MODEL
+  }
+
+  get weixinPassModel(): string {
+    return this.envConfig.WEIXIN_PASS_MODEL
   }
 }

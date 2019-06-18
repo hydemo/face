@@ -1,5 +1,8 @@
 import { AppModule } from './app.module';
 import { NestFactory } from '@nestjs/core';
+import * as helmet from 'helmet';
+import * as compression from 'compression';
+import * as rateLimit from 'express-rate-limit';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
@@ -18,7 +21,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config: ConfigService = app.get(ConfigService);
 
-  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(helmet())
+    .use(compression())
+    .use(bodyParser.json({ limit: '20mb' }))
+    .use(
+      bodyParser.urlencoded({
+        extended: true
+      })
+    ).use(rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100 // limit each IP to 100 requests per windowMs
+    }));
 
   const initService: InitService = app.get(InitService);
   // const scheduleService: ScheduleService = app.get(ScheduleService);
@@ -55,7 +68,6 @@ async function bootstrap() {
     ],
   });
   SwaggerModule.setup('swagger', app, ApiDocument);
-  //
   await app.listen(config.port);
 
 }

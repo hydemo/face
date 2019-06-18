@@ -157,6 +157,19 @@ export class WeixinUtil {
             }
         });
     }
+    async sendPassMessage(openId: string, data: ApplicationDTO) {
+        const token = await this.access_token()
+        await axios({
+            method: 'post',
+            url: `https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${token}`,
+            data: {
+                touser: openId,
+                template_id: this.config.weixinPassModel,
+                url: this.config.url,
+                data,
+            }
+        });
+    }
 }
 
 

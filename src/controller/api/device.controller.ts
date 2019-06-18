@@ -83,25 +83,5 @@ export class DeviceController {
     return { statusCode: 200, msg: '删除设备成功' };
   }
 
-  // @Roles('1')
-  // @Put('/:_id/sim/:simId')
-  // @ApiOkResponse({
-  //   description: '绑定旧sim卡成功',
-  // })
-  // @ApiOperation({ title: '绑定旧sim卡', description: '绑定旧sim卡' })
-  // async bindOldDevice(@Param('_id', new MongodIdPipe()) _id: string, @Param('simId', new MongodIdPipe()) simId: string) {
-  //   await this.deviceService.bindOldSim(_id, simId);
-  //   return { statusCode: 200, msg: '绑定旧sim卡成功' };
-  // }
 
-  // @Roles('1')
-  // @Put('/:_id/unbindSim')
-  // @ApiOkResponse({
-  //   description: '解绑sim卡成功',
-  // })
-  // @ApiOperation({ title: '解绑sim卡成功', description: '解绑sim卡成功' })
-  // async unbindSim(@Param('_id', new MongodIdPipe()) _id: string) {
-  //   await this.deviceService.unbindSim(_id);
-  //   return { statusCode: 200, msg: '解绑sim卡成功' };
-  // }
 }

@@ -29,4 +29,6 @@ export interface IDevice extends Document {
   readonly isBind: boolean;
   // 区域根节点
   readonly description: string,
+  // 广告机
+  readonly media?: string;
 }
