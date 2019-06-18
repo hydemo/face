@@ -16,7 +16,6 @@ export class InitService {
 
   async init() {
     // const data = await this.socUtil.qrcodeAddress('')
-    console.log(this.configService.weixinVerifyModel, 'data')
     const adminExist = await this.adminService.countByCondition({ role: 0 })
     if (!adminExist) {
       const admin: CreateAdminDTO = {

@@ -32,7 +32,6 @@ export class CameraUtil {
    * @param Mode 模式 device: IDevice, Mode: numbers
    */
   async getList(): Promise<any> {
-    console.log(222)
     const { username = 'admin', password = 'admin123', deviceUUID = 'umettw42g7iu' } = {}
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
@@ -158,7 +157,6 @@ export class CameraUtil {
   * @param face 名单信息
   */
   async addOnePic(device: IDevice, user: IPic, Mode: number) {
-    console.log(111)
     const { username, password, deviceUUID } = device
     const Img = await this.getImg(`${this.config.qiniuLink}/${user.faceUrl}`);
     const ImgName = user.username;
