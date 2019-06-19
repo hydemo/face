@@ -93,6 +93,10 @@ export class CallbackService {
   async sendMessage(orbit: IOrbit, user: IUser, device: IDevice) {
     const receivers: IReceiver[] = await this.receivers(user, device.zone)
     return await Promise.all(receivers.map(async receiver => {
+      const receiverUser: IUser | null = await this.userService.findById(receiver.id)
+      if (!receiverUser) {
+        return
+      }
       const message: CreateOrbitMessageDTO = {
         sender: user._id,
         receiver: receiver.id,
@@ -132,7 +136,7 @@ export class CallbackService {
           color: "#173177"
         },
       }
-      this.weixinUtil.sendApplicationMessage(user.openId, application)
+      this.weixinUtil.sendApplicationMessage(receiverUser.openId, application)
     }))
   }
 
