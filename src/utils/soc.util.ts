@@ -99,7 +99,6 @@ export class SOCUtil {
       ]
     }
     const result = await this.socRequest(data, 'shhcj_xxba_jndj')
-    console.log(result, 'result')
     return { list: result.datas, page: result.pages[0] }
   }
 }

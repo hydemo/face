@@ -35,7 +35,6 @@ export class CameraUtil {
     const { username = 'admin', password = 'oyxj19891024', deviceUUID = 'umettw42g7iu' } = {}
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
-    console.log(222)
     const result = await axios({
       method: 'post',
       url: `http://183.251.18.106:8011`,
@@ -48,7 +47,6 @@ export class CameraUtil {
         UUID: deviceUUID,
       }
     });
-    console.log(result.data.GetList)
     return result.data.GetList.List
   }
 
@@ -183,7 +181,6 @@ export class CameraUtil {
       url: this.config.p2pUrl,
       data,
     })
-    console.log(result, 'result')
     if (result.data.Result === 'ok') {
       return result.data.AddOnePic;
     }

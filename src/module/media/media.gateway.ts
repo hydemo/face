@@ -37,7 +37,6 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) { }
 
   async handleConnection(client) {
-    console.log(111)
     const media: any = await this.jwtService.verify(
       client.handshake.query.token,
     )
