@@ -58,6 +58,7 @@ export const UserSchema = new mongoose.Schema(
 );
 
 UserSchema.post('find', function (results: any) {
+  console.log(results, 'find')
   results.map(result => {
     if (result.cardNumber) {
       const number = result.cardNumber;
@@ -69,6 +70,7 @@ UserSchema.post('find', function (results: any) {
 })
 
 UserSchema.post('findOne', function (result: any) {
+  console.log(result, 'findone')
   if (result.cardNumber) {
     const number = result.cardNumber;
     const thisYear = moment().format('YYYY')
