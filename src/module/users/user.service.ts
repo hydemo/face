@@ -304,6 +304,7 @@ export class UserService {
       await this.phoneUtil.codeCheck(verify.phone, verify.code)
       isPhoneVerify = true
     }
+    console.log(user, 'verifyuser')
     await this.userModel.findByIdAndUpdate(user._id, { ...verify, isVerify: true, isPhoneVerify }).lean().exec()
     return null
   }
