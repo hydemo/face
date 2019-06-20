@@ -297,9 +297,13 @@ export class UserService {
     if (!user.isPhoneVerify && (!verify.phone || !verify.code)) {
       throw new ApiException('手机号未绑定', ApiErrorCode.INPUT_ERROR, 406);
     } else if (verify.phone && verify.code) {
-      const existing = await this.userModel.findOne({ _id: { $ne: user._id }, phone: verify.phone });
-      if (existing) {
+      const phoneExisting = await this.userModel.findOne({ _id: { $ne: user._id }, phone: verify.phone });
+      if (phoneExisting) {
         throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
+      }
+      const cardNumberExisting = await this.userModel.findOne({ _id: { $ne: user._id }, cardNumber: verify.cardNumber });
+      if (cardNumberExisting) {
+        throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
       }
       await this.phoneUtil.codeCheck(verify.phone, verify.code)
       isPhoneVerify = true
