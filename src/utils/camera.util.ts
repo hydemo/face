@@ -27,17 +27,17 @@ export class CameraUtil {
 
   /**
    * 获取设备白名单
-   *
+   *s
    * @param device 设备信息
    * @param Mode 模式 device: IDevice, Mode: numbers
    */
-  async getList(): Promise<any> {
-    const { username = 'admin', password = 'admin123', deviceUUID = 'umettw42g7iu' } = {}
+  async getList(ip): Promise<any> {
+    const { username = 'admin', password = 'oyxj19891024', deviceUUID = 'umettw42g7iu' } = {}
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const result = await axios({
       method: 'post',
-      url: this.config.p2pUrl,
+      url: `http://${ip}:8011`,
       data: {
         Name: 'WBListInfoREQ',
         TimeStamp: timeStamp,

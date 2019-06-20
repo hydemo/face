@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as moment from 'moment';
 import * as md5 from 'md5';
+import * as uuid from 'uuid/v4'
 import { ConfigService } from 'src/config/config.service';
 import axios from 'axios'
 import { CryptoUtil } from './crypto.util';
@@ -63,6 +64,42 @@ export class SOCUtil {
       ]
     }
     const result = await this.socRequest(data, 'dzfwpt_qrcode')
+    return { list: result.datas, page: result.pages[0] }
+  }
+
+  /**
+    * 上传数据
+    * 
+    * @param code 图片数据
+    */
+  async upload(): Promise<any> {
+
+    const data = {
+      datas: [
+        {
+          lv_sbxxlsh: uuid().replace(/-/g, ''),
+          lv_gmsfhm: '350583198404040055',
+          lv_xm: '杨晓峰',
+          lv_zzdz_dzbm: '4DE6E021-F52A-1A9C-E054-90E2BA510A0C',
+          lv_lxdh: '18065361777',
+          lv_djdw_jgdm: 'MA32HCJJ-6',
+          lv_djdw_jgmc: '厦门杏仁科技有限公司',
+          lv_djr_gmsfhm: '350583198912246076',
+          lv_djr_xm: '欧阳旭靖',
+          lv_djsj: moment().format('YYYYMMDDHHmmss')
+        }
+      ],
+      pages: [
+        {
+          "psize": "15",
+          "tcount": "",
+          "pno": "1",
+          "tsize": "",
+        }
+      ]
+    }
+    const result = await this.socRequest(data, 'shhcj_xxba_jndj')
+    console.log(result, 'result')
     return { list: result.datas, page: result.pages[0] }
   }
 }
