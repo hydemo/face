@@ -1,4 +1,17 @@
 import * as mongoose from 'mongoose';
+import * as moment from 'moment';
+
+const getAge = (cardNumber) => {
+  const thisYear = moment().format('YYYY')
+  if (cardNumber.length > 15) {
+    const birthYear = cardNumber.slice(6, 10)
+    return Number(thisYear) - Number(birthYear)
+  } else {
+    const birthYear = `19${cardNumber.slice(6, 8)}`
+    return Number(thisYear) - Number(birthYear)
+  }
+
+}
 
 export const UserSchema = new mongoose.Schema(
   {
@@ -39,7 +52,7 @@ export const UserSchema = new mongoose.Schema(
     // 是否实名认证
     isVerify: { type: Boolean, default: false },
     // 是否手机认证
-    isPhoneVerify: { type: Boolean, default: false }
+    isPhoneVerify: { type: Boolean, default: false },
   },
   { collection: 'user', versionKey: false, timestamps: true },
 );
@@ -58,8 +71,17 @@ UserSchema.post('find', function (results: any) {
 UserSchema.post('findOne', function (result: any) {
   if (result.cardNumber) {
     const number = result.cardNumber;
+    const thisYear = moment().format('YYYY')
+    if (number.length > 15) {
+      const birthYear = number.slice(6, 10)
+      result.age = Number(thisYear) - Number(birthYear)
+    } else {
+      const birthYear = `19${number.slice(6, 8)}`
+      result.age = Number(thisYear) - Number(birthYear)
+    }
     const replaceStr = number.substring(4, 13);
     const str = '*'.repeat(replaceStr.length)
     result.cardNumber = number.replace(replaceStr, str);
   }
 })
+
