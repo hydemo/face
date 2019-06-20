@@ -43,4 +43,5 @@ export interface IUser extends Document {
   readonly isVerify: boolean;
   // 是否手机认证
   readonly isPhoneVerify: boolean;
+  readonly age: number;
 }

@@ -34,6 +34,8 @@ export class AuthStrategy extends PassportStrategy(Strategy) {
             throw new UnauthorizedException();
         }
         if (user.isDelete || user.isBlock) throw new ApiException('账号已删除', ApiErrorCode.ACCOUNT_DELETED, 406);
+        console.log(user, 'user')
         return user;
+
     }
 }
