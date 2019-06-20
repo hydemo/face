@@ -47,6 +47,7 @@ export class CameraUtil {
         UUID: deviceUUID,
       }
     });
+    console.log(result.data.GetList)
     return result.data.GetList.List
   }
 
