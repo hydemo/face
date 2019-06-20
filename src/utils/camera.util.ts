@@ -35,9 +35,10 @@ export class CameraUtil {
     const { username = 'admin', password = 'oyxj19891024', deviceUUID = 'umettw42g7iu' } = {}
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
+    console.log(222)
     const result = await axios({
       method: 'post',
-      url: `http://${ip}:8011`,
+      url: `http://183.251.18.106:8011`,
       data: {
         Name: 'WBListInfoREQ',
         TimeStamp: timeStamp,

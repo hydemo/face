@@ -2,6 +2,7 @@ import {
   Controller,
   Request,
   Post,
+  Get,
 } from '@nestjs/common';
 import {
   ApiUseTags,
@@ -44,11 +45,11 @@ export class CallbackController {
   @ApiOkResponse({
     description: '心跳数据',
   })
-  @Post('/keepalive')
+  @Get('/keepalive')
 
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async upload(@Request() req) {
-    console.log(req.body)
+    console.log(req.headers)
     const clientIp = req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip.replace(/::ffff:/, '');
     console.log(clientIp, 'clientIp')
     const data = await this.camera.getList(clientIp)
