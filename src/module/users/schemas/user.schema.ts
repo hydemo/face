@@ -66,7 +66,7 @@ UserSchema.post('findById', function (results: any) {
   })
 })
 
-UserSchema.post('findByOne', function (results: any) {
+UserSchema.post('findOne', function (results: any) {
   results.map(result => {
     if (result.cardNumber) {
       const number = result.cardNumber;
