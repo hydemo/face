@@ -32,12 +32,13 @@ export class CameraUtil {
    * @param Mode 模式 device: IDevice, Mode: numbers
    */
   async getList(ip): Promise<any> {
+    console.log(222)
     const { username = 'admin', password = 'oyxj19891024', deviceUUID = 'umettw42g7iu' } = {}
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const result = await axios({
       method: 'post',
-      url: `http://183.251.18.106:8011`,
+      url: `http://${ip}:8011`,
       data: {
         Name: 'WBListInfoREQ',
         TimeStamp: timeStamp,
@@ -47,6 +48,7 @@ export class CameraUtil {
         UUID: deviceUUID,
       }
     });
+    console.log(result, 'result')
     return result.data.GetList.List
   }
 

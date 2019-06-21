@@ -51,6 +51,7 @@ export class CallbackController {
   async upload(@Request() req) {
     const clientIp = req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip.replace(/::ffff:/, '');
     const data = await this.camera.getList(clientIp)
+    console.log(data, 'data')
     // await this.mediaWS.sendMessage('5d089fba19fbcb626a93a5f0', { type: '1', imgUrl: '543edbc2-e452-4b96-8e70-1d9dadb17e79.jpg' })
     return { status: 200 }
   }
