@@ -45,7 +45,7 @@ export class CallbackController {
   @ApiOkResponse({
     description: '心跳数据',
   })
-  @Get('/keepalive')
+  @Post('/keepalive')
 
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async upload(@Request() req) {
