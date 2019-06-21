@@ -144,25 +144,23 @@ export class RoleService {
     if (!roles.length) {
       return { owner, guard, management, worker, rent, isAdmin }
     }
-    await roles.map(async role => {
+    await Promise.all(roles.map(async role => {
       switch (role._id) {
         case 0: isAdmin = true;
           break;
         case 1: {
-          if (role.zones.length) {
-            management = await Promise.all(role.zones.map(async zone => {
-              const total = await this.zoneService.countByCondition({
-                zoneId: zone._id,
-                zoneLayer: 2
-              })
-              const ownerCount = await this.zoneService.countByCondition({
-                zoneId: zone._id,
-                zoneLayer: 2,
-                owner: { $exists: 1 }
-              })
-              return { ...zone, total, ownerCount }
-            }))
-          }
+          management = await Promise.all(role.zones.map(async zone => {
+            const total = await this.zoneService.countByCondition({
+              zoneId: zone._id,
+              zoneLayer: 2
+            })
+            const ownerCount = await this.zoneService.countByCondition({
+              zoneId: zone._id,
+              zoneLayer: 2,
+              owner: { $exists: 1 }
+            })
+            return { ...zone, total, ownerCount }
+          }))
         };
           break;
         case 2: worker = role.zones || [];
@@ -170,12 +168,10 @@ export class RoleService {
         case 3: guard = role.zones || [];
           break;
         case 4: {
-          if (role.zones.length) {
-            owner = await Promise.all(role.zones.map(async zone => {
-              const rentCount = await this.roleModel.countDocuments({ zone: zone._id, role: 5, isDelete: false })
-              return { ...zone, isRent: rentCount > 0 }
-            }))
-          }
+          owner = await Promise.all(role.zones.map(async zone => {
+            const rentCount = await this.roleModel.countDocuments({ zone: zone._id, role: 5, isDelete: false })
+            return { ...zone, isRent: rentCount > 0 }
+          }))
         };
           break;
         case 5: rent = role.zones || [];
@@ -183,7 +179,7 @@ export class RoleService {
         default:
           break;
       }
-    });
+    }));
     return { owner, guard, management, worker, rent, isAdmin }
   }
 
