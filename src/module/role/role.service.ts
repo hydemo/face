@@ -150,7 +150,7 @@ export class RoleService {
           break;
         case 1: {
           if (role.zones.length) {
-            management = await role.zones.map(async zone => {
+            management = await Promise.all(role.zones.map(async zone => {
               const total = await this.zoneService.countByCondition({
                 zoneId: zone._id,
                 zoneLayer: 2
@@ -161,7 +161,7 @@ export class RoleService {
                 owner: { $exists: 1 }
               })
               return { ...zone, total, ownerCount }
-            })
+            }))
           }
         };
           break;
@@ -171,10 +171,10 @@ export class RoleService {
           break;
         case 4: {
           if (role.zones.length) {
-            owner = await role.zones.map(async zone => {
+            owner = await Promise.all(role.zones.map(async zone => {
               const rentCount = await this.roleModel.countDocuments({ zone: zone._id, role: 5, isDelete: false })
               return { ...zone, isRent: rentCount > 0 }
-            })
+            }))
           }
         };
           break;
