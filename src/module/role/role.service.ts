@@ -159,7 +159,12 @@ export class RoleService {
               zoneLayer: 2,
               owner: { $exists: 1 }
             })
-            return { ...zone, total, ownerCount }
+            const workerCount = await this.roleModel.countDocuments({
+              zone: zone._id,
+              isDelete: false,
+              $and: [{ role: { $lt: 4 } }, { role: { $gt: 0 } }]
+            })
+            return { ...zone, total, ownerCount, workerCount }
           }))
         };
           break;
