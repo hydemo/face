@@ -17,7 +17,6 @@ import { CryptoUtil } from 'src/utils/crypto.util';
   exports: [ZoneService],
   imports: [
     DatabaseModule,
-    RoleModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
 })

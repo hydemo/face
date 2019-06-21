@@ -830,7 +830,7 @@ export class ResidentService {
         .populate({ path: 'user', model: 'user', select: '-password' })
         .lean()
         .exec()
-      return { address, users, isRent: owner.isDisable }
+      return { address, users, isRent: owner.isDisable, isOwner: String(userId) === String(address.owner) }
     }))
   }
 
@@ -850,7 +850,7 @@ export class ResidentService {
         .populate({ path: 'user', model: 'user', select: '-password' })
         .lean()
         .exec()
-      return { address, users, isRent: owner.isDisable }
+      return { address, users, isRent: owner.isDisable, isOwner: String(userId) === String(address.owner) }
     }))
   }
 

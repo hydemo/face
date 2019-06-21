@@ -2,12 +2,11 @@ import { Model } from 'mongoose';
 import * as uuid from 'uuid/v4';
 import { Inject, Injectable } from '@nestjs/common';
 import { IZone } from './interfaces/zone.interfaces';
-import { CreateZoneDTO, ZoneDTO, CreateZoneByScanDTO } from './dto/zone.dto';
+import { ZoneDTO, CreateZoneByScanDTO } from './dto/zone.dto';
 import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
-import { RoleService } from '../role/role.service';
 import { RedisService } from 'nestjs-redis';
 import { SOCUtil } from 'src/utils/soc.util';
 import { IZoneProfile } from 'src/module/zone/interfaces/zonePrifile.interface';
@@ -18,7 +17,6 @@ import { IChildren } from './interfaces/children.interface';
 export class ZoneService {
   constructor(
     @Inject('ZoneModelToken') private readonly zoneModel: Model<IZone>,
-    @Inject(RoleService) private readonly roleService: RoleService,
     @Inject(SOCUtil) private socUtil: SOCUtil,
     private readonly redis: RedisService,
   ) { }
@@ -36,10 +34,7 @@ export class ZoneService {
   // }
 
   async getVisitorQrcode(user: string, zoneId: string) {
-    const canActive = await this.roleService.checkRoles({ user, role: 3, zone: zoneId, isDelete: false })
-    if (!canActive) {
-      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
-    }
+
     const zone: IZone | null = await this.zoneModel.findById(zoneId)
     if (!zone) {
       throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
@@ -298,5 +293,9 @@ export class ZoneService {
       parent,
       isDelete: false,
     }
+  }
+  // 根据条件计数
+  async countByCondition(condition: any) {
+    return this.zoneModel.countDocuments(condition)
   }
 }

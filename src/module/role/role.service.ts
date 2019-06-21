@@ -8,12 +8,14 @@ import { IList } from 'src/common/interface/list.interface';
 import { CreateRoleByScanDTO, RoleDTO } from './dto/role.dto';
 import { WeixinUtil } from 'src/utils/weixin.util';
 import { IUser } from '../users/interfaces/user.interfaces';
+import { ZoneService } from '../zone/zone.service';
 
 @Injectable()
 export class RoleService {
   constructor(
     @Inject('RoleModelToken') private readonly roleModel: Model<IRole>,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+    @Inject(ZoneService) private readonly zoneService: ZoneService,
   ) { }
 
   // 创建数据
@@ -125,7 +127,6 @@ export class RoleService {
     const total = await this.roleModel.countDocuments(condition);
     return { list, total };
   }
-
   // 查询全部数据
   async myRoles(userId: string, condition?: any) {
     const cond = { ...condition, user: userId, isDelete: false }
@@ -143,17 +144,39 @@ export class RoleService {
     if (!roles.length) {
       return { owner, guard, management, worker, rent, isAdmin }
     }
-    roles.map(role => {
+    await roles.map(async role => {
       switch (role._id) {
         case 0: isAdmin = true;
           break;
-        case 1: management = role.zones || [];
+        case 1: {
+          if (role.zones.length) {
+            management = await role.zones.map(async zone => {
+              const total = await this.zoneService.countByCondition({
+                zoneId: zone._id,
+                zoneLayer: 2
+              })
+              const ownerCount = await this.zoneService.countByCondition({
+                zoneId: zone._id,
+                zoneLayer: 2,
+                owner: { $exists: 1 }
+              })
+              return { ...zone, total, ownerCount }
+            })
+          }
+        };
           break;
         case 2: worker = role.zones || [];
           break;
         case 3: guard = role.zones || [];
           break;
-        case 4: owner = role.zones || [];
+        case 4: {
+          if (role.zones.length) {
+            owner = await role.zones.map(async zone => {
+              const rentCount = await this.roleModel.countDocuments({ zone: zone._id, role: 5, isDelete: false })
+              return { ...zone, isRent: rentCount > 0 }
+            })
+          }
+        };
           break;
         case 5: rent = role.zones || [];
           break;
@@ -189,5 +212,4 @@ export class RoleService {
   async findOneAndDelete(condition: any) {
     return await this.roleModel.findOneAndUpdate(condition, { isDelete: true })
   }
-
 }

@@ -22,6 +22,9 @@ import { CreateRentDTO } from 'src/module/rent/dto/rent.dto';
 import { RentService } from 'src/module/rent/rent.service';
 import { ResidentService } from 'src/module/resident/resident.service';
 import { IResident } from 'src/module/resident/interfaces/resident.interfaces';
+import { RoleService } from 'src/module/role/role.service';
+import { ApiException } from 'src/common/expection/api.exception';
+import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 
 
 @ApiUseTags('zones')
@@ -35,6 +38,7 @@ export class ZoneController {
     @Inject(BlackService) private blackService: BlackService,
     @Inject(RentService) private rentService: RentService,
     @Inject(ResidentService) private residentService: ResidentService,
+    @Inject(RoleService) private roleService: RoleService,
 
   ) { }
 
@@ -141,6 +145,10 @@ export class ZoneController {
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any,
   ) {
+    const canActive = await this.roleService.checkRoles({ user: req.user._id, role: 3, zone: id, isDelete: false })
+    if (!canActive) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
     const data: string = await this.zoneService.getVisitorQrcode(req.user._id, id);
     return { statusCode: 200, data, };
   }

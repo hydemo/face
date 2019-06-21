@@ -92,4 +92,9 @@ export class RentService {
     const total = await this.rentModel.countDocuments(condition);
     return { list, total };
   }
+
+  // 用户列表
+  async countByCondition(condition: any): Promise<number> {
+    return await this.rentModel.countDocuments(condition);
+  }
 }
