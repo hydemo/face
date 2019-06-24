@@ -149,7 +149,7 @@ export class CallbackService {
     await Promise.all(residents.map(async resident => {
       if (resident.type === 'visitor') {
         await this.visitorReceivers(resident, zone, receivers)
-      } else if (resident.type === 'family') {
+      } else if (resident.type === 'family' && resident.isMonitor) {
         await this.familyReceivers(resident, receivers)
       }
     }))
