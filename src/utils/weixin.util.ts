@@ -150,7 +150,7 @@ export class WeixinUtil {
             data: {
                 touser: openId,
                 template_id: this.config.weixinApplicationModel,
-                url: `${this.config.url}/review`,
+                url: `${this.config.url}/review?throwType=weixin`,
                 data,
             }
         });
@@ -163,7 +163,7 @@ export class WeixinUtil {
             data: {
                 touser: openId,
                 template_id: this.config.weixinPassModel,
-                url: `${this.config.url}/message`,
+                url: `${this.config.url}/message?throwType=weixin`,
                 data,
             }
         });
