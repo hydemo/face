@@ -130,7 +130,7 @@ export class WeixinUtil {
 
     async sendVerifyMessage(openId: string, data: ApplicationDTO) {
         const token = await this.access_token()
-        const result = await axios({
+        return await axios({
             method: 'post',
             url: `https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${token}`,
             data: {
@@ -140,8 +140,8 @@ export class WeixinUtil {
                 data,
             }
         });
-        return
     }
+
     async sendApplicationMessage(openId: string, data: ApplicationDTO) {
         const token = await this.access_token()
         await axios({
@@ -150,7 +150,7 @@ export class WeixinUtil {
             data: {
                 touser: openId,
                 template_id: this.config.weixinApplicationModel,
-                url: `${this.config.url}`,
+                url: `${this.config.url}/review`,
                 data,
             }
         });
