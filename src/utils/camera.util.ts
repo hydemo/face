@@ -100,19 +100,20 @@ export class CameraUtil {
       method: 'post',
       url: this.config.p2pUrl,
       data: {
-        Name: 'WBListInfoACK',
+        Name: 'WBListInfoREQ',
         TimeStamp: timeStamp,
         Sign: sign,
         Mode: face.mode,
-        Action: 'DeleteOneP',
+        Action: 'DeleteOnePic',
         UUID: deviceUUID,
-        DeleteOneP: {
+        DeleteOnePic: {
           LibIndex: face.libIndex,
           FlieIndex: face.flieIndex,
           Pic: face.pic,
         }
       }
     });
+    console.log(result, 'resulsttt')
     if (result.data.Result === 'ok') {
       return true
     }
@@ -124,8 +125,13 @@ export class CameraUtil {
    * 
    * @param face 名单信息
    */
-  async updateOnePic(face: IFace, pic: IPic) {
-    await this.deleteOnePic(face)
+  async updateOnePic(face: IFace, user: IUser, img: string) {
+    // await this.deleteOnePic(face)
+    const pic: IPic = {
+      username: user.username,
+      _id: user._id,
+      faceUrl: img,
+    }
     return await this.addOnePic(face.device, pic, face.mode)
   }
 
@@ -160,6 +166,7 @@ export class CameraUtil {
   */
   async addOnePic(device: IDevice, user: IPic, Mode: number) {
     const { username, password, deviceUUID } = device
+    console.log(user.faceUrl, 'facedd')
     const Img = await this.getImg(`${this.config.qiniuLink}/${user.faceUrl}`);
     const ImgName = user.username;
     const ImgNum = user._id;
@@ -183,6 +190,7 @@ export class CameraUtil {
       url: this.config.p2pUrl,
       data,
     })
+    console.log(result, 'result')
     if (result.data.Result === 'ok') {
       return result.data.AddOnePic;
     }

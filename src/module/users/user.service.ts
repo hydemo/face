@@ -308,6 +308,9 @@ export class UserService {
       await this.phoneUtil.codeCheck(verify.phone, verify.code)
       isPhoneVerify = true
     }
+    if (verify.faceUrl) {
+      await this.faceService.updatePic({ user: user._id }, user, verify.faceUrl)
+    }
     await this.userModel.findByIdAndUpdate(user._id, { ...verify, isVerify: true, isPhoneVerify }).lean().exec()
     return null
   }

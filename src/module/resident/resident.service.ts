@@ -405,7 +405,7 @@ export class ResidentService {
         mode: 2,
         libIndex: result.LibIndex,
         flieIndex: result.FlieIndex,
-        pic: result.pic,
+        pic: result.Pic,
         bondToObjectId: resident,
         zone: zone.zoneId,
       }
@@ -788,7 +788,7 @@ export class ResidentService {
         throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
       }
       if (resident.user.faceUrl) {
-        await this.faceService.updatePic({ bondToObjectId: id }, user)
+        await this.faceService.updatePic({ bondToObjectId: id }, user, resident.user.faceUrl)
       }
 
     }

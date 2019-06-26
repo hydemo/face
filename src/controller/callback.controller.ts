@@ -15,6 +15,7 @@ import { CallbackService } from 'src/module/callback/callback.service';
 import { CameraUtil } from 'src/utils/camera.util';
 import { MediaGateway } from 'src/module/media/media.gateway';
 import { SOCUtil } from 'src/utils/soc.util';
+import { PhoneUtil } from 'src/utils/phone.util';
 
 @ApiUseTags('callback')
 @ApiBearerAuth()
@@ -26,6 +27,7 @@ export class CallbackController {
     private readonly camera: CameraUtil,
     private readonly mediaWS: MediaGateway,
     private readonly scoUtil: SOCUtil,
+    private readonly phoneUtil: PhoneUtil,
   ) { }
 
   @ApiOkResponse({
@@ -48,11 +50,8 @@ export class CallbackController {
   @Post('/keepalive')
 
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
-  async upload(@Request() req) {
-    const clientIp = req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip.replace(/::ffff:/, '');
-    const data = await this.camera.getList(clientIp)
-    console.log(data, 'data')
-    // await this.mediaWS.sendMessage('5d089fba19fbcb626a93a5f0', { type: '1', imgUrl: '543edbc2-e452-4b96-8e70-1d9dadb17e79.jpg' })
+  async keeplive(@Request() req) {
+    await this.callbackService.keepalive(req.body)
     return { status: 200 }
   }
 

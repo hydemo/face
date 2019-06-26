@@ -30,8 +30,8 @@ export class PhoneUtil {
       //发送短信
       smsClient.sendSMS({
         PhoneNumbers: `${phone}`,
-        SignName: '小门神',
-        TemplateCode: 'SMS_134125398',
+        SignName: this.config.signModel,
+        TemplateCode: this.config.verifyModel,
         TemplateParam: `{ "code": "${code}" }`
       }).then((res) => {
         let { Code } = res;
@@ -47,6 +47,57 @@ export class PhoneUtil {
   }
 
   /**
+   * 发送p2p异常提醒
+   * @returns {Promise} promise
+   * @author:oy
+   */
+  sendP2PError(): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const accessKeyId = this.config.phoneAccessKey;
+      const secretAccessKey = this.config.phoneAccessSecret;
+      //生成验证码
+      const code = randomize('0', 6);
+      //生成手机连接    
+      const smsClient = new SMSClient({ accessKeyId, secretAccessKey });
+      //发送短信
+      smsClient.sendSMS({
+        PhoneNumbers: this.config.phoneNumber,
+        SignName: this.config.signThinkThenModel,
+        TemplateCode: this.config.p2pErrorModel,
+      }).then((res) => {
+        resolve(true)
+      }, (err) => {
+        reject(err)
+      })
+    });
+  }
+
+  /**
+   * 发送p2p异常提醒
+   * @returns {Promise} promise
+   * @author:oy
+   */
+  sendDeviceError(location: string, id: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const accessKeyId = this.config.phoneAccessKey;
+      const secretAccessKey = this.config.phoneAccessSecret;
+      //生成手机连接    
+      const smsClient = new SMSClient({ accessKeyId, secretAccessKey });
+      //发送短信
+      smsClient.sendSMS({
+        PhoneNumbers: this.config.phoneNumber,
+        SignName: this.config.signThinkThenModel,
+        TemplateCode: this.config.deviceErrorModel,
+        TemplateParam: `{ "location": "${location}", "uuid": "${id}" }`
+      }).then((res) => {
+        resolve(true)
+      }, (err) => {
+        reject(err)
+      })
+    });
+  }
+
+  /*
    * ----{短信验证}----
    * @param {String} phone 手机号 
    * @param {String} code 验证码

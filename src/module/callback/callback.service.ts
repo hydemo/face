@@ -35,6 +35,7 @@ export class CallbackService {
     @Inject(StrangerService) private readonly strangerService: StrangerService,
     @Inject(QiniuUtil) private readonly qiniuUtil: QiniuUtil,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+
     private readonly mediaWs: MediaGateway,
   ) { }
   async callback(body: any) {
@@ -189,5 +190,9 @@ export class CallbackService {
       receivers.push({ id: resid.user, type: 'family' })
     })
     return receivers
+  }
+  // 心跳包处理
+  async keepalive(body: any) {
+
   }
 }

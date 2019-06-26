@@ -137,7 +137,7 @@ export class BlackService {
         mode: 2,
         libIndex: result.LibIndex,
         flieIndex: result.FlieIndex,
-        pic: result.pic,
+        pic: result.Pic,
         bondToObjectId: black._id,
         zone: black.zone,
       }

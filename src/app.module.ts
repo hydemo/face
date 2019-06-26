@@ -49,6 +49,7 @@ import { MediaModule } from './module/media/media.module';
 import { MediaGateway } from './module/media/media.gateway';
 import { CMSMediaController } from './controller/cms/media.controller';
 import { MediaController } from './controller/api/media.controller';
+import { PhoneUtil } from './utils/phone.util';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { MediaController } from './controller/api/media.controller';
     CryptoUtil,
     WeixinUtil,
     SOCUtil,
+    PhoneUtil,
   ],
   controllers: [
     CallbackController,

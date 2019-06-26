@@ -98,6 +98,18 @@ export class ConfigService {
       WEIXIN_APPLICATION_MODEL: Joi.string().required(),
 
       WEIXIN_PASS_MODEL: Joi.string().required(),
+
+      PHONE_DEVICE_ERROR_MODEL: Joi.string().required(),
+
+      PHONE_VERIFY_MODEL: Joi.string().required(),
+
+      PHONE_P2P_ERROR_MODEL: Joi.string().required(),
+
+      PHONE_SIGN_MODEL: Joi.string().required(),
+
+      PHONE_SIGN_THINKTHEN_MODEL: Joi.string().required(),
+
+      PHONE_NUMBER: Joi.string().required(),
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -243,5 +255,29 @@ export class ConfigService {
 
   get weixinPassModel(): string {
     return this.envConfig.WEIXIN_PASS_MODEL
+  }
+
+  get deviceErrorModel(): string {
+    return this.envConfig.PHONE_DEVICE_ERROR_MODEL
+  }
+
+  get p2pErrorModel(): string {
+    return this.envConfig.PHONE_P2P_ERROR_MODEL
+  }
+
+  get verifyModel(): string {
+    return this.envConfig.PHONE_VERIFY_MODEL
+  }
+
+  get signModel(): string {
+    return this.envConfig.PHONE_SIGN_MODEL
+  }
+
+  get signThinkThenModel(): string {
+    return this.envConfig.PHONE_SIGN_THINKTHEN_MODEL
+  }
+
+  get phoneNumber(): string {
+    return this.envConfig.PHONE_NUMBER
   }
 }

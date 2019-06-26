@@ -97,14 +97,15 @@ export class FaceService {
     return { list, total };
   }
   // 根据条件更新
-  async updatePic(condition: any, user: IUser) {
+  async updatePic(condition: any, user: IUser, img: string) {
     const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
+    console.log(faces, 'faces')
     return await Promise.all(faces.map(async face => {
-      const result = await this.cameraUtil.updateOnePic(face, user)
+      const result = await this.cameraUtil.updateOnePic(face, user, img)
       const update = {
         libIndex: result.LibIndex,
         flieIndex: result.FlieIndex,
-        pic: result.pic,
+        pic: result.Pic,
       }
       await this.faceModel.findByIdAndUpdate(face._id, update)
     }))
