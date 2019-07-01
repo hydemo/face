@@ -136,7 +136,7 @@ export class WeixinUtil {
             data: {
                 touser: openId,
                 template_id: this.config.weixinVerifyModel,
-                url: `${this.config.url}?throwType=weixin`,
+                url: `${this.config.url}/home?throwType=weixin`,
                 data,
             }
         });
