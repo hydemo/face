@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as moment from 'moment';
+import { RedisService } from 'nestjs-redis';
 import { UserService } from '../users/user.service';
 import { DeviceService } from '../device/device.service';
 import { CreatAttributeDTO } from '../orbit/dto/attribute.dto';
@@ -35,6 +36,7 @@ export class CallbackService {
     @Inject(StrangerService) private readonly strangerService: StrangerService,
     @Inject(QiniuUtil) private readonly qiniuUtil: QiniuUtil,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+    private readonly redis: RedisService,
 
     private readonly mediaWs: MediaGateway,
   ) { }
@@ -193,6 +195,8 @@ export class CallbackService {
   }
   // 心跳包处理
   async keepalive(body: any) {
-
+    const { DeviceUUID } = body;
+    const client = this.redis.getClient()
+    await client.hset('device', DeviceUUID, 0)
   }
 }

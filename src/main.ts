@@ -34,7 +34,7 @@ async function bootstrap() {
     }));
 
   const initService: InitService = app.get(InitService);
-  // const scheduleService: ScheduleService = app.get(ScheduleService);
+  const scheduleService: ScheduleService = app.get(ScheduleService);
 
   // app.use(bodyParser.xml({
   //   limit: '2MB',   // Reject payload bigger than 1 MB
@@ -59,7 +59,7 @@ async function bootstrap() {
     .build();
 
   initService.init();
-  // scheduleService.enableSchedule()
+  scheduleService.enableSchedule()
 
   const ApiDocument = SwaggerModule.createDocument(app, ApiOptions, {
     include: [
