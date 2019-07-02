@@ -78,6 +78,7 @@ export class PhoneUtil {
    * @author:oy
    */
   sendDeviceError(location: string, id: string): Promise<boolean> {
+    console.log(location, id)
     return new Promise((resolve, reject) => {
       const accessKeyId = this.config.phoneAccessKey;
       const secretAccessKey = this.config.phoneAccessSecret;

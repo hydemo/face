@@ -50,6 +50,7 @@ import { MediaGateway } from './module/media/media.gateway';
 import { CMSMediaController } from './controller/cms/media.controller';
 import { MediaController } from './controller/api/media.controller';
 import { PhoneUtil } from './utils/phone.util';
+import { ZOCUtil } from './utils/zoc.util';
 
 @Module({
   imports: [
@@ -84,6 +85,7 @@ import { PhoneUtil } from './utils/phone.util';
     CryptoUtil,
     WeixinUtil,
     SOCUtil,
+    ZOCUtil,
     PhoneUtil,
   ],
   controllers: [

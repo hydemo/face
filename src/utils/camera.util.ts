@@ -113,7 +113,6 @@ export class CameraUtil {
         }
       }
     });
-    console.log(result, 'resulsttt')
     if (result.data.Result === 'ok') {
       return true
     }
@@ -126,7 +125,7 @@ export class CameraUtil {
    * @param face 名单信息
    */
   async updateOnePic(face: IFace, user: IUser, img: string) {
-    // await this.deleteOnePic(face)
+    await this.deleteOnePic(face)
     const pic: IPic = {
       username: user.username,
       _id: user._id,

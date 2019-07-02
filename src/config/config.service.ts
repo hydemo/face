@@ -79,6 +79,13 @@ export class ConfigService {
 
       SOC_AESSECRET: Joi.string().required(),
 
+      ZOC_URL: Joi.string().required(),
+
+      ZOC_APPID: Joi.string().required(),
+
+      ZOC_APPSECRET: Joi.string().required(),
+
+
       WEIXIN_APPID: Joi.string().required(),
 
       WEIXIN_APPSECRET: Joi.string().required(),
@@ -214,6 +221,18 @@ export class ConfigService {
 
   get socAESSecret(): string {
     return this.envConfig.SOC_AESSECRET
+  }
+
+  get zocUrl(): string {
+    return this.envConfig.ZOC_URL
+  }
+
+  get zocAppId(): string {
+    return this.envConfig.ZOC_APPID
+  }
+
+  get zocAppSecret(): string {
+    return this.envConfig.ZOC_APPSECRET
   }
 
   get weixinAppid(): string {

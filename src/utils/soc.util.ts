@@ -68,6 +68,31 @@ export class SOCUtil {
   }
 
   /**
+   * 标准地址信息查询
+   * 
+   * @param code 图片数据
+   */
+  async address(code: string): Promise<any> {
+    const data = {
+      datas: [
+        {
+          EWM_SYSTEMID: code,
+        }
+      ],
+      pages: [
+        {
+          "psize": "15",
+          "tcount": "",
+          "pno": '1',
+          "tsize": "",
+        }
+      ]
+    }
+    const result = await this.socRequest(data, 'xjpt_xxba_addrewm_bs')
+    return result.datas[0]
+  }
+
+  /**
     * 上传数据
     * 
     * @param code 图片数据

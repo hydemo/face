@@ -99,7 +99,6 @@ export class FaceService {
   // 根据条件更新
   async updatePic(condition: any, user: IUser, img: string) {
     const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
-    console.log(faces, 'faces')
     return await Promise.all(faces.map(async face => {
       const result = await this.cameraUtil.updateOnePic(face, user, img)
       const update = {
@@ -112,13 +111,12 @@ export class FaceService {
   }
 
   // 根据id删除
-  async delete(id: string) {
-    const face: IFace | null = await this.faceModel.findById(id).populate({ path: 'device', model: 'device' })
-    if (!face) {
-      return
+  async delete(face: IFace) {
+    const faceCount: number = await this.count({ isDelete: false, device: face.device, user: face.user })
+    if (faceCount === 1) {
+      await this.cameraUtil.deleteOnePic(face)
     }
-    await this.cameraUtil.deleteOnePic(face)
-    await this.faceModel.findByIdAndUpdate(id, { isDelete: false })
+    await this.faceModel.findByIdAndUpdate(face.id, { isDelete: false })
   }
 
   async updateByCondition(condition: any, update: any) {

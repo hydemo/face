@@ -754,13 +754,9 @@ export class ResidentService {
     if (String(data.reviewer) !== String(user)) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident })
+    const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident, isDelete: false })
     await Promise.all(faces.map(async face => {
-      const faceCount: number = await this.faceService.count({ isDelete: false, device: face.device, user: face.user })
-      if (faceCount === 1) {
-        await this.cameraUtil.deleteOnePic(face);
-      }
-      return
+      return await this.faceService.delete(face)
     }))
     return await this.residentModel.findByIdAndUpdate(resident, { isDelete: true }).lean().exec();
   }
@@ -788,7 +784,7 @@ export class ResidentService {
         throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
       }
       if (resident.user.faceUrl) {
-        await this.faceService.updatePic({ bondToObjectId: id }, user, resident.user.faceUrl)
+        await this.faceService.updatePic({ bondToObjectId: id, isDelete: false }, user, resident.user.faceUrl)
       }
 
     }
@@ -810,7 +806,7 @@ export class ResidentService {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     const expireTime = moment().add(update.expireTime, 'd')
-    await this.faceService.updateByCondition({ bondToObjectId: resident._id }, { expireTime })
+    await this.faceService.updateByCondition({ bondToObjectId: resident._id, isDelete: false }, { expireTime })
     return await this.residentModel.findByIdAndUpdate(id, { expireTime })
   }
 
@@ -859,7 +855,7 @@ export class ResidentService {
     const residents: IResident[] = await this.residentModel.find({ address: address._id, isDelete: false })
     await Promise.all(residents.map(async resident => {
       if (resident.type === 'visitor') {
-        const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident._id })
+        const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident._id, isDelete: false })
         faces.map(face => this.faceService.delete(face._id))
         return await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
       }
@@ -904,6 +900,18 @@ export class ResidentService {
     await this.residentModel.findOneAndUpdate({ isDelete: true, type: 'owner', address: address._id, user: address.owner }, { isDisable: false, isDelete: false })
     await this.residentModel.update({ reviewer: address.owner, isDelete: false }, { isDisable: false })
     return
+  }
+
+  // 删除访客
+  async removeVisitor() {
+    const visitors = await this.residentModel.find({ type: 'visitor', isDelete: false, isDisable: false, expireTime: { $lt: Date.now() } })
+    await Promise.all(visitors.map(async visitor => {
+      const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: visitor._id, isDelete: false })
+      await Promise.all(faces.map(async face => {
+        return await this.faceService.delete(face)
+      }))
+      await this.residentModel.findByIdAndUpdate(visitor._id, { isDelete: true }).lean().exec();
+    }))
   }
 
   // 根据用户id查询住客列表
