@@ -105,4 +105,22 @@ export class CryptoUtil {
     }
 
 
+    /**
+     * des加密
+     * @param key 密钥
+     * @param message 包
+     */
+    dexText(text: string, secret: string) {
+        const key = new Buffer(secret);
+        const iv = new Buffer(0);
+        const plaintext = text;
+        const alg = 'des-ecb'
+        const autoPad = true
+        //encrypt  
+        const cipher = crypto.createCipheriv(alg, key, iv);
+        cipher.setAutoPadding(autoPad)  //default true  
+        let ciph = cipher.update(plaintext, 'utf8', 'hex');
+        ciph += cipher.final('hex');
+        return ciph
+    }
 }
