@@ -897,7 +897,7 @@ export class ResidentService {
       await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
 
     }))
-    await this.residentModel.findOneAndUpdate({ isDelete: true, type: 'owner', address: address._id, user: address.owner }, { isDisable: false, isDelete: false })
+    await this.residentModel.findOneAndUpdate({ isDisable: true, type: 'owner', address: address._id, user: address.owner }, { isDisable: false, isDelete: false })
     await this.residentModel.update({ reviewer: address.owner, isDelete: false }, { isDisable: false })
     return
   }
