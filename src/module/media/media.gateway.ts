@@ -37,6 +37,7 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) { }
 
   async handleConnection(client) {
+    console.log(client.handshake.query.token, 'token')
     const media: any = await this.jwtService.verify(
       client.handshake.query.token,
     )
@@ -44,12 +45,28 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!mediaExist) {
       return
     }
-    this.connectedMedias = [...this.connectedMedias, { id: String(media.id), client }];
+    const index = this.connectedMedias.findIndex(v => v.id === String(media.id))
+    if (index < 0) {
+      this.connectedMedias = [...this.connectedMedias, { id: String(media.id), client }];
+    } else {
+      this.connectedMedias[index] = { id: String(media.id), client }
+    }
+    console.log(this.connectedMedias, 'sss')
     client.emit('connect', '连接成功')
   }
 
-  async handleDisconnect(socket) {
-    // console.log(111)
+  async handleDisconnect(client) {
+    const media: any = await this.jwtService.verify(
+      client.handshake.query.token,
+    )
+    const mediaExist = await this.mediaService.findById(media.id)
+    if (!mediaExist) {
+      return
+    }
+    this.connectedMedias = this.connectedMedias.filter(v => v.id !== String(mediaExist.id))
+    console.log(this.connectedMedias, 'mediaExist')
+    console.log(111)
+
   }
 
   @SubscribeMessage('message')

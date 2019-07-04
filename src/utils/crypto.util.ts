@@ -110,11 +110,12 @@ export class CryptoUtil {
      * @param key 密钥
      * @param message 包
      */
-    dexText(text: string, secret: string) {
-        const key = new Buffer(secret);
+    desText(text: string, secret: string) {
+        const key = new Buffer(secret, 'hex');
+        console.log(key, 'key')
         const iv = new Buffer(0);
         const plaintext = text;
-        const alg = 'des-ecb'
+        const alg = 'des-ede3'
         const autoPad = true
         //encrypt  
         const cipher = crypto.createCipheriv(alg, key, iv);
@@ -122,5 +123,9 @@ export class CryptoUtil {
         let ciph = cipher.update(plaintext, 'utf8', 'hex');
         ciph += cipher.final('hex');
         return ciph
+    }
+
+    hmac(text: string) {
+        return crypto.createHmac('sha1', text).update('待加密字串').digest().toString('base64');
     }
 }

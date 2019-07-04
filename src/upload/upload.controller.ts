@@ -47,7 +47,15 @@ export class UploadController {
   // @UseGuards(AuthGuard())
   @ApiOperation({ title: '获取七牛云token', description: '获取七牛云token' })
   async uploadToken() {
-    const uploadToken = await this.qiniuUtil.getToken()
+    const uploadToken = await this.qiniuUtil.getUpToken()
+    return { statusCode: 200, uploadToken }
+  }
+
+  @Get('qiniu/DownLoadToken')
+  // @UseGuards(AuthGuard())
+  @ApiOperation({ title: '获取七牛云token', description: '获取七牛云token' })
+  async downLoadToken() {
+    const uploadToken = await this.qiniuUtil.getDownToken()
     return { statusCode: 200, uploadToken }
   }
 

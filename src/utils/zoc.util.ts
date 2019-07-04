@@ -138,10 +138,9 @@ export class ZOCUtil {
     * 获取签名
     */
   async getEncodedata(json: string) {
-    const url = `${this.config.zocUrl}/api/check/encrypt/zipencrypt`;
+    const url = `${this.config.zocUrl}/api/check/encrypt/zipdecrypt`;
     const token = await this.getToken()
     const key = '296CD6EB2CA94321ABEF575F4CFC10EC'
-    // const key = new Buffer(secret, 'hex');
     const result = await axios({
       method: 'post',
       url,
@@ -154,7 +153,6 @@ export class ZOCUtil {
         key,
       },
     });
-    console.log(result)
     return result.data.data
   }
   /**
@@ -187,18 +185,21 @@ export class ZOCUtil {
         sign,
       },
     });
-    console.log(result.data)
+    console.log(result, 'result')
   }
   /**
   * 数据上报
   */
   async upload(json: string, order: string) {
     const time = moment().format('YYYYMMDDHHmmss')
+    if (fs.existsSync('./upload/Resident')) {
+      fs.rmdirSync('./upload/Resident')
+    }
     fs.mkdirSync('./upload/Resident')
     const filename = `Resident-${time}.json`
     const encryptData = await this.getEncodedata(json);
-    console.log(encryptData)
-    fs.writeFileSync(`./upload/Resident/${filename}`, encryptData)
+    const desData = await this.cryptoUtil.desText(json, '296CD6EB2CA94321ABEF575F4CFC10EC296CD6EB2CA94321')
+    fs.writeFileSync(`./upload/Resident/${filename}`, desData)
     const zip = new Zip()
     zip.folder(`/upload/Resident`);
     zip.generateAsync({  // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
@@ -226,7 +227,6 @@ export class ZOCUtil {
     const url = `${this.config.zocUrl}/api/check/gate/resident`;
     const token = await this.getToken()
     const order = this.getOrder()
-    console.log(order, order.length, '222')
     const address = await this.socUtil.address('4DE6E021-F538-1A9C-E054-90E2BA510A0C')
     const data = {
       SBXXLSH: order,
@@ -283,6 +283,14 @@ export class ZOCUtil {
     return true
   }
 
+  async test() {
+    const text = '1234'
+    const des = await this.cryptoUtil.desText(text, '296CD6EB2CA94321ABEF575F4CFC10EC296CD6EB2CA94321');
+
+    const en = await this.getEncodedata(des);
+    console.log(en, 'en');
+    console.log(des, 'text');
+  }
 
 
 }
