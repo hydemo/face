@@ -117,6 +117,20 @@ export class ConfigService {
       PHONE_SIGN_THINKTHEN_MODEL: Joi.string().required(),
 
       PHONE_NUMBER: Joi.string().required(),
+
+      COMPANY_NAME: Joi.string().required(),
+
+      COMPANY_ADDRESS: Joi.string().required(),
+
+      COMPANY_CREDIT_CODE: Joi.string().required(),
+
+      COMPANY_AGENCY_CODE: Joi.string().required(),
+
+      COMPANY_APP_NAME: Joi.string().required(),
+
+      COMPANY_CONTACT: Joi.string().required(),
+
+      COMPANY_CONTACT_PHONE: Joi.string().required(),
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -298,5 +312,33 @@ export class ConfigService {
 
   get phoneNumber(): string {
     return this.envConfig.PHONE_NUMBER
+  }
+
+  get companyName(): string {
+    return this.envConfig.COMPANY_NAME
+  }
+
+  get companyAddress(): string {
+    return this.envConfig.COMPANY_ADDRESS
+  }
+
+  get companyCreditCode(): string {
+    return this.envConfig.COMPANY_CREDIT_CODE
+  }
+
+  get companyAgencyCode(): string {
+    return this.envConfig.COMPANY_AGENCY_CODE
+  }
+
+  get companyAppName(): string {
+    return this.envConfig.COMPANY_APP_NAME
+  }
+
+  get companyContact(): string {
+    return this.envConfig.COMPANY_CONTACT
+  }
+
+  get companyContactPhone(): string {
+    return this.envConfig.COMPANY_CONTACT_PHONE
   }
 }

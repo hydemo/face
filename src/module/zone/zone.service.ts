@@ -12,6 +12,7 @@ import { SOCUtil } from 'src/utils/soc.util';
 import { IZoneProfile } from 'src/module/zone/interfaces/zonePrifile.interface';
 import { ZoneProfileDTO } from './dto/zonePrifile.dto';
 import { IChildren } from './interfaces/children.interface';
+import { IDetail } from './interfaces/detail.interface';
 
 @Injectable()
 export class ZoneService {
@@ -181,7 +182,7 @@ export class ZoneService {
       zoneId: parent.zoneId,
       ancestor: [...parent.ancestor, parent._id],
       houseNumber,
-      buildingType: profile.dzsx
+      buildingType: profile.dzsx,
     }
     return await this.zoneModel.create(create);
   }
@@ -221,6 +222,7 @@ export class ZoneService {
   // 二维码添加小区
   async addByQrcode(createZone: CreateZoneByScanDTO) {
     const result: any = await this.socUtil.qrcodeAddress(createZone.code, '1')
+    const detail: IDetail = await this.socUtil.address(createZone.code)
     const list: IZoneProfile[] = result.list
     const page = result.page
     const count = Number(page.tcount)
@@ -236,7 +238,14 @@ export class ZoneService {
       hasChildren: count > 1,
       houseNumber: createZone.name,
       profile: parentProfile,
-      buildingType: parentProfile.dzsx
+      buildingType: parentProfile.dzsx,
+      detail,
+      propertyCo: {
+        name: createZone.propertyCoName,
+        contact: createZone.contact,
+        contactPhone: createZone.contactPhone,
+        creditCode: createZone.creditCode,
+      }
     }
     const createParent: IZone = await new this.zoneModel(parent);
     createParent.zoneId = createParent._id;

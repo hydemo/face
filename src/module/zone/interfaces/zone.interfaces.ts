@@ -1,5 +1,7 @@
 import { Document } from 'mongoose';
 import { IZoneProfile } from './zonePrifile.interface';
+import { IPropertyCo } from './propertyCo.interface';
+import { IDetail } from './detail.interface';
 
 export interface IZone extends Document {
   // 区域名称
@@ -32,7 +34,12 @@ export interface IZone extends Document {
   houseNumber: string;
   //是否分区
   hasPartition: Boolean;
+  // 地址信息
   readonly profile: IZoneProfile;
+  //物业信息
+  readonly protertyCo?: IPropertyCo;
+  // 小区地址详情
+  readonly detail?: IDetail;
   // 建筑类型 50:建筑物 60:单元房 61：梯位
   buildingType: string;
   // 分区id

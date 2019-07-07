@@ -1,7 +1,8 @@
 import { ApiModelProperty, ApiModelPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsMongoId, IsPositive, IsBoolean, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsNumber, IsMongoId, IsPositive, IsBoolean, IsOptional, IsArray, IsMobilePhone } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ZoneProfileDTO } from './zonePrifile.dto';
+import { PropertyCoDTO } from './propertyCo.dto';
 
 export class CreateZoneDTO {
   @IsString()
@@ -35,6 +36,26 @@ export class CreateZoneByScanDTO {
   @Type(() => Number)
   @ApiModelProperty({ description: '区域类型' })
   readonly zoneType: number;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '物业名称' })
+  readonly propertyCoName: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '物业信用代码' })
+  readonly creditCode: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '物业负责人' })
+  readonly contact: string;
+
+  @IsMobilePhone('zh-CN')
+  @Type(() => String)
+  @ApiModelProperty({ description: '负责人电话' })
+  readonly contactPhone: string;
 }
 
 export class ZoneDTO {
@@ -96,11 +117,11 @@ export class ZoneDTO {
   @Type(() => Boolean)
   @ApiModelPropertyOptional({ description: '是否删除' })
   readonly isDelete?: boolean;
-
+  propertyCo?: PropertyCoDTO;
   houseNumber: string;
 
   hasPartition?: boolean;
-
+  detail?: any;
   profile: ZoneProfileDTO;
   // 建筑类型 50:建筑物 60:单元房 61：梯位
   buildingType: string;

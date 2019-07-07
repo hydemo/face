@@ -6,6 +6,7 @@ import { ConfigService } from 'src/config/config.service';
 import axios from 'axios'
 import { CryptoUtil } from './crypto.util';
 import { IZoneProfile } from 'src/module/zone/interfaces/zonePrifile.interface';
+import { IDetail } from 'src/module/zone/interfaces/detail.interface';
 
 @Injectable()
 export class SOCUtil {
@@ -72,7 +73,7 @@ export class SOCUtil {
    * 
    * @param code 图片数据
    */
-  async address(code: string): Promise<any> {
+  async address(code: string): Promise<IDetail> {
     const data = {
       datas: [
         {
@@ -107,8 +108,8 @@ export class SOCUtil {
           lv_xm: '杨晓峰',
           lv_zzdz_dzbm: '4DE6E021-F52A-1A9C-E054-90E2BA510A0C',
           lv_lxdh: '18065361777',
-          lv_djdw_jgdm: 'MA32HCJJ-6',
-          lv_djdw_jgmc: '厦门杏仁科技有限公司',
+          lv_djdw_jgdm: this.config.companyAgencyCode,
+          lv_djdw_jgmc: this.config.companyName,
           lv_djr_gmsfhm: '350583198912246076',
           lv_djr_xm: '欧阳旭靖',
           lv_djsj: moment().format('YYYYMMDDHHmmss')

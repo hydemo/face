@@ -166,7 +166,7 @@ export class CameraUtil {
   async addOnePic(device: IDevice, user: IPic, Mode: number) {
     const { username, password, deviceUUID } = device
     console.log(user.faceUrl, 'facedd')
-    const Img = await this.getImg(`${this.config.qiniuLink}/${user.faceUrl}`);
+    const Img = await this.getImg(`${user.faceUrl}`);
     const ImgName = user.username;
     const ImgNum = user._id;
     const timeStamp: string = Date.now().toString()
@@ -201,7 +201,7 @@ export class CameraUtil {
    * @param url 图片地址
    */
   async getImg(url: string): Promise<string> {
-    const result: any = await axios.get(`${url}?imageView2/1/w/800/h/800/format/jpg/q/76|imageslim`, { responseType: 'arraybuffer' })
+    const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageView2/1/w/800/h/800/format/jpg/q/76|imageslim`, { responseType: 'arraybuffer' })
     const img = new Buffer(result.data, 'binary').toString('base64')
     return img
   }

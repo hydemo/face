@@ -1,4 +1,4 @@
-export interface ZoneProfileDTO {
+export class ZoneProfileDTO {
   // GUID地址编码
   readonly dzbm: string;
   // 区县名称
