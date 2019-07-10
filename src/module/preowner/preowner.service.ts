@@ -29,9 +29,8 @@ export class PreownerService {
     let checkResult = false
     if (preowners.length) {
       const houseNumbers = houseNumber.split('-');
-      if (houseNumber[2].includes('梯')) {
+      if (houseNumbers[2].includes('梯')) {
         houseNumbers[2] = houseNumbers[2].split('梯')[1]
-        console.log(houseNumbers, 'house')
       }
       preowners.map(preowner => {
         if (preowner.building === houseNumbers[1] && preowner.houseNumber === houseNumbers[2]) {
