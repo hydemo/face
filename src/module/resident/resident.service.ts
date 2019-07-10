@@ -102,7 +102,10 @@ export class ResidentService {
       type: 'owner',
     }
     const creatResident = await this.residentModel.create(resident);
-    // const preowners = await this.preownerService.findByCardNumber(user.cardNumber)
+    const ownerCheck = await this.preownerService.ownerCheck(user.cardNumber, zone.zoneId, zone.houseNumber)
+    if (ownerCheck) {
+      await this.agreeOwner(creatResident._id, user._id)
+    }
     return creatResident;
   }
 
@@ -430,14 +433,6 @@ export class ResidentService {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     await this.agreeOwner(id, user);
-    const otherApplications: IResident[] = await this.residentModel.find({
-      checkResult: 1,
-      isDelete: false,
-      isDisable: false,
-      type: 'owner',
-      address: resident.address,
-    })
-    return await Promise.all(otherApplications.map(async application => await this.rejectOwner(application.id, user)))
   }
 
   // 物业通过业主审核
@@ -480,6 +475,14 @@ export class ResidentService {
     }
     await this.zoneService.updateOwner(resident.address._id, resident.user._id)
     await this.roleService.create(role)
+    const otherApplications: IResident[] = await this.residentModel.find({
+      checkResult: 1,
+      isDelete: false,
+      isDisable: false,
+      type: 'owner',
+      address: resident.address,
+    })
+    await Promise.all(otherApplications.map(async application => await this.rejectOwner(application.id, reviewer)))
     const message: ApplicationDTO = {
       first: {
         value: `您提交的${resident.address.houseNumber}业主申请已审核`,

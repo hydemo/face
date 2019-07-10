@@ -24,8 +24,21 @@ export class PreownerService {
   }
 
   // 根据身份证查找
-  async findByCardNumber(cardNumber: string, zone: string) {
-    return this.PreownerModel.find({ cardNumber, zone }).lean().exec()
+  async ownerCheck(cardNumber: string, zone: string, houseNumber: string): Promise<Boolean> {
+    const preowners: IPreowner[] = await this.PreownerModel.find({ cardNumber, zone }).lean().exec()
+    let checkResult = false
+    if (preowners.length) {
+      const houseNumbers = houseNumber.split('-');
+      if (houseNumber[2].includes('梯')) {
+        houseNumbers[2] = houseNumbers[2].split('梯')[1]
+      }
+      preowners.map(preowner => {
+        if (preowner.building === houseNumbers[1] && preowner.houseNumber === houseNumbers[2]) {
+          checkResult = true
+        }
+      })
+    }
+    return checkResult
   }
 
 }

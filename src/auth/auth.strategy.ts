@@ -30,7 +30,6 @@ export class AuthStrategy extends PassportStrategy(Strategy) {
             throw new UnauthorizedException()
         }
         const user = await this.authService.validateUser(payload);
-        console.log(user, 'user')
         if (!user) {
             throw new UnauthorizedException();
         }
