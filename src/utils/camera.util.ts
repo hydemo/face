@@ -95,6 +95,7 @@ export class CameraUtil {
    * @param face 名单信息
    */
   async deleteOnePic(face: IFace) {
+    console.log(face, 'face')
     const { device } = face
     const { username, password, deviceUUID } = device
     const timeStamp: string = Date.now().toString()
@@ -117,6 +118,7 @@ export class CameraUtil {
           }
         }
       })
+      console.log(result, 'result')
       if (result.data.Result === 'ok') {
         return true
       }
@@ -201,6 +203,7 @@ export class CameraUtil {
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
+      return false
     } catch (error) {
       await this.phoneUtil.sendP2PError()
     }

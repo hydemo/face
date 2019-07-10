@@ -761,6 +761,7 @@ export class ResidentService {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident, isDelete: false })
+    console.log(faces,'faces')
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
