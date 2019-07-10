@@ -8,9 +8,10 @@ import { RoleModule } from '../role/role.module';
 import { DeviceModule } from '../device/device.module';
 import { ConfigModule } from 'src/config/config.module';
 import { FaceModule } from '../face/face.module';
+import { PhoneUtil } from 'src/utils/phone.util';
 
 @Module({
-  providers: [BlackService, CameraUtil, ...blacksProviders],
+  providers: [BlackService, CameraUtil, PhoneUtil, ...blacksProviders],
   exports: [BlackService],
   imports: [
     DatabaseModule,

@@ -8,6 +8,7 @@ import { SOCUtil } from 'src/utils/soc.util';
 import { CryptoUtil } from 'src/utils/crypto.util';
 import { ZOCUtil } from 'src/utils/zoc.util';
 import { CameraUtil } from 'src/utils/camera.util';
+import { PhoneUtil } from 'src/utils/phone.util';
 
 @Module({
   providers: [
@@ -16,6 +17,7 @@ import { CameraUtil } from 'src/utils/camera.util';
     CryptoUtil,
     ZOCUtil,
     CameraUtil,
+    PhoneUtil,
     ...zonesProviders
   ],
   exports: [ZoneService],

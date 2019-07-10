@@ -9,10 +9,14 @@ import { IFace } from 'src/module/face/interfaces/face.interfaces';
 import { IUser } from 'src/module/users/interfaces/user.interfaces';
 import { config } from 'rxjs';
 import { IPic } from 'src/common/interface/pic.interface';
+import { PhoneUtil } from './phone.util';
 
 @Injectable()
 export class CameraUtil {
-  constructor(private readonly config: ConfigService) { }
+  constructor(
+    private readonly config: ConfigService,
+    private readonly phoneUtil: PhoneUtil,
+  ) { }
   /**
    * 获取设备白名单
    *
@@ -48,7 +52,6 @@ export class CameraUtil {
         UUID: deviceUUID,
       }
     });
-    console.log(result, 'result')
     return result.data.GetList.List
   }
 
@@ -91,7 +94,7 @@ export class CameraUtil {
    * 
    * @param face 名单信息
    */
-  async deleteOnePic(face: IFace): Promise<boolean> {
+  async deleteOnePic(face: IFace) {
     const { device } = face
     const { username, password, deviceUUID } = device
     const timeStamp: string = Date.now().toString()
@@ -116,7 +119,7 @@ export class CameraUtil {
     if (result.data.Result === 'ok') {
       return true
     }
-    return false
+    await this.phoneUtil.sendP2PError()
   }
 
   /**
@@ -189,11 +192,10 @@ export class CameraUtil {
       url: this.config.p2pUrl,
       data,
     })
-    console.log(result, 'result')
     if (result.data.Result === 'ok') {
       return result.data.AddOnePic;
     }
-    return false
+    await this.phoneUtil.sendP2PError()
   }
   /**
    * 根据图片地址生成base64

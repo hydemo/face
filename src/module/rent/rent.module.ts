@@ -6,9 +6,10 @@ import { DatabaseModule } from 'src/database/database.module';
 import { CameraUtil } from 'src/utils/camera.util';
 import { WeixinUtil } from 'src/utils/weixin.util';
 import { ResidentModule } from '../resident/resident.module';
+import { PhoneUtil } from 'src/utils/phone.util';
 
 @Module({
-  providers: [RentService, CameraUtil, WeixinUtil, ...rentsProviders],
+  providers: [RentService, CameraUtil, WeixinUtil, PhoneUtil, ...rentsProviders],
   exports: [RentService],
   imports: [
     DatabaseModule,

@@ -10,12 +10,14 @@ import { FaceModule } from '../face/face.module';
 import { WeixinUtil } from 'src/utils/weixin.util';
 import { RoleModule } from '../role/role.module';
 import { ConfigModule } from 'src/config/config.module';
+import { PhoneUtil } from 'src/utils/phone.util';
 
 @Module({
   providers: [
     ResidentService,
     CameraUtil,
     WeixinUtil,
+    PhoneUtil,
     ...residentsProviders
   ],
   exports: [ResidentService],
