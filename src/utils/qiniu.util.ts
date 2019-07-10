@@ -59,19 +59,6 @@ export class QiniuUtil {
     return uploadToken
   }
   /**
-   * 获取七牛云下载token
-   *
-   */
-  async getDownToken(): Promise<string> {
-    const client = this.redis.getClient()
-    const token = await client.get('qiniu_downToken')
-    if (!token) {
-      return this.refreshUpToken()
-    }
-    return token;
-  }
-
-  /**
    * 上传base64文件到七牛云
    * 
    * @param img 图片数据

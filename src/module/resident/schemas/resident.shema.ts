@@ -33,7 +33,15 @@ export const ResidentSchema = new mongoose.Schema(
     // 是否出租
     isRent: Boolean,
     // 是否推送
-    isPush: { type: Boolean, default: false }
+    isPush: { type: Boolean, default: false },
+    // 是否推送社会化信息采集平台
+    isSOCPush: { type: Boolean, defaut: false },
+    // 社会化信息采集平台订单号
+    SOCOrder: String,
+    // 是否推送到智能感知平台
+    isZOCPush: { type: Boolean, defaut: false },
+    // 智能感知平台包名
+    ZOCZip: String,
   },
   { collection: 'resident', versionKey: false, timestamps: true },
 );

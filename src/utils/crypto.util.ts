@@ -103,25 +103,34 @@ export class CryptoUtil {
         }
         return hexA;
     }
-
+    /**
+     * 字节补齐
+     */
+    length_process(text: string): string {
+        const buf = new Buffer(text);
+        const length = buf.length;
+        const suplementLength = 8 - length % 8;
+        const suplement = new Buffer(suplementLength);
+        const newBuf = Buffer.concat([buf, suplement]);
+        return newBuf.toString();
+    }
 
     /**
      * des加密
-     * @param key 密钥
-     * @param message 包
+     * @param text 加密内容
+     * @param secret 密钥16进制字符串
      */
     desText(text: string, secret: string) {
+        const str = this.length_process(text)
         const key = new Buffer(secret, 'hex');
-        console.log(key, 'key')
         const iv = new Buffer(0);
-        const plaintext = text;
         const alg = 'des-ede3'
         const autoPad = true
         //encrypt  
         const cipher = crypto.createCipheriv(alg, key, iv);
         cipher.setAutoPadding(autoPad)  //default true  
-        let ciph = cipher.update(plaintext, 'utf8', 'hex');
-        ciph += cipher.final('hex');
+        let ciph = cipher.update(str, 'utf8');
+        // ciph += cipher.final('binary');
         return ciph
     }
 

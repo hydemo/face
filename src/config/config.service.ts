@@ -85,6 +85,7 @@ export class ConfigService {
 
       ZOC_APPSECRET: Joi.string().required(),
 
+      ZOC_UP_SECRET: Joi.string().required(),
 
       WEIXIN_APPID: Joi.string().required(),
 
@@ -131,6 +132,12 @@ export class ConfigService {
       COMPANY_CONTACT: Joi.string().required(),
 
       COMPANY_CONTACT_PHONE: Joi.string().required(),
+
+      MANAGEMENT_NAME: Joi.string().required(),
+
+      MANAGEMENT_CARD_NUMBER: Joi.string().required(),
+
+      MANAGEMENT_PHONE: Joi.string().required(),
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -249,6 +256,10 @@ export class ConfigService {
     return this.envConfig.ZOC_APPSECRET
   }
 
+  get zocUpSecret(): string {
+    return this.envConfig.ZOC_UP_SECRET
+  }
+
   get weixinAppid(): string {
     return this.envConfig.WEIXIN_APPID
   }
@@ -340,5 +351,17 @@ export class ConfigService {
 
   get companyContactPhone(): string {
     return this.envConfig.COMPANY_CONTACT_PHONE
+  }
+
+  get managementName(): string {
+    return this.envConfig.MANAGEMENT_NAME
+  }
+
+  get managementCardNumber(): string {
+    return this.envConfig.MANAGEMENT_CARD_NUMBER
+  }
+
+  get managementPhone(): string {
+    return this.envConfig.MANAGEMENT_PHONE
   }
 }

@@ -40,23 +40,26 @@ export class CallbackController {
 
   @ApiOperation({ title: '人脸识别回调', description: '人脸识别回调' })
   async faceInfo(@Request() req) {
-    const time = moment().format('YYYYMMDDHHmmss');
-    const address = await this.socUtil.address('4DE6E021-F538-1A9C-E054-90E2BA510A0C');
-    const zone = await this.socUtil.address('1A814683-14F8-6129-E054-90E2BA548A34');
-    const deviceZone = await this.socUtil.address('50C92F98-CCE5-37D6-E054-90E2BA548A34');
-    // await this.zocUtil.genResident(time, address);
-    // await this.zocUtil.genBasicAddr(time, deviceZone);
-    // await this.zocUtil.genDevice(time, zone);
-    // await this.zocUtil.genEnRecord(time, deviceZone);
-    // await this.zocUtil.genManufacturer(time);
-    // await this.zocUtil.genPropertyCo(time, zone)
-    // await this.zocUtil.genImage(time, zone)
-    // await this.zocUtil.upload(time)
-    // await this.zocUtil.
-    // await this.callbackService.callback(req.body)
+    // // return await this.zocUtil.test()
+    // const time = moment().format('YYYYMMDDHHmmss');
+    // const address = await this.socUtil.address('4DE6E021-F538-1A9C-E054-90E2BA510A0C');
+    // const zone = await this.socUtil.address('1A814683-14F8-6129-E054-90E2BA548A34');
+    // const deviceZone = await this.socUtil.address('50C92F98-CCE5-37D6-E054-90E2BA548A34');
+    // console.log(zone, 'zone')
+    // const zip = await this.zocUtil.genZip()
+    // // await this.zocUtil.genResident(zip, time, address);
+    // // await this.zocUtil.genBasicAddr(zip, time, deviceZone);
+    // await this.zocUtil.genDevice(zip, time, zone);
+    // // await this.zocUtil.genEnRecord(zip, time, deviceZone);
+    // // await this.zocUtil.genManufacturer(zip, time);
+    // // await this.zocUtil.genPropertyCo(zip, time, zone)
+    // // await this.zocUtil.genImage(zip, time, zone, '7443634e-c73e-417d-940f-341648e994e2.jpg')
+    // // await this.zocUtil.upload(zip, time)
+    // // // await this.zocUtil.
+    await this.callbackService.callback(req.body)
     // await this.camera.getList()
     // await this.mediaWS.sendMessage('5d089fba19fbcb626a93a5f0', { type: '1', imgUrl: '543edbc2-e452-4b96-8e70-1d9dadb17e79.jpg' })
-    return { status: 200, address, zone, deviceZone }
+    return { status: 200 }
   }
 
 

@@ -28,6 +28,10 @@ export const OrbitSchema = new mongoose.Schema(
     faceFeature: { type: String },
     // 是否删除
     isDelete: { type: Boolean, default: false },
+    // 是否推送到智能感知平台
+    isZOCPush: { type: Boolean, defaut: false },
+    // 智能感知平台包名
+    ZOCZip: String,
     // 人脸属性
     attribute: {
       // 年龄

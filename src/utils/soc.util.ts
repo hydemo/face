@@ -46,7 +46,7 @@ export class SOCUtil {
   /**
    * 根据二维码获取地址库信息
    * 
-   * @param code 图片数据
+   * @param code 地址二维码
    */
   async qrcodeAddress(code: string, pno: string): Promise<any> {
     const data = {
@@ -71,7 +71,7 @@ export class SOCUtil {
   /**
    * 标准地址信息查询
    * 
-   * @param code 图片数据
+   * @param code 地址二维码
    */
   async address(code: string): Promise<IDetail> {
     const data = {
@@ -128,4 +128,3 @@ export class SOCUtil {
     return { list: result.datas, page: result.pages[0] }
   }
 }
-

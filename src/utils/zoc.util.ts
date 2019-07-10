@@ -5,11 +5,9 @@ import * as md5 from 'md5';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Zip from 'jszip';
-import * as uuid from 'uuid/v4';
 import { ConfigService } from 'src/config/config.service';
 import axios from 'axios';
 import { CryptoUtil } from './crypto.util';
-import { IResident } from 'src/module/resident/interfaces/resident.interfaces';
 import { SOCUtil } from './soc.util';
 import { CameraUtil } from './camera.util';
 
@@ -19,7 +17,6 @@ export class ZOCUtil {
     private readonly config: ConfigService,
     private readonly cryptoUtil: CryptoUtil,
     private readonly redis: RedisService,
-    private readonly socUtil: SOCUtil,
     private readonly cameraUtil: CameraUtil,
   ) { }
 
@@ -148,7 +145,7 @@ export class ZOCUtil {
     if (result.data.status === 100) {
       const token = result.data.data.token
       const client = this.redis.getClient()
-      client.set('zoc_token', token, 'EX', 60 * 60 * 1.5)
+      client.set('zoc_token', token, 'EX', 60 * 60 * 1)
       return token
     } else {
       return ''
@@ -173,7 +170,7 @@ export class ZOCUtil {
   async getEncodedata(json: string) {
     const url = `${this.config.zocUrl}/api/check/encrypt/zipdecrypt`;
     const token = await this.getToken()
-    const key = '296CD6EB2CA94321ABEF575F4CFC10EC'
+    const key = this.config.zocUpSecret
     const result = await axios({
       method: 'post',
       url,
@@ -196,11 +193,8 @@ export class ZOCUtil {
     const token = await this.getToken()
     const buf = fs.readFileSync(`./upload/${zipname}`)
     const ts = Date.now()
-    // const time = moment().format('YYYYMMDDHHmmss')
-    // const random = this.getRandom(6)
     const zipdata = buf.toString('base64')
     const key = md5(buf)
-    // const zipname = `03-91350206MA32HCJJ6X-1.7-${time}-${random}.zip`
     const signString = `md5sum${key}zipdata${zipdata}zipname${zipname}ts${ts}`
     const sign = this.cryptoUtil.encryptPassword(signString)
     const result = await axios({
@@ -221,17 +215,15 @@ export class ZOCUtil {
     console.log(result, 'result')
   }
   /**
+   * 生成zip对象
+   */
+  async genZip() {
+    return new Zip()
+  }
+  /**
   * 数据上报
   */
-  async upload(time: string) {
-    const zip = new Zip()
-    zip.folder(`/upload/Resident`);
-    zip.folder(`/upload/BasicAddr`);
-    zip.folder(`/upload/Device`);
-    zip.folder(`/upload/EnRecord`);
-    zip.folder(`/upload/Manufacturer`);
-    zip.folder(`/upload/PropertyCo`);
-    zip.folder(`/upload/Image`);
+  async upload(zip: any, time: string) {
     zip.generateAsync({  // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
       type: "nodebuffer",
       // 压缩算法
@@ -242,7 +234,7 @@ export class ZOCUtil {
     })
       .then(async content => {
         const random = this.getRandom(6)
-        const zipname = `03-91350206MA32HCJJ6X-1.7-${time}-${random}.zip`
+        const zipname = `03-${this.config.companyCreditCode}-1.7-${time}-${random}.zip`
         fs.writeFileSync(`./upload/${zipname}`, content)
         await this.uploadZip(zipname)
       });
@@ -251,9 +243,9 @@ export class ZOCUtil {
   /**
    * 生成住户信息
    */
-  async genResident(time: String, address: any): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/resident`;
-    const token = await this.getToken()
+  async genResident(zip: any, time: String, address: any): Promise<boolean> {
+    // const url = `${this.config.zocUrl}/api/check/gate/resident`;
+    // const token = await this.getToken()
     const order = this.getOrder()
     const data = {
       SBXXLSH: order,
@@ -296,34 +288,32 @@ export class ZOCUtil {
       MJZH: '',
       MJMM: '',
     }
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-    console.log(result.data, 'resident')
-    const json = JSON.stringify(data)
-    if (fs.existsSync('./upload/Resident')) {
-      this.rmdir('./upload/Resident')
-    }
-    fs.mkdirSync('./upload/Resident')
+    // 参数校验
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'resident')
+
+    const json = JSON.stringify([data])
     const filename = `Resident-${time}.json`
-    const desData = await this.cryptoUtil.desText(json, '296CD6EB2CA94321ABEF575F4CFC10EC296CD6EB2CA94321')
-    fs.writeFileSync(`./upload/Resident/${filename}`, desData)
-    // await this.upload(json, order)
+    const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
+    const folder = zip.folder('Resident')
+    folder.file(filename, desData)
     return true
   }
 
   /**
   * 生成标准地址信息
   */
-  async genBasicAddr(time: String, address: any): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/addr`;
-    const token = await this.getToken()
+  async genBasicAddr(zip: any, time: String, address: any): Promise<boolean> {
+    // const url = `${this.config.zocUrl}/api/check/gate/addr`;
+    // const token = await this.getToken()
     const data = {
       SYSTEMID: address.SYSTEMID,
       DSBM: address.DSBM,
@@ -344,35 +334,34 @@ export class ZOCUtil {
       GAJGJGMC: address.GAJGJGMC,
       JWWGDM: address.JWWGDM,
       JWWGMC: address.JWWGMC,
+      MDJD: address.MDJD,
     }
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-    console.log(result.data, 'basicAddr')
-    const json = JSON.stringify(data)
-    if (fs.existsSync('./upload/BasicAddr')) {
-      this.rmdir('./upload/BasicAddr')
-    }
-    fs.mkdirSync('./upload/BasicAddr')
+    //参数校验
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'basicAddr')
+
+    const json = JSON.stringify([data])
     const filename = `BasicAddr-${time}.json`
-    const desData = await this.cryptoUtil.desText(json, '296CD6EB2CA94321ABEF575F4CFC10EC296CD6EB2CA94321')
-    fs.writeFileSync(`./upload/BasicAddr/${filename}`, desData)
-    // await this.upload(json, order)
+    const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
+    const folder = zip.folder('BasicAddr')
+    folder.file(filename, desData)
     return true
   }
 
   /**
   * 生成小区物业信息
   */
-  async genPropertyCo(time: String, address: any): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/property`;
-    const token = await this.getToken()
+  async genPropertyCo(zip: any, time: String, address: any): Promise<boolean> {
+    // const url = `${this.config.zocUrl}/api/check/gate/property`;
+    // const token = await this.getToken()
     const data = {
       WYGS: '骏源(福建)物业管理发展有限公司',
       JGDM: '91350503M0000EY48Q',
@@ -384,34 +373,32 @@ export class ZOCUtil {
       DSBM: address.DSBM,
       QU_ID: address.QU_ID,
     }
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-    console.log(result.data, 'propertyCo')
-    const json = JSON.stringify(data)
-    if (fs.existsSync('./upload/PropertyCo')) {
-      this.rmdir('./upload/PropertyCo')
-    }
-    fs.mkdirSync('./upload/PropertyCo')
+    // 参数校验
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'propertyCo')
+
+    const json = JSON.stringify([data])
     const filename = `PropertyCo-${time}.json`
-    const desData = await this.cryptoUtil.desText(json, '296CD6EB2CA94321ABEF575F4CFC10EC296CD6EB2CA94321')
-    fs.writeFileSync(`./upload/PropertyCo/${filename}`, desData)
-    // await this.upload(json, order)
+    const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
+    const folder = zip.folder('PropertyCo')
+    folder.file(filename, desData)
     return true
   }
 
   /**
  * 生成门禁设备信息
  */
-  async genDevice(time: String, address: any): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/device`;
-    const token = await this.getToken()
+  async genDevice(zip: any, time: String, address: any): Promise<boolean> {
+    // const url = `${this.config.zocUrl}/api/check/gate/device`;
+    // const token = await this.getToken()
     const data = {
       MJCS: this.config.companyName,
       SBXQDZBM: address.SYSTEMID,
@@ -422,44 +409,42 @@ export class ZOCUtil {
       MAPX: '118.39867161160882',
       MAPY: '24.95556924198733',
       MJCSDM: '91440300072526351A',
-      MJJLX: '人脸',
+      MJJLX: '03',
       MJJBH: '10028839',
       MJJZT: 'Y',
       CJSJ: this.getTemp(),
       TYSJ: '',
       GAJGJGDM: address.GAJGJGDM,
       TJRQ: '2019-07-01',
-      FWFGSL: '1',
-      FWFGDZBM: ['6F09E6B4-AD63-B89D-E054-90E2BA510A0C']
+      FWFGSL: '0',
+      FWFGDZBM: []
     }
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-    console.log(result.data, 'device')
-    const json = JSON.stringify(data)
-    if (fs.existsSync('./upload/Device')) {
-      this.rmdir('./upload/Device')
-    }
-    fs.mkdirSync('./upload/Device')
+    // 参数校验
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'device')
+
+    const json = JSON.stringify([data])
     const filename = `Device-${time}.json`
-    const desData = await this.cryptoUtil.desText(json, '296CD6EB2CA94321ABEF575F4CFC10EC296CD6EB2CA94321')
-    fs.writeFileSync(`./upload/Device/${filename}`, desData)
-    // await this.upload(json, order)
+    const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
+    const folder = zip.folder('Device')
+    folder.file(filename, desData)
     return true
   }
 
   /**
 * 生成刷卡记录
 */
-  async genEnRecord(time: String, address: any): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/record`;
-    const token = await this.getToken()
+  async genEnRecord(zip: any, time: String, address: any): Promise<boolean> {
+    // const url = `${this.config.zocUrl}/api/check/gate/record`;
+    // const token = await this.getToken()
     const data = {
       DSBM: address.SYSTEMID,
       DZMC: address.DZMC,
@@ -484,35 +469,35 @@ export class ZOCUtil {
       KMZT: 'Y',
       CZLX: '04',
       HJFJH: '',
+      JCLX: 1,
+      CRLX: 1,
     }
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-    console.log(result.data, 'record')
-    const json = JSON.stringify(data)
-    if (fs.existsSync('./upload/EnRecord')) {
-      this.rmdir('./upload/EnRecord')
-    }
-    fs.mkdirSync('./upload/EnRecord')
+    // 参数校验
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'record')
+
+    const json = JSON.stringify([data])
     const filename = `EnRecord-${time}.json`
-    const desData = await this.cryptoUtil.desText(json, '296CD6EB2CA94321ABEF575F4CFC10EC296CD6EB2CA94321')
-    fs.writeFileSync(`./upload/EnRecord/${filename}`, desData)
-    // await this.upload(json, order)
+    const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
+    const folder = zip.folder('EnRecord')
+    folder.file(filename, desData)
     return true
   }
 
   /**
 * 生成门禁厂商基础信息
 */
-  async genManufacturer(time: String): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/company`;
-    const token = await this.getToken()
+  async genManufacturer(zip: any, time: String): Promise<boolean> {
+    // const url = `${this.config.zocUrl}/api/check/gate/company`;
+    // const token = await this.getToken()
     const data = {
       CSMC: this.config.companyName,
       ZZJGDM: this.config.companyCreditCode,
@@ -521,75 +506,60 @@ export class ZOCUtil {
       LXDH: this.config.companyContactPhone,
       LXYJ: '',
     }
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-    console.log(result.data, 'company')
-    const json = JSON.stringify(data)
-    if (fs.existsSync('./upload/Manufacturer')) {
-      this.rmdir('./upload/Manufacturer')
-    }
-    fs.mkdirSync('./upload/Manufacturer')
+    // 参数校验
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'company')
+    const json = JSON.stringify([data])
     const filename = `Manufacturer-${time}.json`
-    const desData = await this.cryptoUtil.desText(json, '296CD6EB2CA94321ABEF575F4CFC10EC296CD6EB2CA94321')
-    fs.writeFileSync(`./upload/Manufacturer/${filename}`, desData)
-    // await this.upload(json, order)
+    const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
+    const folder = zip.folder('Manufacturer')
+    folder.file(filename, desData)
     return true
   }
   /**
 * 生成图像数据
 */
-  async genImage(time: String, address: any): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/image`;
-    const img = await this.cameraUtil.getImg('7443634e-c73e-417d-940f-341648e994e2.jpg')
-    const token = await this.getToken()
+  async genImage(zip: any, time: String, address: any, img: string): Promise<boolean> {
+    // const url = `${this.config.zocUrl}/api/check/gate/image`;
+    const ZP = await this.cameraUtil.getImg(img)
+    // const token = await this.getToken()
     const data = {
       CASE_ID: this.getOrder(),
       ZPLX: '人口',
       ZP: img,
       GAJGJGDM: address.GAJGJGDM,
       GAJGNBDM: '',
-      GAJGJGMC: '',
-      DJR_XM: '欧阳旭靖',
-      HZSJHM: '13799746707',
-      DJR_GMSFHM: '350583198912246076',
+      GAJGJGMC: address.GAJGJGMC,
+      DJR_XM: this.config.managementName,
+      HZSJHM: this.config.managementPhone,
+      DJR_GMSFHM: this.config.managementCardNumber,
       DJSJ: time,
     }
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-    console.log(result.data, 'image')
-    const json = JSON.stringify(data)
-    if (fs.existsSync('./upload/Image')) {
-      this.rmdir('./upload/Image')
-    }
-    fs.mkdirSync('./upload/Image')
+    // 参数校验
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'image')
+    const json = JSON.stringify([data])
     const filename = `Image-${time}.json`
-    const desData = await this.cryptoUtil.desText(json, '296CD6EB2CA94321ABEF575F4CFC10EC296CD6EB2CA94321')
-    fs.writeFileSync(`./upload/Image/${filename}`, desData)
-    // await this.upload(json, order)
+    const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
+    const folder = zip.folder('Image')
+    folder.file(filename, desData)
     return true
   }
-
-  async test() {
-    if (fs.existsSync('./upload/A')) {
-      await this.rmdir('./upload/A')
-    }
-    fs.mkdirSync('./upload/TT')
-  }
-
-
 }
 
