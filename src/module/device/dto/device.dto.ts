@@ -60,6 +60,7 @@ export class CreateDeviceDTO {
   @ApiModelProperty({ description: '安装具体区域' })
   readonly position: string
 
+
 }
 
 export class BindSimDTO {

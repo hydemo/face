@@ -31,4 +31,7 @@ export interface IDevice extends Document {
   readonly description: string,
   // 广告机
   readonly media?: string;
+
+  deviceId: number;
+
 }

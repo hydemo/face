@@ -16,11 +16,17 @@ export class DeviceService {
     @Inject('DeviceModelToken') private readonly deviceModel: Model<IDevice>,
     @Inject(ZoneService) private readonly zoneService: ZoneService,
   ) { }
+  // 获取设备id
+  async getDeviceId() {
+
+  }
 
   // 创建数据
   async create(createDeviceDTO: CreateDeviceDTO): Promise<IDevice> {
     const creatDevice = new this.deviceModel(createDeviceDTO);
+    // creatDevice.deviceId =
     await creatDevice.save();
+
     await this.zoneService.incDeviceCount(creatDevice.zone, 1);
     return creatDevice;
   }

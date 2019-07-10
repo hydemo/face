@@ -190,7 +190,7 @@ export class ZOCUtil {
    * 上传数据报
    */
   async uploadZip(zipname: string) {
-    const url = `${this.config.zocUrl}/api/uptest/mj`;
+    const url = `${this.config.zocUrl}/api/upload/mj`;
     const token = await this.getToken()
     const buf = fs.readFileSync(`./upload/${zipname}`)
     const ts = Date.now()
@@ -225,7 +225,7 @@ export class ZOCUtil {
   * 数据上报
   */
   async upload(zip: any, time: string) {
-    zip.generateAsync({  // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
+    return zip.generateAsync({  // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
       type: "nodebuffer",
       // 压缩算法
       compression: "DEFLATE",
