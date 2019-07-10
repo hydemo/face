@@ -7,6 +7,7 @@ import { RoleModule } from '../role/role.module';
 import { SOCUtil } from 'src/utils/soc.util';
 import { CryptoUtil } from 'src/utils/crypto.util';
 import { ZOCUtil } from 'src/utils/zoc.util';
+import { CameraUtil } from 'src/utils/camera.util';
 
 @Module({
   providers: [
@@ -14,6 +15,7 @@ import { ZOCUtil } from 'src/utils/zoc.util';
     SOCUtil,
     CryptoUtil,
     ZOCUtil,
+    CameraUtil,
     ...zonesProviders
   ],
   exports: [ZoneService],
