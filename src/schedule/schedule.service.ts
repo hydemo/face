@@ -25,7 +25,8 @@ export class ScheduleService {
       await this.residentService.removeVisitor()
     });
 
-    Schedule.scheduleJob('*/30 * * * * *', async () => {
+    Schedule.scheduleJob('*/5 * * * * *', async () => {
+      console.log(22)
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
@@ -33,10 +34,10 @@ export class ScheduleService {
       }))
     });
 
-    Schedule.scheduleJob('* */5 * * * *', async () => {
+    Schedule.scheduleJob('*/1 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
-      console.log(keys)
+      console.log(keys, 'ss')
       await Promise.all(keys.map(async key => {
         const value = await client.hget('device', key)
         if (Number(value) > 10) {
