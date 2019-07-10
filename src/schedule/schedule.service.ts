@@ -26,7 +26,6 @@ export class ScheduleService {
     });
 
     Schedule.scheduleJob('*/2 * * * *', async () => {
-      console.log(22)
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
@@ -37,7 +36,6 @@ export class ScheduleService {
     Schedule.scheduleJob('*/30 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
-      console.log(keys, 'ss')
       await Promise.all(keys.map(async key => {
         const value = await client.hget('device', key)
         if (Number(value) > 10) {
