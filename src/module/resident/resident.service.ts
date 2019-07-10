@@ -35,6 +35,7 @@ import { RoleService } from '../role/role.service';
 import { RoleDTO } from '../role/dto/role.dto';
 import { ConfigService } from 'src/config/config.service';
 import { ApplicationDTO } from 'src/common/dto/Message.dto';
+import { PreownerService } from '../preowner/preowner.service';
 
 @Injectable()
 export class ResidentService {
@@ -48,6 +49,7 @@ export class ResidentService {
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
     @Inject(RoleService) private readonly roleService: RoleService,
     @Inject(ConfigService) private readonly config: ConfigService,
+    @Inject(PreownerService) private readonly preownerService: PreownerService,
     private readonly redis: RedisService,
   ) { }
 
@@ -100,6 +102,7 @@ export class ResidentService {
       type: 'owner',
     }
     const creatResident = await this.residentModel.create(resident);
+    // const preowners = await this.preownerService.findByCardNumber(user.cardNumber)
     return creatResident;
   }
 
@@ -162,7 +165,7 @@ export class ResidentService {
       applicationTime: new Date(),
       isMonitor: false,
       type: 'family',
-      reviewer: owner.user,
+      reviewer: owner.user._id,
     }
     const creatResident = await this.residentModel.create(resident);
     const message: ApplicationDTO = {
@@ -214,7 +217,7 @@ export class ResidentService {
       applicationTime: new Date(),
       isMonitor: true,
       type: 'visitor',
-      reviewer: owner.user,
+      reviewer: owner.user._id,
     }
     const creatResident = await this.residentModel.create(resident);
     const message: ApplicationDTO = {
@@ -337,7 +340,7 @@ export class ResidentService {
     if (user.type !== 'user') {
       throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
     }
-    return await this.addVisitor(zone, user, user._id, expireTime)
+    return await this.addVisitor(zone, user, userId, expireTime)
   }
 
   async addVisitorByLink(key: string, user: IUser) {

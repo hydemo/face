@@ -8,6 +8,7 @@ import {
   UploadedFile,
   Get,
   Inject,
+  Param,
 } from '@nestjs/common';
 
 import {
@@ -22,6 +23,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from 'src/config/config.service';
 import * as qiniu from 'qiniu';
 import { QiniuUtil } from 'src/utils/qiniu.util';
+import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
+import { PreownerService } from 'src/module/preowner/preowner.service';
 
 
 
@@ -33,6 +36,7 @@ export class UploadController {
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
     @Inject(QiniuUtil) private readonly qiniuUtil: QiniuUtil,
+    @Inject(PreownerService) private readonly preownerService: PreownerService,
 
   ) { }
   @Post('local')
@@ -41,6 +45,18 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadImage(@Request() req, @UploadedFile() file) {
     return { statusCode: 200, msg: '上传成功 ', data: file.filename };
+  }
+
+  @Post('zone/:id/owner')
+  @ApiConsumes('multipart/form-data')
+  @ApiImplicitFile({ name: 'file', required: true, description: '修改头像' })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadOwner(
+    @Request() req, @UploadedFile() file: any,
+    @Param('id', new MongodIdPipe()) id: string,
+  ) {
+    await this.preownerService.upload(id, file.filename)
+    return { statusCode: 200, msg: '上传成功 ' };
   }
 
   @Get('qiniu/token')

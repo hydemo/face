@@ -10,7 +10,7 @@ export class AuthService {
 
     async validateUser(payload: { type: string, id: string }): Promise<any> {
         if (payload.type === 'user') {
-            return await this.userService.findById(payload.id);
+            return await this.userService.updateById(payload.id, {});
 
         } else {
             return await this.adminService.findById(payload.id);

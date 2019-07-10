@@ -11,6 +11,7 @@ import { WeixinUtil } from 'src/utils/weixin.util';
 import { RoleModule } from '../role/role.module';
 import { ConfigModule } from 'src/config/config.module';
 import { PhoneUtil } from 'src/utils/phone.util';
+import { PreownerModule } from '../preowner/preowner.module';
 
 @Module({
   providers: [
@@ -28,6 +29,7 @@ import { PhoneUtil } from 'src/utils/phone.util';
     FaceModule,
     RoleModule,
     ConfigModule,
+    PreownerModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
 })

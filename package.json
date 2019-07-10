@@ -61,7 +61,8 @@
     "rimraf": "^2.6.2",
     "rxjs": "^6.2.2",
     "sha1": "^1.1.1",
-    "typescript": "^3.0.1"
+    "typescript": "^3.0.1",
+    "xlsx": "^0.14.3"
   },
   "devDependencies": {
     "@nestjs/testing": "^5.1.0",

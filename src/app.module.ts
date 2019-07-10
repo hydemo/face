@@ -51,6 +51,7 @@ import { CMSMediaController } from './controller/cms/media.controller';
 import { MediaController } from './controller/api/media.controller';
 import { PhoneUtil } from './utils/phone.util';
 import { ZOCUtil } from './utils/zoc.util';
+import { PreownerModule } from './module/preowner/preowner.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { ZOCUtil } from './utils/zoc.util';
     BlackModule,
     RentModule,
     MediaModule,
+    PreownerModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => configService.redis,

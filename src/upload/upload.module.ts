@@ -6,6 +6,7 @@ import { extname } from 'path';
 import { UploadController } from './upload.controller';
 import { ConfigModule } from 'src/config/config.module';
 import { QiniuUtil } from 'src/utils/qiniu.util';
+import { PreownerModule } from 'src/module/preowner/preowner.module';
 
 
 @Module({
@@ -15,10 +16,11 @@ import { QiniuUtil } from 'src/utils/qiniu.util';
   controllers: [UploadController],
   imports: [
     ConfigModule,
+    PreownerModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     MulterModule.registerAsync({
       useFactory: () => {
-        const uploadPath = join(__dirname, '../..', 'upload');
+        const uploadPath = join(__dirname, '../..', 'upload/excel');
         const storage = diskStorage({
           destination: uploadPath
           , filename: (req, file, cb) => {
