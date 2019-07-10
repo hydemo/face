@@ -28,7 +28,7 @@ export class RoleDTO {
   @IsMongoId()
   @Type(() => String)
   @ApiModelProperty({ description: '区域' })
-  readonly zone?: string;
+  readonly zone: string;
 
   @IsString()
   @Type(() => String)

@@ -9,18 +9,36 @@ import { CreateRoleByScanDTO, RoleDTO } from './dto/role.dto';
 import { WeixinUtil } from 'src/utils/weixin.util';
 import { IUser } from '../users/interfaces/user.interfaces';
 import { ZoneService } from '../zone/zone.service';
+import { DeviceService } from '../device/device.service';
+import { IDevice } from '../device/interfaces/device.interfaces';
+import { IFace } from '../face/interfaces/face.interfaces';
+import { FaceService } from '../face/face.service';
+import { CameraUtil } from 'src/utils/camera.util';
+import { ConfigService } from 'src/config/config.service';
+import { CreateFaceDTO } from '../face/dto/face.dto';
+import { UserService } from '../users/user.service';
 
 @Injectable()
 export class RoleService {
   constructor(
     @Inject('RoleModelToken') private readonly roleModel: Model<IRole>,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+    @Inject(ConfigService) private readonly config: ConfigService,
+    @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
     @Inject(ZoneService) private readonly zoneService: ZoneService,
+    @Inject(DeviceService) private readonly deviceService: DeviceService,
+    @Inject(UserService) private readonly userService: UserService,
+    @Inject(FaceService) private readonly faceService: FaceService,
   ) { }
 
   // 创建数据
-  async create(role: RoleDTO): Promise<IRole> {
+  async create(role: RoleDTO): Promise<IRole | null> {
+    const user: IUser | null = await this.userService.findById(role.user)
+    if (!user) {
+      return null
+    }
     const creatRole = await this.roleModel.create(role);
+    await this.addToDevice(role.zone, user, creatRole._id)
     return creatRole;
   }
 
@@ -37,7 +55,35 @@ export class RoleService {
       role: role.role,
       description: role.description
     }
-    return await this.roleModel.create(createRole);
+    const result = await this.roleModel.create(createRole);
+    await this.addToDevice(role.zone, user, result._id)
+    return result
+  }
+
+  // 添加人员到设备
+  async addToDevice(zone: string, user: IUser, bondToObjectId: string) {
+    const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
+    await Promise.all(devices.map(async device => {
+      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id })
+      if (faceExist) {
+        return
+      }
+      const result: any = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode)
+      if (!result) {
+        throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
+      }
+      const face: CreateFaceDTO = {
+        device: device._id,
+        user: user._id,
+        mode: 2,
+        libIndex: result.LibIndex,
+        flieIndex: result.FlieIndex,
+        pic: result.Pic,
+        bondToObjectId,
+        zone: zone,
+      }
+      await this.faceService.create(face);
+    }))
   }
 
   // 删除数据
