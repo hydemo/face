@@ -762,6 +762,7 @@ export class ResidentService {
   // 根据id删除
   async deleteById(resident: string, user: string): Promise<IResident | null> {
     const data: IResident | null = await this.residentModel.findById(resident).lean()
+    console.log(data, 'data')
     if (!data) {
       return null
     }

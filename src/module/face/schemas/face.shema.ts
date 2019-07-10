@@ -22,6 +22,8 @@ export const FaceSchema = new mongoose.Schema(
     bondToObjectId: ObjectId,
     // 区域
     zone: ObjectId,
+    // 是否删除
+    isDelete: { type: Boolean, default: false }
   },
   { collection: 'face', versionKey: false, timestamps: true },
 );
