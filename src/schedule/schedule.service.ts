@@ -25,7 +25,7 @@ export class ScheduleService {
       await this.residentService.removeVisitor()
     });
 
-    Schedule.scheduleJob('*/5 * * * * *', async () => {
+    Schedule.scheduleJob('*/2 * * * *', async () => {
       console.log(22)
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
@@ -34,7 +34,7 @@ export class ScheduleService {
       }))
     });
 
-    Schedule.scheduleJob('*/1 * * * *', async () => {
+    Schedule.scheduleJob('*/30 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
       console.log(keys, 'ss')
