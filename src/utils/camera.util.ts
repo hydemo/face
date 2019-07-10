@@ -99,25 +99,29 @@ export class CameraUtil {
     const { username, password, deviceUUID } = device
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
-    const result = await axios({
-      method: 'post',
-      url: this.config.p2pUrl,
-      data: {
-        Name: 'WBListInfoREQ',
-        TimeStamp: timeStamp,
-        Sign: sign,
-        Mode: face.mode,
-        Action: 'DeleteOnePic',
-        UUID: deviceUUID,
-        DeleteOnePic: {
-          LibIndex: face.libIndex,
-          FlieIndex: face.flieIndex,
-          Pic: face.pic,
+    try {
+      const result = await axios({
+        method: 'post',
+        url: this.config.p2pUrl,
+        data: {
+          Name: 'WBListInfoREQ',
+          TimeStamp: timeStamp,
+          Sign: sign,
+          Mode: face.mode,
+          Action: 'DeleteOnePic',
+          UUID: deviceUUID,
+          DeleteOnePic: {
+            LibIndex: face.libIndex,
+            FlieIndex: face.flieIndex,
+            Pic: face.pic,
+          }
         }
+      })
+      if (result.data.Result === 'ok') {
+        return true
       }
-    });
-    if (result.data.Result === 'ok') {
-      return true
+    } catch (error) {
+      await this.phoneUtil.sendP2PError()
     }
     await this.phoneUtil.sendP2PError()
   }
@@ -187,13 +191,18 @@ export class CameraUtil {
         ImgNum,
       }
     }
-    const result: any = await axios({
-      method: 'post',
-      url: this.config.p2pUrl,
-      data,
-    })
-    if (result.data.Result === 'ok') {
-      return result.data.AddOnePic;
+    try {
+
+      const result: any = await axios({
+        method: 'post',
+        url: this.config.p2pUrl,
+        data,
+      })
+      if (result.data.Result === 'ok') {
+        return result.data.AddOnePic;
+      }
+    } catch (error) {
+      await this.phoneUtil.sendP2PError()
     }
     await this.phoneUtil.sendP2PError()
   }
