@@ -194,12 +194,12 @@ export class CameraUtil {
       }
     }
     try {
-
       const result: any = await axios({
         method: 'post',
         url: this.config.p2pUrl,
         data,
       })
+      console.log(result, 'addResult')
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }

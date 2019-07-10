@@ -398,12 +398,20 @@ export class ResidentService {
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
     await Promise.all(devices.map(async device => {
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id })
-      if (faceExist) {
-        return
-      }
-      const result: any = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode)
-      if (!result) {
-        throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
+      console.log(faceExist, 'faceExist')
+      let result: any;
+      if (!faceExist) {
+        result = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode)
+        console.log(result, 'result')
+        if (!result) {
+          throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
+        }
+      } else {
+        result = {
+          libIndex: faceExist.libIndex,
+          flieIndex: faceExist.flieIndex,
+          pic: faceExist.pic,
+        }
       }
       const face: CreateFaceDTO = {
         device: device._id,
@@ -761,7 +769,7 @@ export class ResidentService {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident, isDelete: false })
-    console.log(faces,'faces')
+    console.log(faces, 'faces')
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
