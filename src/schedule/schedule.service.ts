@@ -36,10 +36,13 @@ export class ScheduleService {
     Schedule.scheduleJob('* */5 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
+      console.log(keys)
       await Promise.all(keys.map(async key => {
         const value = await client.hget('device', key)
         if (Number(value) > 10) {
+
           const device: IDevice | null = await this.deviceService.findByUUID(key)
+          console.log(device)
           if (!device) return
           const zoneName = device.position.houseNumber.split('-')
           await this.phone.sendDeviceError(zoneName[0], key)
