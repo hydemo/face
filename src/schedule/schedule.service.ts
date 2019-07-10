@@ -41,9 +41,8 @@ export class ScheduleService {
       await Promise.all(keys.map(async key => {
         const value = await client.hget('device', key)
         if (Number(value) > 10) {
-
+          await client.hdel('device', key)
           const device: IDevice | null = await this.deviceService.findByUUID(key)
-          console.log(device)
           if (!device) return
           const zoneName = device.position.houseNumber.split('-')
           await this.phone.sendDeviceError(zoneName[0], key)
