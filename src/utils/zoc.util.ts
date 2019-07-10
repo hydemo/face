@@ -190,7 +190,7 @@ export class ZOCUtil {
    * 上传数据报
    */
   async uploadZip(zipname: string) {
-    const url = `${this.config.zocUrl}/api/uptest/mj`;
+    const url = `${this.config.zocUrl}/api/upload/mj`;
     const token = await this.getToken()
     const buf = fs.readFileSync(`./upload/${zipname}`)
     const ts = Date.now()
