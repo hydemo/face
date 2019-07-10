@@ -114,8 +114,9 @@ export class FaceService {
   async delete(face: IFace) {
     const faceCount: number = await this.count({ isDelete: false, device: face.device, user: face.user })
     console.log(faceCount, 'faceCount')
-    if (faceCount === 1) {
-      await this.cameraUtil.deleteOnePic(face)
+    const faceToDelete: IFace | null = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
+    if (faceCount === 1 && faceToDelete) {
+      await this.cameraUtil.deleteOnePic(faceToDelete)
     }
     await this.faceModel.findByIdAndUpdate(face.id, { isDelete: true })
   }

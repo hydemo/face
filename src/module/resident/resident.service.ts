@@ -408,9 +408,9 @@ export class ResidentService {
         }
       } else {
         result = {
-          libIndex: faceExist.libIndex,
-          flieIndex: faceExist.flieIndex,
-          pic: faceExist.pic,
+          LibIndex: faceExist.libIndex,
+          FlieIndex: faceExist.flieIndex,
+          Pic: faceExist.pic,
         }
       }
       const face: CreateFaceDTO = {
