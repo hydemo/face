@@ -7,4 +7,6 @@ export class PropertyCoDTO {
   readonly contact: string;
   // 负责人电话
   readonly contactPhone: string;
+  // 物业地址
+  readonly address: string;
 }

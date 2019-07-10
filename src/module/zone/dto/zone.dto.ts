@@ -56,6 +56,11 @@ export class CreateZoneByScanDTO {
   @Type(() => String)
   @ApiModelProperty({ description: '负责人电话' })
   readonly contactPhone: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '物业地址' })
+  readonly address: string;
 }
 
 export class ZoneDTO {

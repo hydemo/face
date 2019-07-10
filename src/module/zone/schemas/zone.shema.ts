@@ -82,6 +82,8 @@ export const ZoneSchema = new mongoose.Schema(
       contact: String,
       // 是否完成
       contactPhone: String,
+      // 物业地址
+      address: String
     },
     // 地址详情
     detail: {

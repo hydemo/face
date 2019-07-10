@@ -245,6 +245,7 @@ export class ZoneService {
         contact: createZone.contact,
         contactPhone: createZone.contactPhone,
         creditCode: createZone.creditCode,
+        address: createZone.address,
       }
     }
     const createParent: IZone = await new this.zoneModel(parent);
