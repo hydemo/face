@@ -6,12 +6,14 @@ import { DatabaseModule } from 'src/database/database.module';
 import { RoleModule } from '../role/role.module';
 import { SOCUtil } from 'src/utils/soc.util';
 import { CryptoUtil } from 'src/utils/crypto.util';
+import { ZOCUtil } from 'src/utils/zoc.util';
 
 @Module({
   providers: [
     ZoneService,
     SOCUtil,
     CryptoUtil,
+    ZOCUtil,
     ...zonesProviders
   ],
   exports: [ZoneService],

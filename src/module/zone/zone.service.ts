@@ -1,5 +1,6 @@
 import { Model } from 'mongoose';
 import * as uuid from 'uuid/v4';
+import * as moment from 'moment';
 import { Inject, Injectable } from '@nestjs/common';
 import { IZone } from './interfaces/zone.interfaces';
 import { ZoneDTO, CreateZoneByScanDTO } from './dto/zone.dto';
@@ -13,12 +14,14 @@ import { IZoneProfile } from 'src/module/zone/interfaces/zonePrifile.interface';
 import { ZoneProfileDTO } from './dto/zonePrifile.dto';
 import { IChildren } from './interfaces/children.interface';
 import { IDetail } from './interfaces/detail.interface';
+import { ZOCUtil } from 'src/utils/zoc.util';
 
 @Injectable()
 export class ZoneService {
   constructor(
     @Inject('ZoneModelToken') private readonly zoneModel: Model<IZone>,
     @Inject(SOCUtil) private socUtil: SOCUtil,
+    @Inject(ZOCUtil) private zocUtil: ZOCUtil,
     private readonly redis: RedisService,
   ) { }
 
@@ -254,6 +257,15 @@ export class ZoneService {
     createParent.children = children.children
     createParent.hasPartition = children.hasPartition
     await createParent.save()
+    // 上报物业信息
+    const time = moment().format('YYYYMMDDHHmmss');
+    const zip = await this.zocUtil.genZip()
+    await this.zocUtil.genPropertyCo(zip, time, createParent)
+    const zocResult: any = await this.zocUtil.upload(zip, time)
+    if (zocResult.success === 200) {
+      await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname })
+    }
+
   }
   //获取子集
   async findSubZone(parent: string, type: string, zones: string[]): Promise<IList<IZone>> {

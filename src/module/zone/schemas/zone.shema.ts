@@ -42,6 +42,10 @@ export const ZoneSchema = new mongoose.Schema(
     partitionSort: { type: Number },
     // 设备数
     deviceCount: { type: Number, default: 0 },
+    // 是否推送到智能感知平台
+    isZOCPush: { type: Boolean, defaut: false },
+    // 智能感知平台包名
+    ZOCZip: String,
     // 小区参数
     profile: {
       // GUID地址编码

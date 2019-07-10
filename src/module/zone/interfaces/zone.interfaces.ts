@@ -37,9 +37,9 @@ export interface IZone extends Document {
   // 地址信息
   readonly profile: IZoneProfile;
   //物业信息
-  readonly protertyCo?: IPropertyCo;
+  readonly propertyCo: IPropertyCo;
   // 小区地址详情
-  readonly detail?: IDetail;
+  readonly detail: IDetail;
   // 建筑类型 50:建筑物 60:单元房 61：梯位
   buildingType: string;
   // 分区id

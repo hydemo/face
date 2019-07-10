@@ -10,6 +10,7 @@ import axios from 'axios';
 import { CryptoUtil } from './crypto.util';
 import { SOCUtil } from './soc.util';
 import { CameraUtil } from './camera.util';
+import { IZone } from 'src/module/zone/interfaces/zone.interfaces';
 
 @Injectable()
 export class ZOCUtil {
@@ -237,6 +238,7 @@ export class ZOCUtil {
         const zipname = `03-${this.config.companyCreditCode}-1.7-${time}-${random}.zip`
         fs.writeFileSync(`./upload/${zipname}`, content)
         await this.uploadZip(zipname)
+        return { success: true, zipname }
       });
   }
 
@@ -359,19 +361,19 @@ export class ZOCUtil {
   /**
   * 生成小区物业信息
   */
-  async genPropertyCo(zip: any, time: String, address: any): Promise<boolean> {
+  async genPropertyCo(zip: any, time: String, address: IZone): Promise<boolean> {
     // const url = `${this.config.zocUrl}/api/check/gate/property`;
     // const token = await this.getToken()
     const data = {
-      WYGS: '骏源(福建)物业管理发展有限公司',
-      JGDM: '91350503M0000EY48Q',
-      WYGSFZR: '傅福来',
-      WYGSDH: '15606037020',
-      WYGSDZ: '福建省泉州市丰泽区安吉路中骏柏景湾12-1703',
-      XQDZBM: address.SYSTEMID,
-      GAJGJGDM: address.GAJGJGDM,
-      DSBM: address.DSBM,
-      QU_ID: address.QU_ID,
+      WYGS: address.propertyCo.name,
+      JGDM: address.propertyCo.creditCode,
+      WYGSFZR: address.propertyCo.contact,
+      WYGSDH: address.propertyCo.contactPhone,
+      WYGSDZ: address.propertyCo.address,
+      XQDZBM: address.detail.SYSTEMID,
+      GAJGJGDM: address.detail.GAJGJGDM,
+      DSBM: address.detail.DSBM,
+      QU_ID: address.detail.QU_ID,
     }
     // 参数校验
     // const result = await axios({
@@ -389,8 +391,7 @@ export class ZOCUtil {
     const filename = `PropertyCo-${time}.json`
     const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
     const folder = zip.folder('PropertyCo')
-    folder.file(filename, desData)
-    return true
+    return folder.file(filename, desData)
   }
 
   /**
