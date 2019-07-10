@@ -36,6 +36,8 @@ export const DeviceSchema = new mongoose.Schema(
     isDelete: { type: Boolean },
     // 广告机
     media: ObjectId,
+    // 设备id
+    deviceId: { type: Number, unique: true }
   },
   { collection: 'device', versionKey: false, timestamps: true },
 );

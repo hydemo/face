@@ -262,7 +262,7 @@ export class ZoneService {
     const zip = await this.zocUtil.genZip()
     await this.zocUtil.genPropertyCo(zip, time, createParent)
     const zocResult: any = await this.zocUtil.upload(zip, time)
-    if (zocResult.success === 200) {
+    if (zocResult.success) {
       await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname })
     }
 

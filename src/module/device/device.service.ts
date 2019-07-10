@@ -18,13 +18,17 @@ export class DeviceService {
   ) { }
   // 获取设备id
   async getDeviceId() {
-
+    const deviceExist = await this.deviceModel.find().sort({ deviceId: -1 }).limit(1)
+    if (!deviceExist.length) {
+      return 180000001
+    }
+    return deviceExist[0].deviceId + 1
   }
 
   // 创建数据
   async create(createDeviceDTO: CreateDeviceDTO): Promise<IDevice> {
     const creatDevice = new this.deviceModel(createDeviceDTO);
-    // creatDevice.deviceId =
+    creatDevice.deviceId = await this.getDeviceId()
     await creatDevice.save();
 
     await this.zoneService.incDeviceCount(creatDevice.zone, 1);
