@@ -55,7 +55,7 @@ export class PhoneUtil {
     const client = this.redis.getClient()
     const isP2pError = await client.get('phone_p2p');
     if (!isP2pError) {
-      client.set('phone_p2p', 'send', 'EX', 60 * 5)
+      client.set('phone_p2p', 'send', 'EX', 60 * 60)
       return new Promise((resolve, reject) => {
         const accessKeyId = this.config.phoneAccessKey;
         const secretAccessKey = this.config.phoneAccessSecret;
@@ -86,7 +86,7 @@ export class PhoneUtil {
     const client = this.redis.getClient()
     const isP2pError = await client.get('phone_device');
     if (!isP2pError) {
-      client.set('phone_device', 'send', 'EX', 60 * 5)
+      client.set('phone_device', 'send', 'EX', 60 * 60)
       return new Promise((resolve, reject) => {
         const accessKeyId = this.config.phoneAccessKey;
         const secretAccessKey = this.config.phoneAccessSecret;
