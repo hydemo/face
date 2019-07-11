@@ -23,6 +23,11 @@ export class PreownerService {
     }))
   }
 
+  // 导入
+  async findAll() {
+    return await this.PreownerModel.find().lean().exec()
+  }
+
   // 根据身份证查找
   async ownerCheck(cardNumber: string, zone: string, houseNumber: string): Promise<Boolean> {
     const preowners: IPreowner[] = await this.PreownerModel.find({ cardNumber, zone }).lean().exec()

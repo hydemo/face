@@ -55,6 +55,11 @@ export class ZoneService {
     return await this.zoneModel.find(condition).lean().exec();
   }
 
+  // 根据条件查询
+  async findOneByCondition(condition: any): Promise<IZone | null> {
+    return await this.zoneModel.findOne(condition).lean().exec();
+  }
+
 
   // 根据id查询
   async findById(id: string): Promise<IZone> {
@@ -260,7 +265,7 @@ export class ZoneService {
     // 上报物业信息
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
-    await this.zocUtil.genPropertyCo(zip, time, createParent)
+    await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
     const zocResult: any = await this.zocUtil.upload(zip, time)
     if (zocResult.success) {
       await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname })

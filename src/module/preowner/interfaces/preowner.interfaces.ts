@@ -9,4 +9,8 @@ export interface IPreowner extends Document {
   readonly building: string;
   // 房间号
   readonly houseNumber: string;
+  // 小区id
+  readonly zoneId: string;
+  // 手机号
+  readonly phone: string;
 }

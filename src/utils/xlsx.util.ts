@@ -28,7 +28,6 @@ export class XLSXUtil {
     const owners: any = []
     const headers: any = {};
     const keys = Object.keys(worksheet).filter(k => k[1] === "1" && k.length === 2);
-    console.log(keys)
     for (let key of keys) {
       const col = key.substring(0, 1);
       const value = worksheet[key].v.replace(/ /g, "");
@@ -42,6 +41,9 @@ export class XLSXUtil {
         case '入住房间名称':
           headers.house = col
           break;
+        case '联系电话':
+          headers.phone = col
+          break;
         default:
           break;
       }
@@ -49,8 +51,6 @@ export class XLSXUtil {
     let length = worksheet["!ref"].split(":")[1].substring(1);
     if (!"0123456789".includes(length[0])) length = length.substring(1);
     for (let i = 2; i <= length; i++) {
-      console.log(headers, 'headers')
-      console.log(`${headers.house}${i}`, worksheet[`${headers.house}${i}`])
       const house = worksheet[`${headers.house}${i}`].v.replace(/ /g, "")
       const houseNumbers = house.split('-').map(v => Number(v))
       const building = `${houseNumbers[0]}幢`
@@ -61,6 +61,7 @@ export class XLSXUtil {
         building,
         houseNumber,
         zone,
+        phone: worksheet[`${headers.phone}${i}`].v.toString().replace(/ /g, ""),
       })
     }
     return owners

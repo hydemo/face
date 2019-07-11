@@ -14,6 +14,8 @@ export const PreownerSchema = new mongoose.Schema(
     houseNumber: String,
     // 小区
     zone: String,
+    // 手机号
+    phone: String,
   },
   { collection: 'preowner', versionKey: false, timestamps: true },
 );

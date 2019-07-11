@@ -33,6 +33,16 @@ export class ScheduleService {
       }))
     });
 
+    // Schedule.scheduleJob('*/1 * * * *', async () => {
+    //   const client = this.redis.getClient()
+    //   const keys = await client.hkeys('device')
+    //   await Promise.all(keys.map(async key => {
+    //     await client.hincrby('device', key, 1)
+    //   }))
+    // });
+
+
+
     Schedule.scheduleJob('*/30 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
