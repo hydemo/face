@@ -19,6 +19,9 @@ import { CreateOrbitMessageDTO } from '../message/dto/message.dto';
 import { MediaGateway } from '../media/media.gateway';
 import { ApplicationDTO } from 'src/common/dto/Message.dto';
 import { WeixinUtil } from 'src/utils/weixin.util';
+import { ZoneService } from '../zone/zone.service';
+import { IZone } from '../zone/interfaces/zone.interfaces';
+import { ZOCUtil } from 'src/utils/zoc.util';
 
 interface IReceiver {
   id: string;
@@ -36,6 +39,8 @@ export class CallbackService {
     @Inject(StrangerService) private readonly strangerService: StrangerService,
     @Inject(QiniuUtil) private readonly qiniuUtil: QiniuUtil,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+    @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
+    @Inject(ZoneService) private readonly zoneService: ZoneService,
     private readonly redis: RedisService,
 
     private readonly mediaWs: MediaGateway,
@@ -81,10 +86,16 @@ export class CallbackService {
       await this.strangerService.create(stranger);
     } else {
       const userId: string = body.PicName.split('_')[1].replace('.jpg', '')
-      const user: IUser | null = await this.userService.findById(userId)
+      const user: IUser | null = await this.userService.updateById(userId, {})
       if (!user) {
         return
       }
+      const zone: IZone = await this.zoneService.findById(device.zone)
+      const time = moment().format('YYYYMMDDHHmmss');
+      const zip = await this.zocUtil.genZip()
+      await this.zocUtil.genEnRecord(zip, time, zone.detail, user)
+      await this.zocUtil.genImage(zip, time, zone.detail, img)
+      await this.zocUtil.upload(zip, time)
       const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, ...stranger }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
       await this.sendMessage(createOrbit, user, device)

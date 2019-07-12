@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import * as moment from 'moment';
 import { RedisService } from 'nestjs-redis';
 import * as md5 from 'md5';
@@ -13,12 +13,14 @@ import { CameraUtil } from './camera.util';
 import { IZone } from 'src/module/zone/interfaces/zone.interfaces';
 import { IDetail } from 'src/module/zone/interfaces/detail.interface';
 import { IPropertyCo } from 'src/module/zone/interfaces/propertyCo.interface';
+import { IUser } from 'src/module/users/interfaces/user.interfaces';
+import { IZoneProfile } from 'src/module/zone/interfaces/zonePrifile.interface';
 
 @Injectable()
 export class ZOCUtil {
   constructor(
     private readonly config: ConfigService,
-    private readonly cryptoUtil: CryptoUtil,
+    @Inject(CryptoUtil) private readonly cryptoUtil: CryptoUtil,
     private readonly redis: RedisService,
     private readonly cameraUtil: CameraUtil,
   ) { }
@@ -243,68 +245,60 @@ export class ZOCUtil {
         return { success: true, zipname }
       });
   }
+  /**
+   * 生成住户信息数据
+   */
+  async genResidentData(profile: IZoneProfile, detail: IDetail, user: IUser, deviceIds: string[]) {
+    const order = await this.getOrder()
+    const data = {
+      SBXXLSH: order,
+      SYSTEMID: profile.dzbm,
+      DSBM: detail.DSBM,
+      DZMC: profile.dzqc,
+      QU_ID: detail.QU_ID,
+      QU: detail.QU,
+      DMDM: detail.DMDM,
+      DMMC: detail.DMMC,
+      XZJDDM: detail.XZJDDM,
+      XZJDMC: detail.XZJDMC,
+      SQJCWHDM: detail.SQJCWHDM,
+      SQJCWHMC: detail.SQJCWHMC,
+      DZYSLX: profile.dzsx,
+      MAPX: profile.lng,
+      MAPY: profile.lat,
+      GAJGJGDM: detail.GAJGJGDM,
+      GAJGNBDM: detail.GAJGJGDM,
+      GAJGJGMC: detail.GAJGJGMC,
+      JWWGDM: detail.JWWGDM,
+      JWWGMC: detail.JWWGMC,
+      ZHXM: user.username,
+      ZHSJHM: user.phone,
+      ZHSFZ: user.cardNumber,
+      ZHLX: '03',
+      CJSJ: this.getTemp(),
+      DJSJ: moment().format('YYYYMMDDHHmmss'),
+      XTLY: this.config.companyAppName,
+      SJCS: this.config.companyCreditCode,
+      GLMJSB: deviceIds,
+      ZHXB: '',
+      ZHMZ: '',
+      ZHJG: '',
+      ZHSFZDZ: '',
+      ICMJKKH: '',
+      ICMJKZT: '',
+      ICMJKLX: '',
+      ZHZT: '',
+      MJZH: '',
+      MJMM: '',
+    }
+    return data
+  }
 
   /**
    * 生成住户信息
    */
   async genResident(zip: any, time: String, data: any): Promise<boolean> {
     console.log(data, data.length, 'data')
-    // const url = `${this.config.zocUrl}/api/check/gate/resident`;
-    // const token = await this.getToken()
-    // const order = this.getOrder()
-    // const data = {
-    //   SBXXLSH: order,
-    //   SYSTEMID: address.SYSTEMID,
-    //   DSBM: address.DSBM,
-    //   DZMC: address.DZMC,
-    //   QU_ID: address.QU_ID,
-    //   QU: address.QU,
-    //   DMDM: address.DMDM,
-    //   DMMC: address.DMMC,
-    //   XZJDDM: address.XZJDDM,
-    //   XZJDMC: address.XZJDMC,
-    //   SQJCWHDM: address.SQJCWHDM,
-    //   SQJCWHMC: address.SQJCWHMC,
-    //   DZYSLX: address.DZYSLX,
-    //   MAPX: address.MAPX,
-    //   MAPY: address.MAPY,
-    //   GAJGJGDM: address.GAJGJGDM,
-    //   GAJGNBDM: address.GAJGJGDM,
-    //   GAJGJGMC: address.GAJGJGMC,
-    //   JWWGDM: address.JWWGDM,
-    //   JWWGMC: address.JWWGMC,
-    //   ZHXM: user.username,
-    //   ZHSJHM: user.phone,
-    //   ZHSFZ: user.cardNumber,
-    //   ZHLX: '03',
-    //   CJSJ: this.getTemp(),
-    //   DJSJ: moment().format('YYYYMMDDHHmmss'),
-    //   XTLY: this.config.companyAppName,
-    //   SJCS: this.config.companyCreditCode,
-    //   GLMJSB: ['180000001', '180000002'],
-    //   ZHXB: '',
-    //   ZHMZ: '',
-    //   ZHJG: '',
-    //   ZHSFZDZ: '',
-    //   ICMJKKH: '',
-    //   ICMJKZT: '',
-    //   ICMJKLX: '',
-    //   ZHZT: '',
-    //   MJZH: '',
-    //   MJMM: '',
-    // }
-    // 参数校验
-    // const result = await axios({
-    //   method: 'post',
-    //   url,
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: token,
-    //   },
-    //   data,
-    // });
-    // console.log(result.data, 'resident')
-
     const json = JSON.stringify(data)
     const filename = `Resident-${time}.json`
     const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
@@ -446,13 +440,13 @@ export class ZOCUtil {
   /**
 * 生成刷卡记录
 */
-  async genEnRecord(zip: any, time: String, address: any): Promise<boolean> {
+  async genEnRecord(zip: any, time: String, detail: IDetail, user: any): Promise<boolean> {
     // const url = `${this.config.zocUrl}/api/check/gate/record`;
     // const token = await this.getToken()
     const data = {
-      DSBM: address.SYSTEMID,
-      DZMC: address.DZMC,
-      GAJGJGDM: address.GAJGJGDM,
+      DSBM: detail.SYSTEMID,
+      DZMC: detail.DZMC,
+      GAJGJGDM: detail.GAJGJGDM,
       KMSJ: this.getTemp(),
       ICMJKKH: '',
       ICMJKLX: '',
@@ -463,9 +457,9 @@ export class ZOCUtil {
       ZHMZ: '',
       ZHJG: '',
       ZHSFZDZ: '',
-      HZXM: '欧阳旭靖',
-      HZSJHM: '13799746707',
-      HZSFZ: '350583198912246076',
+      HZXM: user.username,
+      HZSJHM: user.phone,
+      HZSFZ: user.cardNumber,
       MJCSDM: '91440300072526351A',
       MJJLX: '04',
       MJJBH: '10028839',
@@ -531,7 +525,7 @@ export class ZOCUtil {
   /**
 * 生成图像数据
 */
-  async genImage(zip: any, time: String, address: any, img: string): Promise<boolean> {
+  async genImage(zip: any, time: String, address: IDetail, img: string): Promise<boolean> {
     // const url = `${this.config.zocUrl}/api/check/gate/image`;
     const ZP = await this.cameraUtil.getImg(img)
     // const token = await this.getToken()

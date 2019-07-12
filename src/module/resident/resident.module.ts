@@ -12,6 +12,9 @@ import { RoleModule } from '../role/role.module';
 import { ConfigModule } from 'src/config/config.module';
 import { PhoneUtil } from 'src/utils/phone.util';
 import { PreownerModule } from '../preowner/preowner.module';
+import { ZOCUtil } from 'src/utils/zoc.util';
+import { SOCUtil } from 'src/utils/soc.util';
+import { CryptoUtil } from 'src/utils/crypto.util';
 
 @Module({
   providers: [
@@ -19,6 +22,9 @@ import { PreownerModule } from '../preowner/preowner.module';
     CameraUtil,
     WeixinUtil,
     PhoneUtil,
+    ZOCUtil,
+    SOCUtil,
+    CryptoUtil,
     ...residentsProviders
   ],
   exports: [ResidentService],

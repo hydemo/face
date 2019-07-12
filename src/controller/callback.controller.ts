@@ -91,66 +91,67 @@ export class CallbackController {
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async test(@Request() req) {
     const time = moment().format('YYYYMMDDHHmmss');
-    const preowners = await this.preownerService.findAll()
+    // const preowners = await this.preownerService.findAll()
     const zone: IZone | null = await this.zoneService.findOneByCondition({ zoneLayer: 0 })
     if (!zone) return
     const detail: IDetail = zone.detail
     const propertyCo: IPropertyCo = zone.propertyCo
     const residents: any = []
-    await Promise.all(preowners.map(async preowner => {
-      const houseNumber = `罗马家园-${preowner.building}-${preowner.houseNumber}`
-      const address: IZone | null = await this.zoneService.findOneByCondition({ houseNumber })
-      if (!address) return
-      const order = await this.zocUtil.getOrder()
-      const data = {
-        SBXXLSH: order,
-        SYSTEMID: address.profile.dzbm,
-        DSBM: detail.DSBM,
-        DZMC: address.profile.dzqc,
-        QU_ID: detail.QU_ID,
-        QU: detail.QU,
-        DMDM: detail.DMDM,
-        DMMC: detail.DMMC,
-        XZJDDM: detail.XZJDDM,
-        XZJDMC: detail.XZJDMC,
-        SQJCWHDM: detail.SQJCWHDM,
-        SQJCWHMC: detail.SQJCWHMC,
-        DZYSLX: address.profile.dzsx,
-        MAPX: address.profile.lng,
-        MAPY: address.profile.lat,
-        GAJGJGDM: detail.GAJGJGDM,
-        GAJGNBDM: detail.GAJGJGDM,
-        GAJGJGMC: detail.GAJGJGMC,
-        JWWGDM: detail.JWWGDM,
-        JWWGMC: detail.JWWGMC,
-        ZHXM: preowner.username,
-        ZHSJHM: preowner.phone,
-        ZHSFZ: preowner.cardNumber,
-        ZHLX: '03',
-        CJSJ: this.zocUtil.getTemp(),
-        DJSJ: moment().format('YYYYMMDDHHmmss'),
-        XTLY: this.config.companyAppName,
-        SJCS: this.config.companyCreditCode,
-        GLMJSB: ['180000001'],
-        ZHXB: '',
-        ZHMZ: '',
-        ZHJG: '',
-        ZHSFZDZ: '',
-        ICMJKKH: '',
-        ICMJKZT: '',
-        ICMJKLX: '',
-        ZHZT: '',
-        MJZH: '',
-        MJMM: '',
-      }
-      residents.push(data)
-    }))
+    // await Promise.all(preowners.map(async preowner => {
+    // const houseNumber = `罗马家园-${preowner.building}-${preowner.houseNumber}`
+    const houseNumber = `罗马家园-1幢-1003室`
+    const address: IZone | null = await this.zoneService.findOneByCondition({ houseNumber })
+    if (!address) return
+    const order = await this.zocUtil.getOrder()
+    const data = {
+      SBXXLSH: order,
+      SYSTEMID: address.profile.dzbm,
+      DSBM: detail.DSBM,
+      DZMC: address.profile.dzqc,
+      QU_ID: detail.QU_ID,
+      QU: detail.QU,
+      DMDM: detail.DMDM,
+      DMMC: detail.DMMC,
+      XZJDDM: detail.XZJDDM,
+      XZJDMC: detail.XZJDMC,
+      SQJCWHDM: detail.SQJCWHDM,
+      SQJCWHMC: detail.SQJCWHMC,
+      DZYSLX: address.profile.dzsx,
+      MAPX: address.profile.lng,
+      MAPY: address.profile.lat,
+      GAJGJGDM: detail.GAJGJGDM,
+      GAJGNBDM: detail.GAJGJGDM,
+      GAJGJGMC: detail.GAJGJGMC,
+      JWWGDM: detail.JWWGDM,
+      JWWGMC: detail.JWWGMC,
+      ZHXM: '欧阳旭靖',
+      ZHSJHM: '13799746707',
+      ZHSFZ: '350583198912246076',
+      ZHLX: '03',
+      CJSJ: this.zocUtil.getTemp(),
+      DJSJ: moment().format('YYYYMMDDHHmmss'),
+      XTLY: this.config.companyAppName,
+      SJCS: this.config.companyCreditCode,
+      GLMJSB: ['180000001'],
+      ZHXB: '',
+      ZHMZ: '',
+      ZHJG: '',
+      ZHSFZDZ: '',
+      ICMJKKH: '',
+      ICMJKZT: '',
+      ICMJKLX: '',
+      ZHZT: '',
+      MJZH: '',
+      MJMM: '',
+    }
+    residents.push(data)
+    // }))
     const zip = await this.zocUtil.genZip()
     await this.zocUtil.genResident(zip, time, residents)
-    await this.zocUtil.genBasicAddr(zip, time, detail)
-    await this.zocUtil.genManufacturer(zip, time)
-    await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
-    await this.zocUtil.genDevice(zip, time, detail)
+    // await this.zocUtil.genBasicAddr(zip, time, detail)
+    // await this.zocUtil.genManufacturer(zip, time)
+    // await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
+    // await this.zocUtil.genDevice(zip, time, detail)
     await this.zocUtil.upload(zip, time)
   }
 

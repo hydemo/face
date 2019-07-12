@@ -36,6 +36,8 @@ import { RoleDTO } from '../role/dto/role.dto';
 import { ConfigService } from 'src/config/config.service';
 import { ApplicationDTO } from 'src/common/dto/Message.dto';
 import { PreownerService } from '../preowner/preowner.service';
+import { ZOCUtil } from 'src/utils/zoc.util';
+import { IZoneProfile } from '../zone/interfaces/zonePrifile.interface';
 
 @Injectable()
 export class ResidentService {
@@ -47,6 +49,7 @@ export class ResidentService {
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+    @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
     @Inject(RoleService) private readonly roleService: RoleService,
     @Inject(ConfigService) private readonly config: ConfigService,
     @Inject(PreownerService) private readonly preownerService: PreownerService,
@@ -391,11 +394,25 @@ export class ResidentService {
     await this.addToDevice(zone, user, creatResident._id)
     return creatResident;
   }
+  // 上报常住人至智能感知平台
+  async uploadToZoc(userId: string, zoneId: string, profile: IZoneProfile, deviceIds: string[]) {
+    const userToZOC = await this.userService.updateById(userId, {})
+    const zoneToZOC = await this.zoneService.findById(zoneId)
+    const data = await this.zocUtil.genResidentData(profile, zoneToZOC.detail, userToZOC, deviceIds)
+    const time = moment().format('YYYYMMDDHHmmss');
+    const zip = await this.zocUtil.genZip()
+    await this.zocUtil.genResident(zip, time, [data])
+    await this.zocUtil.upload(zip, time)
+  }
 
   // 添加人员到设备
   async addToDevice(zone: IZone, user: IUser, resident: string, expire?: Date) {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
+    if (!expire) {
+      const deviceIds = devices.map(device => String(device.deviceId))
+      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds)
+    }
     await Promise.all(devices.map(async device => {
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id })
       console.log(faceExist, 'faceExist')

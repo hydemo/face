@@ -108,14 +108,18 @@ export class UserService {
   }
 
   // 根据id修改
-  async updateById(_id: any, user: any) {
+  async updateById(_id: any, user: any): Promise<IUser> {
     if (user.phone) {
       const existing = await this.userModel.findOne({ _id: { $ne: _id }, phone: user.phone });
       if (existing) {
         throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
       }
     }
-    return await this.userModel.findByIdAndUpdate(_id, user, { new: true }).exec();
+    const newUser = await this.userModel.findByIdAndUpdate(_id, user, { new: true }).exec();
+    if (!newUser) {
+      throw new ApiException('用户不存在', ApiErrorCode.NO_EXIST, 404);
+    }
+    return newUser
   }
   // 根据id删除
   async blockById(_id: string) {

@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+import * as moment from 'moment';
 import { Inject, Injectable } from '@nestjs/common';
 import { IDevice } from './interfaces/device.interfaces';
 import { CreateDeviceDTO } from './dto/device.dto';
@@ -9,12 +10,14 @@ import { IList } from 'src/common/interface/list.interface';
 import { ZoneService } from '../zone/zone.service';
 import { TaskService } from '../task/task.service';
 import { ITask } from '../task/interfaces/task.interfaces';
+import { ZOCUtil } from 'src/utils/zoc.util';
 
 @Injectable()
 export class DeviceService {
   constructor(
     @Inject('DeviceModelToken') private readonly deviceModel: Model<IDevice>,
     @Inject(ZoneService) private readonly zoneService: ZoneService,
+    @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
   ) { }
   // 获取设备id
   async getDeviceId() {
@@ -24,13 +27,24 @@ export class DeviceService {
     }
     return deviceExist[0].deviceId + 1
   }
+  // 上报设备至智能感知平台
+  async uploadToZoc(zoneId: string) {
+    const zone = await this.zoneService.findById(zoneId)
+    const time = moment().format('YYYYMMDDHHmmss');
+    const zip = await this.zocUtil.genZip()
+    await this.zocUtil.genBasicAddr(zip, time, zone.detail)
+    await this.zocUtil.genManufacturer(zip, time)
+    await this.zocUtil.genPropertyCo(zip, time, zone.propertyCo, zone.detail)
+    await this.zocUtil.genDevice(zip, time, zone.detail)
+    await this.zocUtil.upload(zip, time)
+  }
 
   // 创建数据
   async create(createDeviceDTO: CreateDeviceDTO): Promise<IDevice> {
     const creatDevice = new this.deviceModel(createDeviceDTO);
     creatDevice.deviceId = await this.getDeviceId()
     await creatDevice.save();
-
+    this.uploadToZoc(createDeviceDTO.zone)
     await this.zoneService.incDeviceCount(creatDevice.zone, 1);
     return creatDevice;
   }
