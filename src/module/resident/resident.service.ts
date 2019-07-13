@@ -260,14 +260,17 @@ export class ResidentService {
   async addFamilyByOwner(family: CreateFamilyDTO, userId: string, ip: string): Promise<IResident> {
     const zone: IZone = await this.zoneService.findById(family.address)
     await this.isOwner(zone._id, userId)
-    const createUserDto: CreateUserDTO = {
-      ...family.user,
-      registerIp: ip,
-      registerTime: new Date(),
-      isVerify: true,
-      isPhoneVerify: false,
+    let createUser = await this.userService.findOneByCondition({ cardNumber: family.user.cardNumber })
+    if (!createUser) {
+      const createUserDto: CreateUserDTO = {
+        ...family.user,
+        registerIp: ip,
+        registerTime: new Date(),
+        isVerify: true,
+        isPhoneVerify: false,
+      }
+      createUser = await this.userService.create(createUserDto)
     }
-    const createUser: IUser = await this.userService.create(createUserDto)
     return await this.addFamily(family.isMonitor, false, createUser, zone, userId)
   }
 
@@ -413,13 +416,16 @@ export class ResidentService {
     //   const deviceIds = devices.map(device => String(device.deviceId))
     //   this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds)
     // }
-    await Promise.all(devices.map(async device => {
+    const img = await this.cameraUtil.getImg(user.faceUrl)
+    Promise.all(devices.map(async device => {
+      const faceCheck: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, bondToObjectId: resident, })
+      if (faceCheck) {
+        return
+      }
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id })
-      console.log(faceExist, 'faceExist')
       let result: any;
       if (!faceExist) {
-        result = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode)
-        console.log(result, 'result')
+        result = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img)
         if (!result) {
           throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
         }

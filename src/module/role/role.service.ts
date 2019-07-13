@@ -66,12 +66,13 @@ export class RoleService {
   // 添加人员到设备
   async addToDevice(zone: string, user: IUser, bondToObjectId: string) {
     const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
-    await Promise.all(devices.map(async device => {
+    const img = await this.cameraUtil.getImg(user.faceUrl)
+    Promise.all(devices.map(async device => {
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id })
       if (faceExist) {
         return
       }
-      const result: any = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode)
+      const result: any = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img)
       if (!result) {
         throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
       }

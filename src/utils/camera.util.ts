@@ -138,9 +138,10 @@ export class CameraUtil {
     const pic: IPic = {
       username: user.username,
       _id: user._id,
-      faceUrl: img,
+      // faceUrl: img,
     }
-    return await this.addOnePic(face.device, pic, face.mode)
+    const Img = await this.getImg(img)
+    return await this.addOnePic(face.device, pic, face.mode, Img)
   }
 
   /**
@@ -172,10 +173,10 @@ export class CameraUtil {
   * @param user 用户信息
   * @param face 名单信息
   */
-  async addOnePic(device: IDevice, user: IPic, Mode: number) {
+  async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string) {
     const { username, password, deviceUUID } = device
-    console.log(user.faceUrl, 'facedd')
-    const Img = await this.getImg(`${user.faceUrl}`);
+    // console.log(user.faceUrl, 'facedd')
+    // const Img = await this.getImg(`${user.faceUrl}`);
     const ImgName = user.username;
     const ImgNum = user._id;
     const timeStamp: string = Date.now().toString()
@@ -205,9 +206,10 @@ export class CameraUtil {
       }
       return false
     } catch (error) {
+      // return false
       await this.phoneUtil.sendP2PError()
     }
-    await this.phoneUtil.sendP2PError()
+    // return await this.phoneUtil.sendP2PError()
   }
   /**
    * 根据图片地址生成base64

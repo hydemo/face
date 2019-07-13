@@ -4,6 +4,6 @@ export interface IPic {
   // id
   readonly _id: string;
   // 头像
-  readonly faceUrl: string;
+  // readonly faceUrl: string;
 }
 

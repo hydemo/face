@@ -324,6 +324,12 @@ export class UserService {
     return await this.userModel.find(condition).lean().exec();
   }
 
+  // 根据条件查询
+  async findOneByCondition(condition: any): Promise<IUser> {
+    return await this.userModel.findOne(condition).lean().exec();
+  }
+
+
   // 生成个人二维码
   async genQrcode(user: IUser) {
     const key = uuid()
