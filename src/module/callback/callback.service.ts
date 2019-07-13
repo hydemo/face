@@ -91,11 +91,11 @@ export class CallbackService {
         return
       }
       const zone: IZone = await this.zoneService.findById(device.zone)
-      const time = moment().format('YYYYMMDDHHmmss');
-      const zip = await this.zocUtil.genZip()
-      await this.zocUtil.genEnRecord(zip, time, zone.detail, user)
-      await this.zocUtil.genImage(zip, time, zone.detail, img)
-      await this.zocUtil.upload(zip, time)
+      // const time = moment().format('YYYYMMDDHHmmss');
+      // const zip = await this.zocUtil.genZip()
+      // await this.zocUtil.genEnRecord(zip, time, zone.detail, user)
+      // await this.zocUtil.genImage(zip, time, zone.detail, img)
+      // await this.zocUtil.upload(zip, time)
       const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, ...stranger }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
       await this.sendMessage(createOrbit, user, device)

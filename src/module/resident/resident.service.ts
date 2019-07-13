@@ -409,10 +409,10 @@ export class ResidentService {
   async addToDevice(zone: IZone, user: IUser, resident: string, expire?: Date) {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
-    if (!expire) {
-      const deviceIds = devices.map(device => String(device.deviceId))
-      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds)
-    }
+    // if (!expire) {
+    //   const deviceIds = devices.map(device => String(device.deviceId))
+    //   this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds)
+    // }
     await Promise.all(devices.map(async device => {
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id })
       console.log(faceExist, 'faceExist')
