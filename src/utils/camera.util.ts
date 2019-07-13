@@ -215,7 +215,7 @@ export class CameraUtil {
    * @param url 图片地址
    */
   async getImg(url: string): Promise<string> {
-    const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageView2/1/w/600/h/600/format/jpg/q/76|imageslim`, { responseType: 'arraybuffer' })
+    const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/800x/gravity/Center/crop/800x800/blur/1x0/quality/85|imageslim`, { responseType: 'arraybuffer' })
     const img = new Buffer(result.data, 'binary').toString('base64')
     return img
   }
