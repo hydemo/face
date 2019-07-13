@@ -101,6 +101,9 @@ export class FaceService {
     const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
     return await Promise.all(faces.map(async face => {
       const result = await this.cameraUtil.updateOnePic(face, user, img)
+      if(!result) {
+        return
+      }
       const update = {
         libIndex: result.LibIndex,
         flieIndex: result.FlieIndex,

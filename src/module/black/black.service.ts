@@ -13,6 +13,8 @@ import { IDevice } from '../device/interfaces/device.interfaces';
 import { ConfigService } from 'src/config/config.service';
 import { CreateFaceDTO } from '../face/dto/face.dto';
 import { FaceService } from '../face/face.service';
+import { IUser } from '../users/interfaces/user.interfaces';
+import { UserService } from '../users/user.service';
 
 @Injectable()
 export class BlackService {
@@ -23,6 +25,7 @@ export class BlackService {
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(ConfigService) private readonly config: ConfigService,
     @Inject(FaceService) private readonly faceService: FaceService,
+    @Inject(UserService) private readonly userService: UserService,
   ) {
 
   }
@@ -126,8 +129,13 @@ export class BlackService {
       .lean()
       .exec()
     const devices: IDevice[] = await this.deviceService.findByZoneId(black.zone)
+    const user: IUser | null = await this.userService.findById(userId);
+    if (!user) {
+      return
+    }
+    const img = await this.cameraUtil.getImg(user.faceUrl)
     devices.map(async device => {
-      const result: any = await this.cameraUtil.addOnePic(device, black, this.config.blackMode)
+      const result: any = await this.cameraUtil.addOnePic(device, black, this.config.blackMode, img)
       if (!result) {
         throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
       }

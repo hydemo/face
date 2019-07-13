@@ -9,6 +9,7 @@ import { DeviceModule } from '../device/device.module';
 import { ConfigModule } from 'src/config/config.module';
 import { FaceModule } from '../face/face.module';
 import { PhoneUtil } from 'src/utils/phone.util';
+import { UserModule } from '../users/user.module';
 
 @Module({
   providers: [BlackService, CameraUtil, PhoneUtil, ...blacksProviders],
@@ -19,6 +20,7 @@ import { PhoneUtil } from 'src/utils/phone.util';
     DeviceModule,
     ConfigModule,
     FaceModule,
+    UserModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
 })
