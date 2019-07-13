@@ -52,7 +52,7 @@ export class CreateZoneByScanDTO {
   @ApiModelProperty({ description: '物业负责人' })
   readonly contact: string;
 
-  // @IsMobilePhone('zh-CN')
+  @IsMobilePhone('zh-CN')
   @Type(() => String)
   @ApiModelProperty({ description: '负责人电话' })
   readonly contactPhone: string;
