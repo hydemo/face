@@ -5,16 +5,19 @@ import { CreateAdminDTO } from 'src/module/admin/dto/admin.dto';
 import { AdminService } from 'src/module/admin/admin.service';
 import { SOCUtil } from 'src/utils/soc.util';
 import { ConfigService } from 'src/config/config.service';
+import { UserService } from 'src/module/users/user.service';
 
 @Injectable()
 export class InitService {
   constructor(
     private readonly adminService: AdminService,
+    private readonly userService: UserService,
     private readonly socUtil: SOCUtil,
     private readonly configService: ConfigService,
   ) { }
 
   async init() {
+    // this.userService.cleanData()
     // const data = await this.socUtil.qrcodeAddress('')
     const adminExist = await this.adminService.countByCondition({ role: 0 })
     if (!adminExist) {

@@ -346,4 +346,17 @@ export class UserService {
     client.set(key, JSON.stringify(value), 'EX', 60 * 5);
     return key
   }
+
+  async cleanData() {
+    const users = await this.userModel.find()
+
+    const cardNumbers: string[] = []
+    for (let user of users) {
+      if (cardNumbers.includes(user.cardNumber)) {
+        await this.userModel.findByIdAndRemove(user._id)
+      } else {
+        cardNumbers.push(user.cardNumber)
+      }
+    }
+  }
 }

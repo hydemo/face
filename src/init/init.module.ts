@@ -4,6 +4,7 @@ import { AdminModule } from 'src/module/admin/admin.module';
 import { SOCUtil } from 'src/utils/soc.util';
 import { CryptoUtil } from 'src/utils/crypto.util';
 import { ConfigModule } from 'src/config/config.module';
+import { UserModule } from 'src/module/users/user.module';
 
 @Global()
 @Module({
@@ -15,6 +16,7 @@ import { ConfigModule } from 'src/config/config.module';
   imports: [
     AdminModule,
     ConfigModule,
+    UserModule,
   ],
   exports: [InitService],
 })
