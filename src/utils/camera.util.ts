@@ -209,6 +209,7 @@ export class CameraUtil {
  * @param face 名单信息
  */
   async handleP2p(upData) {
+    console.log(upData, '上传')
     const client = this.redis.getClient()
     const length = await client.llen('p2p')
     if (!length) {

@@ -34,16 +34,18 @@ export class ScheduleService {
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
         await client.hincrby('device', key, 1)
-      }))
+      })).
     });
 
     Schedule.scheduleJob('*/5 * * * * *', async () => {
+      console.log('开始上传。。。。。')
       const client = this.redis.getClient()
       const data: any = await client.lpop('p2p')
-      const result = await this.camera.handleP2p(data)
+      const result = await this.camera.handleP2p(JSON.parse(data))
       if (!result) {
         return
       }
+      console.log('上传成功。。。。。')
       const face = {
         ...data.face,
         libIndex: result.LibIndex,
