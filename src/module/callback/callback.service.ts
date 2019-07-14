@@ -158,7 +158,7 @@ export class CallbackService {
   async receivers(user: IUser, zone: string): Promise<IReceiver[]> {
     const receivers: IReceiver[] = []
     const residents: IResident[] = await this.residentService.findByCondition({
-      isDelete: false, user: user._id, checkResult: 2
+      isDelete: false, user: user._id, checkResult: 2, isMonitor: true
     });
     await Promise.all(residents.map(async resident => {
       if (resident.type === 'visitor') {
