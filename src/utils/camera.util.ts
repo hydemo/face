@@ -212,7 +212,6 @@ export class CameraUtil {
   async handleP2p(upData) {
     console.log(upData, '上传')
     const client = this.redis.getClient()
-    const length = await client.llen('p2p')
     if (!length) {
       return
     }
@@ -222,7 +221,7 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
-      console.log(result,'result')
+      console.log(result, 'result')
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
