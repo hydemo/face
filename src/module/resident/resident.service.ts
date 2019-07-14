@@ -957,4 +957,9 @@ export class ResidentService {
   async findByCondition(condition: any): Promise<IResident[]> {
     return await this.residentModel.find(condition)
   }
+
+  // 根据id修改
+  async updateById(id: string, update: any): Promise<IResident | null> {
+    return await this.residentModel.findByIdAndUpdate(id, update)
+  }
 }

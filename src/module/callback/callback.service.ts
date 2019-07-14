@@ -179,12 +179,15 @@ export class CallbackService {
       address: resident.address,
       checkResult: 2
     })
-    residents.map(resid => {
+    residents.map(async resid => {
       if (String(resid.user) === String(resident.user)) {
         return
       }
+
       receivers.push({ id: resid.user, type: 'visitor' })
+      await this.residentService.updateById(resid._id, { isMonitor: false })
     })
+
     return receivers
   }
 
