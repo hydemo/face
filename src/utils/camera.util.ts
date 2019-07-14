@@ -207,6 +207,7 @@ export class CameraUtil {
       return false
     } catch (error) {
       // return false
+      console.log(error, 'error')
       await this.phoneUtil.sendP2PError()
     }
     // return await this.phoneUtil.sendP2PError()

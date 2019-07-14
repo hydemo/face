@@ -96,18 +96,36 @@ export class FaceService {
     const total = await this.faceModel.countDocuments(condition);
     return { list, total };
   }
+  // 判断是否上传过
+  checkUpload(deviceFaces, deviceId) {
+    let update = null;
+    deviceFaces.map(deviceFace => {
+      if (deviceFace.deviceId === deviceId) {
+        update = deviceFace.result
+      }
+    })
+    return update
+  }
   // 根据条件更新
   async updatePic(condition: any, user: IUser, img: string) {
     const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
+    const deviceFaces: any = []
     return await Promise.all(faces.map(async face => {
-      const result = await this.cameraUtil.updateOnePic(face, user, img)
-      if(!result) {
-        return
-      }
-      const update = {
-        libIndex: result.LibIndex,
-        flieIndex: result.FlieIndex,
-        pic: result.Pic,
+      let update: any = this.checkUpload(deviceFaces, String(face.device._id))
+      if (!update) {
+        let result = await this.cameraUtil.updateOnePic(face, user, img)
+        if (!result) {
+          return
+        }
+        update = {
+          libIndex: result.LibIndex,
+          flieIndex: result.FlieIndex,
+          pic: result.Pic,
+        }
+        deviceFaces.push({
+          deviceId: String(face.device._id),
+          update,
+        })
       }
       await this.faceModel.findByIdAndUpdate(face._id, update)
     }))
