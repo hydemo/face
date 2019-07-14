@@ -113,21 +113,22 @@ export class FaceService {
     return await Promise.all(faces.map(async face => {
       let update: any = this.checkUpload(deviceFaces, String(face.device._id))
       if (!update) {
-        let result = await this.cameraUtil.updateOnePic(face, user, img)
-        if (!result) {
-          return
-        }
-        update = {
-          libIndex: result.LibIndex,
-          flieIndex: result.FlieIndex,
-          pic: result.Pic,
-        }
-        deviceFaces.push({
-          deviceId: String(face.device._id),
-          update,
-        })
+        await this.cameraUtil.updateOnePic(face, user, img)
+        //   if (!result) {
+        //     return
+        //   }
+        //   update = {
+        //     libIndex: result.LibIndex,
+        //     flieIndex: result.FlieIndex,
+        //     pic: result.Pic,
+        //   }
+        //   deviceFaces.push({
+        //     deviceId: String(face.device._id),
+        //     update,
+        //   })
+        // }
+        // await this.faceModel.findByIdAndUpdate(face._id, update)
       }
-      await this.faceModel.findByIdAndUpdate(face._id, update)
     }))
   }
 
@@ -144,5 +145,8 @@ export class FaceService {
 
   async updateByCondition(condition: any, update: any) {
     return await this.faceModel.updateMany(condition, update)
+  }
+  async updateById(id: string, update: any) {
+    return await this.faceModel.findByIdAndUpdate(id, update)
   }
 }

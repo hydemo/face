@@ -423,26 +423,26 @@ export class ResidentService {
         return
       }
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id })
-      let result: any;
       if (!faceExist) {
-        result = await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img)
-        if (!result) {
-          throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
+        const face = {
+          device: device._id,
+          user: user._id,
+          mode: 2,
+          // libIndex: result.LibIndex,
+          // flieIndex: result.FlieIndex,
+          // pic: result.Pic,
+          bondToObjectId: resident,
+          zone: zone.zoneId,
         }
-      } else {
-        result = {
-          LibIndex: faceExist.libIndex,
-          FlieIndex: faceExist.flieIndex,
-          Pic: faceExist.pic,
-        }
+        return await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, face)
       }
       const face: CreateFaceDTO = {
         device: device._id,
         user: user._id,
         mode: 2,
-        libIndex: result.LibIndex,
-        flieIndex: result.FlieIndex,
-        pic: result.Pic,
+        libIndex: faceExist.libIndex,
+        flieIndex: faceExist.flieIndex,
+        pic: faceExist.pic,
         bondToObjectId: resident,
         zone: zone.zoneId,
       }

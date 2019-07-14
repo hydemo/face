@@ -135,22 +135,17 @@ export class BlackService {
     }
     const img = await this.cameraUtil.getImg(user.faceUrl)
     devices.map(async device => {
-      const result: any = await this.cameraUtil.addOnePic(device, black, this.config.blackMode, img)
-      if (!result) {
-        throw new ApiException('上传失败', ApiErrorCode.INTERNAL_ERROR, 500);
-      }
-      const face: CreateFaceDTO = {
+      const face = {
         device: device._id,
         user: black._id,
         mode: 2,
-        libIndex: result.LibIndex,
-        flieIndex: result.FlieIndex,
-        pic: result.Pic,
+        // libIndex: '',
+        // flieIndex: '',
+        // pic: '',
         bondToObjectId: black._id,
         zone: black.zone,
       }
-
-      await this.faceService.create(face);
+      await this.cameraUtil.addOnePic(device, black, this.config.blackMode, img, face)
     })
     await this.blackModel.findByIdAndUpdate(id, {
       checkResult: 2,

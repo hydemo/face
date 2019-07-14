@@ -18,12 +18,15 @@ import { MediaGateway } from 'src/module/media/media.gateway';
 import { SOCUtil } from 'src/utils/soc.util';
 import { PhoneUtil } from 'src/utils/phone.util';
 import { ZOCUtil } from 'src/utils/zoc.util';
+import { RedisService } from 'nestjs-redis';
 import { PreownerService } from 'src/module/preowner/preowner.service';
 import { ZoneService } from 'src/module/zone/zone.service';
 import { IDetail } from 'src/module/zone/interfaces/detail.interface';
 import { IZone } from 'src/module/zone/interfaces/zone.interfaces';
 import { ConfigService } from 'src/config/config.service';
 import { IPropertyCo } from 'src/module/zone/interfaces/propertyCo.interface';
+import { ResidentService } from 'src/module/resident/resident.service';
+
 
 @ApiUseTags('callback')
 @ApiBearerAuth()
@@ -40,7 +43,10 @@ export class CallbackController {
     private readonly preownerService: PreownerService,
     private readonly zoneService: ZoneService,
     private readonly config: ConfigService,
-  ) { }
+    private readonly redis: RedisService,
+  ) {
+
+  }
 
   @ApiOkResponse({
     description: '人脸识别回调',
@@ -86,73 +92,116 @@ export class CallbackController {
   @ApiOkResponse({
     description: '心跳数据',
   })
+  @Post('/send')
+
+  @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  async send(@Request() req) {
+    const client = this.redis.getClient()
+    await client.lpush('p2p', JSON.stringify({ count: 1, data: { a: 1, b: [1, 2] } }))
+    // await client.lpush('p2p', '333')
+    const data = JSON.parse(await client.lpop('p2p'))
+    console.log(await client.llen('p2p'))
+    console.log(data.data, 'aa')
+    console.log(await client.lpop('p2p'))
+  }
+
+  // @ApiOkResponse({
+  //   description: '心跳数据',
+  // })
+
+  // @Post('/handle')
+
+  // @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  // async handle(@Request() req) {
+  //   const sub = this.redis.getClient()
+  //   sub.subscribe(['camera_upload', 'camera_delete'])
+  //   sub.on("message", function (channel, message) {
+  //     // Receive message Hello world! from channel news
+  //     // Receive message Hello again! from channel music
+  //     console.log("Receive message %s from channel %s", message, channel);
+  //   });
+  // }
+
+  @ApiOkResponse({
+    description: '心跳数据',
+  })
   @Post('/test')
 
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async test(@Request() req) {
-    const time = moment().format('YYYYMMDDHHmmss');
-    // const preowners = await this.preownerService.findAll()
-    const zone: IZone | null = await this.zoneService.findOneByCondition({ zoneLayer: 0 })
-    if (!zone) return
-    const detail: IDetail = zone.detail
-    const propertyCo: IPropertyCo = zone.propertyCo
-    const residents: any = []
-    // await Promise.all(preowners.map(async preowner => {
-    // const houseNumber = `罗马家园-${preowner.building}-${preowner.houseNumber}`
-    const houseNumber = `罗马家园-1幢-1003室`
-    const address: IZone | null = await this.zoneService.findOneByCondition({ houseNumber })
-    if (!address) return
-    const order = await this.zocUtil.getOrder()
-    const data = {
-      SBXXLSH: order,
-      SYSTEMID: address.profile.dzbm,
-      DSBM: detail.DSBM,
-      DZMC: address.profile.dzqc,
-      QU_ID: detail.QU_ID,
-      QU: detail.QU,
-      DMDM: detail.DMDM,
-      DMMC: detail.DMMC,
-      XZJDDM: detail.XZJDDM,
-      XZJDMC: detail.XZJDMC,
-      SQJCWHDM: detail.SQJCWHDM,
-      SQJCWHMC: detail.SQJCWHMC,
-      DZYSLX: address.profile.dzsx,
-      MAPX: address.profile.lng,
-      MAPY: address.profile.lat,
-      GAJGJGDM: detail.GAJGJGDM,
-      GAJGNBDM: detail.GAJGJGDM,
-      GAJGJGMC: detail.GAJGJGMC,
-      JWWGDM: detail.JWWGDM,
-      JWWGMC: detail.JWWGMC,
-      ZHXM: '欧阳旭靖',
-      ZHSJHM: '13799746707',
-      ZHSFZ: '350583198912246076',
-      ZHLX: '03',
-      CJSJ: this.zocUtil.getTemp(),
-      DJSJ: moment().format('YYYYMMDDHHmmss'),
-      XTLY: this.config.companyAppName,
-      SJCS: this.config.companyCreditCode,
-      GLMJSB: ['180000001'],
-      ZHXB: '',
-      ZHMZ: '',
-      ZHJG: '',
-      ZHSFZDZ: '',
-      ICMJKKH: '',
-      ICMJKZT: '',
-      ICMJKLX: '',
-      ZHZT: '',
-      MJZH: '',
-      MJMM: '',
-    }
-    residents.push(data)
-    // }))
-    const zip = await this.zocUtil.genZip()
-    await this.zocUtil.genResident(zip, time, residents)
-    // await this.zocUtil.genBasicAddr(zip, time, detail)
-    // await this.zocUtil.genManufacturer(zip, time)
-    // await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
-    // await this.zocUtil.genDevice(zip, time, detail)
-    await this.zocUtil.upload(zip, time)
+    // const pub = this.redis.getClient()
+    // sub.subscribe('camera_upload', 'camera_delete', function (err, count) {
+    //   pub.publish("camera_upload", "Hello world!");
+    //   pub.publish("camera_delete", "Hello again!");
+    // });
+    // this.sub.on("message", function (channel, message) {
+    //   // Receive message Hello world! from channel news
+    //   // Receive message Hello again! from channel music
+    //   console.log("Receive message %s from channel %s", message, channel);
+    // });
+    // const time = moment().format('YYYYMMDDHHmmss');
+    // // const preowners = await this.preownerService.findAll()
+    // const zone: IZone | null = await this.zoneService.findOneByCondition({ zoneLayer: 0 })
+    // if (!zone) return
+    // const detail: IDetail = zone.detail
+    // const propertyCo: IPropertyCo = zone.propertyCo
+    // const residents: any = []
+    // // await Promise.all(preowners.map(async preowner => {
+    // // const houseNumber = `罗马家园-${preowner.building}-${preowner.houseNumber}`
+    // const houseNumber = `罗马家园-1幢-1003室`
+    // const address: IZone | null = await this.zoneService.findOneByCondition({ houseNumber })
+    // if (!address) return
+    // const order = await this.zocUtil.getOrder()
+    // const data = {
+    //   SBXXLSH: order,
+    //   SYSTEMID: address.profile.dzbm,
+    //   DSBM: detail.DSBM,
+    //   DZMC: address.profile.dzqc,
+    //   QU_ID: detail.QU_ID,
+    //   QU: detail.QU,
+    //   DMDM: detail.DMDM,
+    //   DMMC: detail.DMMC,
+    //   XZJDDM: detail.XZJDDM,
+    //   XZJDMC: detail.XZJDMC,
+    //   SQJCWHDM: detail.SQJCWHDM,
+    //   SQJCWHMC: detail.SQJCWHMC,
+    //   DZYSLX: address.profile.dzsx,
+    //   MAPX: address.profile.lng,
+    //   MAPY: address.profile.lat,
+    //   GAJGJGDM: detail.GAJGJGDM,
+    //   GAJGNBDM: detail.GAJGJGDM,
+    //   GAJGJGMC: detail.GAJGJGMC,
+    //   JWWGDM: detail.JWWGDM,
+    //   JWWGMC: detail.JWWGMC,
+    //   ZHXM: '欧阳旭靖',
+    //   ZHSJHM: '13799746707',
+    //   ZHSFZ: '350583198912246076',
+    //   ZHLX: '03',
+    //   CJSJ: this.zocUtil.getTemp(),
+    //   DJSJ: moment().format('YYYYMMDDHHmmss'),
+    //   XTLY: this.config.companyAppName,
+    //   SJCS: this.config.companyCreditCode,
+    //   GLMJSB: ['180000001'],
+    //   ZHXB: '',
+    //   ZHMZ: '',
+    //   ZHJG: '',
+    //   ZHSFZDZ: '',
+    //   ICMJKKH: '',
+    //   ICMJKZT: '',
+    //   ICMJKLX: '',
+    //   ZHZT: '',
+    //   MJZH: '',
+    //   MJMM: '',
+    // }
+    // residents.push(data)
+    // // }))
+    // const zip = await this.zocUtil.genZip()
+    // await this.zocUtil.genResident(zip, time, residents)
+    // // await this.zocUtil.genBasicAddr(zip, time, detail)
+    // // await this.zocUtil.genManufacturer(zip, time)
+    // // await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
+    // // await this.zocUtil.genDevice(zip, time, detail)
+    // await this.zocUtil.upload(zip, time)
   }
 
 }

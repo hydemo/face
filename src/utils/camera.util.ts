@@ -3,6 +3,7 @@ import { createHash } from 'crypto';
 import * as md5 from 'md5';
 import axios from 'axios';
 import * as uuid from 'uuid/v4';
+import { RedisService } from 'nestjs-redis';
 import { ConfigService } from 'src/config/config.service';
 import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 import { IFace } from 'src/module/face/interfaces/face.interfaces';
@@ -16,6 +17,7 @@ export class CameraUtil {
   constructor(
     private readonly config: ConfigService,
     private readonly phoneUtil: PhoneUtil,
+    private readonly redis: RedisService,
   ) { }
   /**
    * 获取设备白名单
@@ -141,7 +143,7 @@ export class CameraUtil {
       // faceUrl: img,
     }
     const Img = await this.getImg(img)
-    return await this.addOnePic(face.device, pic, face.mode, Img)
+    return await this.addOnePic(face.device, pic, face.mode, Img, face)
   }
 
   /**
@@ -173,7 +175,7 @@ export class CameraUtil {
   * @param user 用户信息
   * @param face 名单信息
   */
-  async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string) {
+  async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: any) {
     const { username, password, deviceUUID } = device
     // console.log(user.faceUrl, 'facedd')
     // const Img = await this.getImg(`${user.faceUrl}`);
@@ -194,25 +196,40 @@ export class CameraUtil {
         ImgNum,
       }
     }
+    const upData = { data, face }
+    const client = this.redis.getClient()
+    await client.lpush('p2p', JSON.stringify(upData))
+  }
+
+  /**
+ * 添加单张图片
+ * 
+ * @param username 设备信息
+ * @param user 用户信息
+ * @param face 名单信息
+ */
+  async handleP2p(upData) {
+    const client = this.redis.getClient()
+    const length = await client.llen('p2p')
+    if (!length) {
+      return
+    }
     try {
       const result: any = await axios({
         method: 'post',
         url: this.config.p2pUrl,
-        data,
+        data: upData.data,
       })
-      // console.log(result, 'addResult')
       if (result.data.Result === 'ok') {
-
         return result.data.AddOnePic;
       }
-      console.log(result.data, 'result')
+      const errorData = { count: 1, upData }
+      await client.lpush('p2pError', JSON.stringify(errorData))
       return false
     } catch (error) {
-      // return false
-      // console.log(error, 'error')
-      await this.phoneUtil.sendP2PError()
+      const errorData = { count: 1, upData }
+      await client.lpush('p2pError', JSON.stringify(errorData))
     }
-    // return await this.phoneUtil.sendP2PError()
   }
   /**
    * 根据图片地址生成base64

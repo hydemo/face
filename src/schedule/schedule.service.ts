@@ -5,14 +5,18 @@ import { PhoneUtil } from 'src/utils/phone.util';
 import { DeviceService } from 'src/module/device/device.service';
 import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 import { ResidentService } from 'src/module/resident/resident.service';
+import { CameraUtil } from 'src/utils/camera.util';
+import { FaceService } from 'src/module/face/face.service';
 
 @Injectable()
 export class ScheduleService {
   constructor(
     private readonly redis: RedisService,
     @Inject(PhoneUtil) private readonly phone: PhoneUtil,
+    @Inject(CameraUtil) private readonly camera: CameraUtil,
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(ResidentService) private readonly residentService: ResidentService,
+    @Inject(FaceService) private readonly faceService: FaceService,
   ) { }
 
   async enableSchedule() {
@@ -31,6 +35,30 @@ export class ScheduleService {
       await Promise.all(keys.map(async key => {
         await client.hincrby('device', key, 1)
       }))
+    });
+
+    Schedule.scheduleJob('*/5 * * * * *', async () => {
+      const client = this.redis.getClient()
+      const data: any = await client.lpop('p2p')
+      const result = await this.camera.handleP2p(data)
+      if (!result) {
+        return
+      }
+      const face = {
+        ...data.face,
+        libIndex: result.LibIndex,
+        flieIndex: result.FlieIndex,
+        pic: result.Pic,
+      }
+      if (face._id) {
+        const update = {
+          libIndex: result.LibIndex,
+          flieIndex: result.FlieIndex,
+          pic: result.Pic,
+        }
+        return await this.faceService.updateById(face._id, update)
+      }
+      await this.faceService.create(face)
     });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {
