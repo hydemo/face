@@ -99,7 +99,8 @@ export class CallbackController {
     const client = this.redis.getClient()
     const errCount = await client.llen('p2pError')
     const finalCount = await client.llen('p2pErrorFinal')
-    return { errCount, finalCount }
+    const final = await client.get('p2pErrorFinal')
+    return { errCount, finalCount, final }
   }
 
   // @ApiOkResponse({
