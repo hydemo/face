@@ -34,7 +34,7 @@ export class ScheduleService {
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
         await client.hincrby('device', key, 1)
-      })).
+      }))
     });
 
     Schedule.scheduleJob('*/5 * * * * *', async () => {
