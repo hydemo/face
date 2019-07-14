@@ -243,13 +243,14 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
+      console.log(result, 'result')
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
       if (result.data.ErrorCode === '-3' || result.data.ErrorCode === '-2') {
         return
       }
-      console.log(result, 'result')
+
       const errorData = { count: 1, upData }
       await client.lpush('p2pError', JSON.stringify(errorData))
       return false
@@ -280,6 +281,7 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
+      console.log(result, 'result')
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
@@ -290,6 +292,7 @@ export class CameraUtil {
       await client.lpush('p2pError', JSON.stringify(newErrorData))
       return false
     } catch (error) {
+      console.log(error, 'error')
       const newErrorData = { count: count + 1, upData }
       await client.lpush('p2pError', JSON.stringify(newErrorData))
     }
