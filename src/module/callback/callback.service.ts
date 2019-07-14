@@ -163,6 +163,7 @@ export class CallbackService {
     await Promise.all(residents.map(async resident => {
       if (resident.type === 'visitor') {
         await this.visitorReceivers(resident, zone, receivers)
+        await this.residentService.updateById(resident._id, { isMonitor: false })
       } else if (resident.type === 'family' && resident.isMonitor) {
         await this.familyReceivers(resident, receivers)
       }
@@ -179,13 +180,13 @@ export class CallbackService {
       address: resident.address,
       checkResult: 2
     })
-    residents.map(async resid => {
+    residents.map(resid => {
       if (String(resid.user) === String(resident.user)) {
         return
       }
 
       receivers.push({ id: resid.user, type: 'visitor' })
-      await this.residentService.updateById(resid._id, { isMonitor: false })
+      // await this.residentService.updateById(resid._id, { isMonitor: false })
     })
 
     return receivers
