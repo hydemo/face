@@ -98,6 +98,10 @@ export class FaceService {
   }
   // 判断是否上传过
   genFaces(deviceFaces, deviceId, face: IFace) {
+    if (!deviceFaces.length) {
+      const faces = [face]
+      deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode })
+    }
     deviceFaces.map(deviceFace => {
       if (deviceFace.deviceId === deviceId) {
         deviceFace.faces.push(face)
@@ -115,6 +119,7 @@ export class FaceService {
   async updatePic(condition: any, user: IUser, img: string) {
     const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
     const deviceFaces: any = []
+    console.log(faces, 'faces')
     faces.map(face => {
       this.genFaces(deviceFaces, String(face.device._id), face)
     })
