@@ -97,37 +97,26 @@ export class CameraUtil {
    * @param face 名单信息
    */
   async deleteOnePic(face: IFace) {
-    console.log(face, 'face')
     const { device } = face
     const { username, password, deviceUUID } = device
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
-    try {
-      const result = await axios({
-        method: 'post',
-        url: this.config.p2pUrl,
-        data: {
-          Name: 'WBListInfoREQ',
-          TimeStamp: timeStamp,
-          Sign: sign,
-          Mode: face.mode,
-          Action: 'DeleteOnePic',
-          UUID: deviceUUID,
-          DeleteOnePic: {
-            LibIndex: face.libIndex,
-            FlieIndex: face.flieIndex,
-            Pic: face.pic,
-          }
-        }
-      })
-      console.log(result, 'result')
-      if (result.data.Result === 'ok') {
-        return true
+    const data = {
+      Name: 'WBListInfoREQ',
+      TimeStamp: timeStamp,
+      Sign: sign,
+      Mode: face.mode,
+      Action: 'DeleteOnePic',
+      UUID: deviceUUID,
+      DeleteOnePic: {
+        LibIndex: face.libIndex,
+        FlieIndex: face.flieIndex,
+        Pic: face.pic,
       }
-    } catch (error) {
-      await this.phoneUtil.sendP2PError()
     }
-    await this.phoneUtil.sendP2PError()
+    const upData = { data, face, type: 'delete' }
+    const client = this.redis.getClient()
+    await client.lpush('p2p', JSON.stringify(upData))
   }
 
   /**
@@ -135,15 +124,50 @@ export class CameraUtil {
    * 
    * @param face 名单信息
    */
-  async updateOnePic(face: IFace, user: IUser, img: string) {
-    await this.deleteOnePic(face)
-    const pic: IPic = {
-      username: user.username,
-      _id: user._id,
-      // faceUrl: img,
+  async updateOnePic(faces: IFace[], user: IUser, img: string, Mode: number) {
+    if (!faces.length) {
+      return
     }
+    const client = this.redis.getClient()
+    const face = faces[0]
+    await this.deleteOnePic(face[0])
+    const { username, password, deviceUUID } = face.device
     const Img = await this.getImg(img)
-    return await this.addOnePic(face.device, pic, face.mode, Img, face)
+    const ImgName = user.username;
+    const ImgNum = user._id;
+    const timeStamp: string = Date.now().toString()
+    const sign = await this.sign(username, password, deviceUUID, timeStamp)
+    const deleteData = {
+      Name: 'WBListInfoREQ',
+      TimeStamp: timeStamp,
+      Sign: sign,
+      Mode,
+      Action: 'DeleteOnePic',
+      UUID: deviceUUID,
+      DeleteOnePic: {
+        LibIndex: face.libIndex,
+        FlieIndex: face.flieIndex,
+        Pic: face.pic,
+      }
+    }
+    const p2pDelete = { data: deleteData, face: faces, type: 'update-delete' }
+    await client.lpush('p2p', JSON.stringify(p2pDelete))
+    const addData = {
+      Name: 'WBListInfoREQ',
+      TimeStamp: timeStamp,
+      Sign: sign,
+      Mode,
+      Action: 'AddOnePic',
+      UUID: deviceUUID,
+      AddOnePic: {
+        Img,
+        ImgName,
+        ImgNum,
+      }
+    }
+    const upData = { data: addData, face: faces, type: 'update-add' }
+    await client.lpush('p2p', JSON.stringify(upData))
+    // return await this.addOnePic(face[0].device, pic, face[0].mode, Img, face)
   }
 
   /**
@@ -196,9 +220,8 @@ export class CameraUtil {
         ImgNum,
       }
     }
-    const upData = { data, face }
+    const upData = { data, face, type: 'add' }
     const client = this.redis.getClient()
-    console.log(upData, 'p2p')
     await client.lpush('p2p', JSON.stringify(upData))
   }
 
@@ -209,8 +232,7 @@ export class CameraUtil {
  * @param user 用户信息
  * @param face 名单信息
  */
-  async handleP2p(upData) {
-    console.log(upData, '上传')
+  async handleP2P(upData) {
     const client = this.redis.getClient()
 
     try {
@@ -219,11 +241,12 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
-      console.log(result, 'result')
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
-      console.log(result, 'result')
+      if (result.data.ErrorCode === '-3' || result.data.ErrorCode === '-2') {
+        return
+      }
       const errorData = { count: 1, upData }
       await client.lpush('p2pError', JSON.stringify(errorData))
       return false
@@ -233,6 +256,42 @@ export class CameraUtil {
       await client.lpush('p2pError', JSON.stringify(errorData))
     }
   }
+  /**
+ * 处理p2p异常，重传5次
+ * 
+ * @param username 设备信息
+ * @param user 用户信息
+ * @param face 名单信息
+ */
+  async handleP2PEroor(errorData: any) {
+    const client = this.redis.getClient()
+    const { upData, count } = errorData
+    if (count > 5) {
+      await client.lpush('p2pErrorFinal', JSON.stringify(errorData))
+      await this.phoneUtil.sendP2PError()
+      return null
+    }
+    try {
+      const result: any = await axios({
+        method: 'post',
+        url: this.config.p2pUrl,
+        data: upData.data,
+      })
+      if (result.data.Result === 'ok') {
+        return result.data.AddOnePic;
+      }
+      if (result.data.ErrorCode === '-3' || result.data.ErrorCode === '-2') {
+        return
+      }
+      const newErrorData = { count: count + 1, upData }
+      await client.lpush('p2pError', JSON.stringify(newErrorData))
+      return false
+    } catch (error) {
+      const newErrorData = { count: count + 1, upData }
+      await client.lpush('p2pError', JSON.stringify(newErrorData))
+    }
+  }
+
   /**
    * 根据图片地址生成base64
    * 

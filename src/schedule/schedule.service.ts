@@ -37,9 +37,7 @@ export class ScheduleService {
       }))
     });
 
-    Schedule.scheduleJob('*/5 * * * * *', async () => {
-      console.log('开始上传。。。。。')
-
+    Schedule.scheduleJob('*/8 * * * * *', async () => {
       const client = this.redis.getClient()
       const length = await client.llen('p2p')
       if (!length) {
@@ -47,26 +45,71 @@ export class ScheduleService {
       }
       const dataString: any = await client.lpop('p2p')
       const data = JSON.parse(dataString)
-      const result = await this.camera.handleP2p(data)
+      const result = await this.camera.handleP2P(data)
       if (!result) {
         return
       }
-      console.log('上传成功。。。。。')
-      const face = {
-        ...data.face,
-        libIndex: result.LibIndex,
-        flieIndex: result.FlieIndex,
-        pic: result.Pic,
-      }
-      if (face._id) {
+      if (data.type === 'add') {
+        const face = {
+          ...data.face,
+          libIndex: result.LibIndex,
+          flieIndex: result.FlieIndex,
+          pic: result.Pic,
+        }
+        await this.faceService.create(face)
+      } else if (data.type === 'delete') {
+        await this.faceService.updateById(data.face._id, { isDelete: true })
+      } else if (data.type === 'update') {
         const update = {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
           pic: result.Pic,
         }
-        return await this.faceService.updateById(face._id, update)
+        await Promise.all(data.faces.map(async face => {
+          return await this.faceService.updateById(face._id, update)
+        }))
       }
-      await this.faceService.create(face)
+      return
+    });
+
+    Schedule.scheduleJob('*/10 * * * * *', async () => {
+      const client = this.redis.getClient()
+      const length = await client.llen('p2pError')
+      if (!length) {
+        return
+      }
+      const dataString: any = await client.lpop('p2pError')
+      const errorData = JSON.parse(dataString)
+      const { upData } = errorData
+      const result = await this.camera.handleP2PEroor(errorData)
+      if (!result) {
+        return
+      }
+      if (upData.type === 'add') {
+        const face = {
+          ...upData.face,
+          libIndex: result.LibIndex,
+          flieIndex: result.FlieIndex,
+          pic: result.Pic,
+        }
+        await this.faceService.create(face)
+      } else if (upData.type === 'delete') {
+        await this.faceService.updateById(upData.face._id, { isDelete: true })
+      } else if (upData.type === 'update-add') {
+        const update = {
+          libIndex: result.LibIndex,
+          flieIndex: result.FlieIndex,
+          pic: result.Pic,
+        }
+        await Promise.all(upData.faces.map(async face => {
+          return await this.faceService.updateById(face._id, update)
+        }))
+      } else if (upData.type === 'update-delete') {
+        await Promise.all(upData.faces.map(async face => {
+          return await this.faceService.updateById(face._id, { isDelete: true })
+        }))
+      }
+      return
     });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {
