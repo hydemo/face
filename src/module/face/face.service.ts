@@ -118,6 +118,7 @@ export class FaceService {
     faces.map(face => {
       this.genFaces(deviceFaces, String(face.device._id), face)
     })
+    console.log(deviceFaces, 'deviceFaces')
     deviceFaces.map(deviceFace => {
       this.cameraUtil.updateOnePic(deviceFace.faces, user, img, deviceFace.faces)
     })
