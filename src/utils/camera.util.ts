@@ -247,7 +247,7 @@ export class CameraUtil {
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
-      if (result.data.ErrorCode === '-3' || result.data.ErrorCode === '-2') {
+      if (result.data.ErrorCode === -3 || result.data.ErrorCode === -2) {
         return
       }
 
@@ -261,12 +261,12 @@ export class CameraUtil {
     }
   }
   /**
- * 处理p2p异常，重传5次
- * 
- * @param username 设备信息
- * @param user 用户信息
- * @param face 名单信息
- */
+  * 处理p2p异常，重传5次
+  * 
+  * @param username 设备信息
+  * @param user 用户信息
+  * @param face 名单信息
+  */
   async handleP2PEroor(errorData: any) {
     const client = this.redis.getClient()
     const { upData, count } = errorData
@@ -285,7 +285,7 @@ export class CameraUtil {
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
-      if (result.data.ErrorCode === '-3' || result.data.ErrorCode === '-2') {
+      if (result.data.ErrorCode === -3 || result.data.ErrorCode === -2) {
         return
       }
       const newErrorData = { count: count + 1, upData }
