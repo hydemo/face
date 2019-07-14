@@ -39,12 +39,15 @@ export class ScheduleService {
 
     Schedule.scheduleJob('*/5 * * * * *', async () => {
       console.log('开始上传。。。。。')
+
       const client = this.redis.getClient()
-      const data: any = await client.lpop('p2p')
-      if (!data) {
+      const length = await client.llen('p2p')
+      if (!length) {
         return
       }
-      const result = await this.camera.handleP2p(JSON.parse(data))
+      const dataString: any = await client.lpop('p2p')
+      const data = JSON.parse(dataString)
+      const result = await this.camera.handleP2p(data)
       if (!result) {
         return
       }

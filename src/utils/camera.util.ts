@@ -225,10 +225,12 @@ export class CameraUtil {
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
+      console.log(result, 'result')
       const errorData = { count: 1, upData }
       await client.lpush('p2pError', JSON.stringify(errorData))
       return false
     } catch (error) {
+      console.log(error)
       const errorData = { count: 1, upData }
       await client.lpush('p2pError', JSON.stringify(errorData))
     }

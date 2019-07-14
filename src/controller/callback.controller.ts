@@ -97,12 +97,7 @@ export class CallbackController {
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async send(@Request() req) {
     const client = this.redis.getClient()
-    await client.lpush('p2p', JSON.stringify({ count: 1, data: { a: 1, b: [1, 2] } }))
-    // await client.lpush('p2p', '333')
-    const data = JSON.parse(await client.lpop('p2p'))
-    console.log(await client.llen('p2p'))
-    console.log(data.data, 'aa')
-    console.log(await client.lpop('p2p'))
+    return await client.llen('p2pError')
   }
 
   // @ApiOkResponse({
