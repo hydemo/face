@@ -97,9 +97,11 @@ export class CallbackController {
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async send(@Request() req) {
     const client = this.redis.getClient()
+    // await client.lpush('p2pError', '11')
+    // const data = await client.l('p2pError')
     const errCount = await client.llen('p2pError')
     const finalCount = await client.llen('p2pErrorFinal')
-    const final = await client.get('p2pErrorFinal')
+    const final = await client.lpop('p2pErrorFinal')
     return { errCount, finalCount, final }
   }
 
