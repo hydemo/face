@@ -198,6 +198,7 @@ export class CameraUtil {
     }
     const upData = { data, face }
     const client = this.redis.getClient()
+    console.log(upData, 'p2p')
     await client.lpush('p2p', JSON.stringify(upData))
   }
 

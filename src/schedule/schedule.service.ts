@@ -41,6 +41,9 @@ export class ScheduleService {
       console.log('开始上传。。。。。')
       const client = this.redis.getClient()
       const data: any = await client.lpop('p2p')
+      if (!data) {
+        return
+      }
       const result = await this.camera.handleP2p(JSON.parse(data))
       if (!result) {
         return
