@@ -101,6 +101,8 @@ export class FaceService {
     if (!deviceFaces.length) {
       const faces = [face]
       deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode })
+      console.log(deviceFaces, deviceFaces[0])
+      return
     }
     deviceFaces.map(deviceFace => {
       if (deviceFace.deviceId === deviceId) {
@@ -113,6 +115,7 @@ export class FaceService {
         deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode })
       }
     })
+    console.log(deviceFaces, '222')
     return
   }
   // 根据条件更新

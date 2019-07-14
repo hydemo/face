@@ -131,6 +131,7 @@ export class CameraUtil {
     const client = this.redis.getClient()
     const face = faces[0]
     await this.deleteOnePic(face[0])
+    console.log(faces, 'faces')
     const { username, password, deviceUUID } = face.device
     const Img = await this.getImg(img)
     const ImgName = user.username;
