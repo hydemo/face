@@ -19,7 +19,7 @@ export class ScheduleService {
     const rule = new Schedule.RecurrenceRule();
     rule.second = 0;
     rule.minute = 0;
-    rule.hour = 0;
+    rule.hour = 3;
 
     Schedule.scheduleJob(rule, async () => {
       await this.residentService.removeVisitor()

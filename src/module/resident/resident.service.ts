@@ -301,7 +301,7 @@ export class ResidentService {
     if (exist) {
       throw new ApiException('已在或已申请该小区', ApiErrorCode.APPLICATION_EXIST, 406);
     }
-    const expireTime: Date = moment().add(1, 'd').toDate()
+    const expireTime: Date = moment().startOf('d').add(1, 'd').toDate()
 
     const resident: ResidentDTO = {
       zone: zone.zoneId,
@@ -344,7 +344,7 @@ export class ResidentService {
   async addVisitorByScan(visitor: CreateVisitorByOwnerDTO, userId: string) {
     const zone: IZone = await this.zoneService.findById(visitor.address)
     await this.isOwner(zone._id, userId)
-    const expireTime = moment().add(visitor.expireTime, 'd').toDate()
+    const expireTime = moment().startOf('d').add(visitor.expireTime, 'd').toDate()
     const user = await this.weixinUtil.scan(visitor.key)
     if (user.type !== 'user') {
       throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
@@ -356,7 +356,7 @@ export class ResidentService {
     const link: any = await this.weixinUtil.scan(key);
     const { address, type, reviewer } = link
     const zone: IZone = await this.zoneService.findById(address)
-    const expireTime = moment().add(1, 'd').toDate()
+    const expireTime = moment().startOf('d').add(1, 'd').toDate()
     if (type !== 'visitor') {
       throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
     }
@@ -629,7 +629,7 @@ export class ResidentService {
 
   // 接受常访客申请
   async agreeVisitor(id: string, user: IUser, expire: number): Promise<boolean> {
-    const expireTime = moment().add(expire, 'd').toDate()
+    const expireTime = moment().startOf('d').add(expire, 'd').toDate()
     const resident: any = await this.residentModel
       .findById(id)
       .populate({ path: 'address', model: 'zone' })
@@ -658,7 +658,7 @@ export class ResidentService {
         color: "#173177"
       },
       keyword2: {
-        value: `${user.username}`,
+        value: `${user.username} `,
         color: "#173177"
       },
       keyword3: {
@@ -670,7 +670,7 @@ export class ResidentService {
         color: "#173177"
       },
       remark: {
-        value: `您现在可以刷脸进出小区，有效期至${moment(expireTime).format('YYYY:MM:DD HH:mm:ss')}`,
+        value: `您现在可以刷脸进出小区，有效期至${moment(expireTime).format('YYYY:MM:DD HH:mm:ss')} `,
         color: "#173177"
       },
     }
@@ -696,7 +696,7 @@ export class ResidentService {
     })
     const message: ApplicationDTO = {
       first: {
-        value: `您提交的${resident.address.houseNumber}${resident.tpye === 'family' ? '家人人' : '访客'}申请已审核`,
+        value: `您提交的${resident.address.houseNumber} ${resident.tpye === 'family' ? '家人人' : '访客'} 申请已审核`,
         color: "#173177"
       },
       keyword1: {
@@ -704,7 +704,7 @@ export class ResidentService {
         color: "#173177"
       },
       keyword2: {
-        value: `${user.username}`,
+        value: `${user.username} `,
         color: "#173177"
       },
       keyword3: {
@@ -844,7 +844,7 @@ export class ResidentService {
     if (update.expireTime > 7) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    const expireTime = moment().add(update.expireTime, 'd')
+    const expireTime = moment().startOf('d').add(update.expireTime, 'd')
     await this.faceService.updateByCondition({ bondToObjectId: resident._id, isDelete: false }, { expireTime })
     return await this.residentModel.findByIdAndUpdate(id, { expireTime })
   }
