@@ -68,6 +68,10 @@ export class ScheduleService {
         await Promise.all(data.faces.map(async face => {
           return await this.faceService.updateById(face._id, update)
         }))
+      } else if (data.type === 'update-delete') {
+        await Promise.all(data.faces.map(async face => {
+          return await this.faceService.updateById(face._id, { isDelete: true })
+        }))
       }
       return
     });
