@@ -960,6 +960,7 @@ export class ResidentService {
 
   // 根据id修改
   async updateById(id: string, update: any): Promise<IResident | null> {
+    console.log(id, update, 'ss')
     return await this.residentModel.findByIdAndUpdate(id, update)
   }
 }
