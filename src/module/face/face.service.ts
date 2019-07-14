@@ -101,7 +101,7 @@ export class FaceService {
     if (!deviceFaces.length) {
       const faces = [face]
       deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode })
-      console.log(deviceFaces, deviceFaces[0])
+      console.log(deviceFaces, deviceFaces[0], '2223')
       return
     }
     deviceFaces.map(deviceFace => {
@@ -123,9 +123,9 @@ export class FaceService {
     const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
     const deviceFaces: any = []
     console.log(faces, 'faces')
-    faces.map(face => {
+    for (let face of faces) {
       this.genFaces(deviceFaces, String(face.device._id), face)
-    })
+    }
     console.log(deviceFaces, 'deviceFaces')
     deviceFaces.map(deviceFace => {
       this.cameraUtil.updateOnePic(deviceFace.faces, user, img, deviceFace.faces)
