@@ -222,6 +222,7 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
+      console.log(result,'result')
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
