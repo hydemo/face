@@ -248,6 +248,7 @@ export class CameraUtil {
       if (result.data.ErrorCode === '-3' || result.data.ErrorCode === '-2') {
         return
       }
+      console.log(result, 'result')
       const errorData = { count: 1, upData }
       await client.lpush('p2pError', JSON.stringify(errorData))
       return false
