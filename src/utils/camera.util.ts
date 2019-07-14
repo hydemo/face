@@ -128,6 +128,7 @@ export class CameraUtil {
     if (!faces.length) {
       return
     }
+    console.log(faces)
     const client = this.redis.getClient()
     const face = faces[0]
     await this.deleteOnePic(face[0])

@@ -98,37 +98,33 @@ export class FaceService {
   }
   // 判断是否上传过
   genFaces(deviceFaces, deviceId, face: IFace) {
-    if (!deviceFaces.length) {
-      const faces = [face]
-      deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode })
-      console.log(deviceFaces, deviceFaces[0], '2223')
-      return
-    }
+    let isAdd = false
     deviceFaces.map(deviceFace => {
+      console.log(deviceFace.deviceId, deviceId, 'sssss')
       if (deviceFace.deviceId === deviceId) {
         deviceFace.faces.push(face)
         if (face.mode > 1) {
           deviceFace.mode = face.mode
         }
-      } else {
-        const faces = [face]
-        deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode })
+        isAdd = true
       }
     })
-    console.log(deviceFaces, '222')
+    if (!isAdd) {
+      const faces = [face]
+      deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode })
+    }
     return
   }
   // 根据条件更新
   async updatePic(condition: any, user: IUser, img: string) {
     const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
     const deviceFaces: any = []
-    console.log(faces, 'faces')
     for (let face of faces) {
       this.genFaces(deviceFaces, String(face.device._id), face)
     }
     console.log(deviceFaces, 'deviceFaces')
     deviceFaces.map(deviceFace => {
-      this.cameraUtil.updateOnePic(deviceFace.faces, user, img, deviceFace.faces)
+      this.cameraUtil.updateOnePic(deviceFace.faces, user, img, deviceFace.mode)
     })
   }
 
