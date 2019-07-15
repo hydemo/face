@@ -60,7 +60,7 @@ export class ScheduleService {
       type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       // await this.faceService.updateById(data.face._id, { isDelete: true })
       // }
-    } else if (data.type === 'update') {
+    } else if (data.type === 'update-add') {
       result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       if (result) {
         const update = {
@@ -107,7 +107,7 @@ export class ScheduleService {
       }
       const dataString: any = await client.rpop('p2p')
       const data = JSON.parse(dataString)
-      console.log(data, 'data')
+      // console.log(data, 'data')
       await this.handelP2P(data, data, dataString, client, 'p2p')
     });
 

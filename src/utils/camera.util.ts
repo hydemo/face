@@ -234,19 +234,18 @@ export class CameraUtil {
  */
   async handleP2P(upData) {
     const client = this.redis.getClient()
-
+    console.log(upData.data, 'ssss')
     try {
       const result: any = await axios({
         method: 'post',
         url: this.config.p2pUrl,
         data: upData.data,
       })
-      console.log(result, 'result')
+      console.log(result.data, 'result')
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
       if (result.data.ErrorCode === -3 || result.data.ErrorCode === -2 || result.data.Code === -6) {
-        console.log(result.data.Code, 'code')
         return
       }
 
@@ -254,7 +253,8 @@ export class CameraUtil {
       await client.lpush('p2pError', JSON.stringify(errorData))
       return false
     } catch (error) {
-      console.log(error)
+      // console.log(error)
+      console.log('error')
       const errorData = { count: 1, upData }
       await client.lpush('p2pError', JSON.stringify(errorData))
     }
