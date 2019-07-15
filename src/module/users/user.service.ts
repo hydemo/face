@@ -298,6 +298,7 @@ export class UserService {
   // 实名认证
   async verify(verify: VerifyUserDTO, user: IUser): Promise<null> {
     let returnUser: any = null
+    let faceUser = user
     let isPhoneVerify = user.isPhoneVerify;
     if (!user.isPhoneVerify && (!verify.phone || !verify.code)) {
       throw new ApiException('手机号未绑定', ApiErrorCode.INPUT_ERROR, 406);
@@ -306,24 +307,36 @@ export class UserService {
       if (phoneExisting) {
         throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
       }
+      await this.phoneUtil.codeCheck(verify.phone, verify.code)
+      isPhoneVerify = true
       const cardNumberExisting = await this.userModel
         .findOne({ _id: { $ne: user._id }, cardNumber: verify.cardNumber })
         .lean()
         .exec();
       if (cardNumberExisting) {
-        await this.userModel.findByIdAndUpdate(cardNumberExisting._id, { openId: user.openId, phone: user.phone })
+        const update = {
+          ...verify,
+          isVerify: true,
+          isPhoneVerify,
+          openId: user.openId
+        }
+        const newUser = await this.userModel
+          .findByIdAndUpdate(cardNumberExisting._id, update, { new: true })
+          .select({ password: 0, openId: 0 })
+          .lean()
+          .exec()
         await this.userModel.findByIdAndRemove(cardNumberExisting._id)
-        cardNumberExisting.accessToken = await this.jwtService.sign({ id: cardNumberExisting._id, type: 'user' });
-        delete cardNumberExisting.password;
-        returnUser = cardNumberExisting;
+        newUser.accessToken = await this.jwtService.sign({ id: cardNumberExisting._id, type: 'user' });
+        returnUser = newUser;
+        faceUser = newUser
       }
-      await this.phoneUtil.codeCheck(verify.phone, verify.code)
-      isPhoneVerify = true
     }
     if (verify.faceUrl) {
-      await this.faceService.updatePic({ user: user._id, isDelete: false }, user, verify.faceUrl)
+      await this.faceService.updatePic({ user: faceUser._id, isDelete: false }, faceUser, verify.faceUrl)
     }
-    await this.userModel.findByIdAndUpdate(user._id, { ...verify, isVerify: true, isPhoneVerify }).lean().exec()
+    if (!returnUser) {
+      await this.userModel.findByIdAndUpdate(user._id, { ...verify, isVerify: true, isPhoneVerify }).lean().exec()
+    }
     return returnUser
   }
 
