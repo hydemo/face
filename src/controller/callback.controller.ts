@@ -105,22 +105,22 @@ export class CallbackController {
 
   }
 
-  // @ApiOkResponse({
-  //   description: '心跳数据',
-  // })
+  @ApiOkResponse({
+    description: '心跳数据',
+  })
 
-  // @Post('/handle')
+  @Post('/handle')
 
-  // @ApiOperation({ title: '心跳数据', description: '心跳数据' })
-  // async handle(@Request() req) {
-  //   const client = this.redis.getClient()
-  //   // await client.lpush('p2p', '11')
-  //   // await client.lpush('p2p', '22')
-  //   // await client.lpush('p2p', '33')
-  //   // await client.rpush('p2p', '44')
-  //   // console.log(await client.rpop('p2p'))
-  //   return await client.rpop('p2p')
-  // }
+  @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  async handle(@Request() req) {
+    const client = this.redis.getClient()
+    await client.hdel('p2p_listen')
+    // await client.lpush('p2p', '22')
+    // await client.lpush('p2p', '33')
+    // await client.rpush('p2p', '44')
+    // console.log(await client.rpop('p2p'))
+    return
+  }
 
   @ApiOkResponse({
     description: '心跳数据',

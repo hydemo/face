@@ -56,10 +56,10 @@ export class ScheduleService {
       }
     } else if (data.type === 'delete') {
       const faceExist = await this.faceService.findById(data.face._id)
-      if (faceExist && !faceExist.isDelete) {
-        await this.camera.handleP2P(data)
-        await this.faceService.updateById(data.face._id, { isDelete: true })
-      }
+      // if (faceExist && !faceExist.isDelete) {
+      await this.camera.handleP2P(data)
+      // await this.faceService.updateById(data.face._id, { isDelete: true })
+      // }
     } else if (data.type === 'update') {
       result = await this.camera.handleP2P(data)
       if (result) {
@@ -68,13 +68,13 @@ export class ScheduleService {
           flieIndex: result.FlieIndex,
           pic: result.Pic,
         }
-        await Promise.all(data.faces.map(async face => {
+        await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, update)
         }))
       }
     } else if (data.type === 'update-delete') {
       await this.camera.handleP2P(data)
-      await Promise.all(data.faces.map(async face => {
+      await Promise.all(data.face.map(async face => {
         await this.faceService.updateById(face._id, { isDelete: true })
       }))
     }

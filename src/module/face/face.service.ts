@@ -105,7 +105,6 @@ export class FaceService {
   genFaces(deviceFaces, deviceId, face: IFace) {
     let isAdd = false
     deviceFaces.map(deviceFace => {
-      console.log(deviceFace.deviceId, deviceId, 'sssss')
       if (deviceFace.deviceId === deviceId) {
         deviceFace.faces.push(face)
         if (face.mode > 1) {
@@ -140,7 +139,7 @@ export class FaceService {
     if (faceCount === 1 && faceToDelete) {
       await this.cameraUtil.deleteOnePic(faceToDelete)
     }
-    // await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true })
+    await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true })
   }
 
   async updateByCondition(condition: any, update: any) {
