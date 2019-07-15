@@ -19,6 +19,68 @@ export class ScheduleService {
     @Inject(FaceService) private readonly faceService: FaceService,
   ) { }
 
+  async handelP2P(data, dataString, client, type) {
+    const isUpload = await client.hget('p2p_listen', data.device)
+    if (isUpload) {
+      client.rpush(type, dataString)
+      return;
+    }
+    if (!data.device) {
+      return
+    }
+    let result: any
+    await client.hset('p2p_listen', data.device, true)
+    if (data.type === 'add') {
+      const faceExist = await this.faceService.findOne({
+        user: data.face.user,
+        device: data.face.device,
+        isDelete: false,
+      })
+      if (faceExist) {
+        result = {
+          LibIndex: faceExist.libIndex,
+          FlieIndex: faceExist.flieIndex,
+          Pic: faceExist.pic,
+        }
+      } else {
+        result = await this.camera.handleP2P(data)
+      }
+      if (result) {
+        const face = {
+          ...data.face,
+          libIndex: result.LibIndex,
+          flieIndex: result.FlieIndex,
+          pic: result.Pic,
+        }
+        await this.faceService.create(face)
+      }
+    } else if (data.type === 'delete') {
+      const faceExist = await this.faceService.findById(data.face._id)
+      if (faceExist && !faceExist.isDelete) {
+        await this.camera.handleP2P(data)
+        await this.faceService.updateById(data.face._id, { isDelete: true })
+      }
+    } else if (data.type === 'update') {
+      result = await this.camera.handleP2P(data)
+      if (result) {
+        const update = {
+          libIndex: result.LibIndex,
+          flieIndex: result.FlieIndex,
+          pic: result.Pic,
+        }
+        await Promise.all(data.faces.map(async face => {
+          await this.faceService.updateById(face._id, update)
+        }))
+      }
+    } else if (data.type === 'update-delete') {
+      await this.camera.handleP2P(data)
+      await Promise.all(data.faces.map(async face => {
+        await this.faceService.updateById(face._id, { isDelete: true })
+      }))
+    }
+    return await client.hset('p2p_listen', data.device, false)
+  }
+
   async enableSchedule() {
     const rule = new Schedule.RecurrenceRule();
     rule.second = 0;
@@ -43,37 +105,9 @@ export class ScheduleService {
       if (!length) {
         return
       }
-      const dataString: any = await client.lpop('p2p')
+      const dataString: any = await client.rpop('p2p')
       const data = JSON.parse(dataString)
-      const result = await this.camera.handleP2P(data)
-      if (!result) {
-        return
-      }
-      if (data.type === 'add') {
-        const face = {
-          ...data.face,
-          libIndex: result.LibIndex,
-          flieIndex: result.FlieIndex,
-          pic: result.Pic,
-        }
-        await this.faceService.create(face)
-      } else if (data.type === 'delete') {
-        await this.faceService.updateById(data.face._id, { isDelete: true })
-      } else if (data.type === 'update') {
-        const update = {
-          libIndex: result.LibIndex,
-          flieIndex: result.FlieIndex,
-          pic: result.Pic,
-        }
-        await Promise.all(data.faces.map(async face => {
-          return await this.faceService.updateById(face._id, update)
-        }))
-      } else if (data.type === 'update-delete') {
-        await Promise.all(data.faces.map(async face => {
-          return await this.faceService.updateById(face._id, { isDelete: true })
-        }))
-      }
-      return
+      await this.handelP2P(data, dataString, client, 'p2p')
     });
 
     Schedule.scheduleJob('*/10 * * * * *', async () => {
@@ -82,38 +116,10 @@ export class ScheduleService {
       if (!length) {
         return
       }
-      const dataString: any = await client.lpop('p2pError')
+      const dataString: any = await client.rpop('p2pError')
       const errorData = JSON.parse(dataString)
       const { upData } = errorData
-      const result = await this.camera.handleP2PEroor(errorData)
-      if (!result) {
-        return
-      }
-      if (upData.type === 'add') {
-        const face = {
-          ...upData.face,
-          libIndex: result.LibIndex,
-          flieIndex: result.FlieIndex,
-          pic: result.Pic,
-        }
-        await this.faceService.create(face)
-      } else if (upData.type === 'delete') {
-        await this.faceService.updateById(upData.face._id, { isDelete: true })
-      } else if (upData.type === 'update-add') {
-        const update = {
-          libIndex: result.LibIndex,
-          flieIndex: result.FlieIndex,
-          pic: result.Pic,
-        }
-        await Promise.all(upData.faces.map(async face => {
-          return await this.faceService.updateById(face._id, update)
-        }))
-      } else if (upData.type === 'update-delete') {
-        await Promise.all(upData.faces.map(async face => {
-          return await this.faceService.updateById(face._id, { isDelete: true })
-        }))
-      }
-      return
+      await this.handelP2P(upData, dataString, client, 'p2pError')
     });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {

@@ -97,13 +97,12 @@ export class CallbackController {
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async send(@Request() req) {
     const client = this.redis.getClient()
-    // await client.lpush('p2pError', '11')
-    // const data = await client.l('p2pError')
     const p2pCount = await client.llen('p2p')
     const errCount = await client.llen('p2pError')
     const finalCount = await client.llen('p2pErrorFinal')
-    const final = await client.lpop('p2pErrorFinal')
+    const final = await client.lrange('p2pErrorFinal', 0, 10)
     return { p2pCount, errCount, finalCount, final }
+
   }
 
   // @ApiOkResponse({
@@ -114,13 +113,13 @@ export class CallbackController {
 
   // @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   // async handle(@Request() req) {
-  //   const sub = this.redis.getClient()
-  //   sub.subscribe(['camera_upload', 'camera_delete'])
-  //   sub.on("message", function (channel, message) {
-  //     // Receive message Hello world! from channel news
-  //     // Receive message Hello again! from channel music
-  //     console.log("Receive message %s from channel %s", message, channel);
-  //   });
+  //   const client = this.redis.getClient()
+  //   // await client.lpush('p2p', '11')
+  //   // await client.lpush('p2p', '22')
+  //   // await client.lpush('p2p', '33')
+  //   // await client.rpush('p2p', '44')
+  //   // console.log(await client.rpop('p2p'))
+  //   return await client.rpop('p2p')
   // }
 
   @ApiOkResponse({

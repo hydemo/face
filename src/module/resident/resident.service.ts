@@ -422,7 +422,7 @@ export class ResidentService {
       if (faceCheck) {
         return
       }
-      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id })
+      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false })
       if (!faceExist) {
         const face = {
           device: device._id,

@@ -30,6 +30,11 @@ export class FaceService {
   async findOne(condition: any): Promise<IFace | null> {
     return await this.faceModel.findOne(condition).lean().exec();
   }
+
+  // 根据条件查询
+  async findById(id: string): Promise<IFace | null> {
+    return await this.faceModel.findById(id).lean().exec();
+  }
   // 统计数量
   async count(condition: any): Promise<number> {
     return await this.faceModel.countDocuments(condition).lean().exec();

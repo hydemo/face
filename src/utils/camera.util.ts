@@ -98,7 +98,7 @@ export class CameraUtil {
    */
   async deleteOnePic(face: IFace) {
     const { device } = face
-    const { username, password, deviceUUID } = device
+    const { username, password, deviceUUID, _id } = device
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const data = {
@@ -114,7 +114,7 @@ export class CameraUtil {
         Pic: face.pic,
       }
     }
-    const upData = { data, face, type: 'delete' }
+    const upData = { data, face, type: 'delete', device: _id }
     const client = this.redis.getClient()
     await client.lpush('p2p', JSON.stringify(upData))
   }
@@ -128,12 +128,10 @@ export class CameraUtil {
     if (!faces.length) {
       return
     }
-    console.log(faces)
     const client = this.redis.getClient()
     const face = faces[0]
     // await this.deleteOnePic(face[0])
-    console.log(faces, face, 'faces')
-    const { username, password, deviceUUID } = face.device
+    const { username, password, deviceUUID, _id } = face.device
     const Img = await this.getImg(img)
     const ImgName = user.username;
     const ImgNum = user._id;
@@ -152,7 +150,7 @@ export class CameraUtil {
         Pic: face.pic,
       }
     }
-    const p2pDelete = { data: deleteData, face: faces, type: 'update-delete' }
+    const p2pDelete = { data: deleteData, face: faces, type: 'update-delete', device: _id }
     await client.lpush('p2p', JSON.stringify(p2pDelete))
     const addData = {
       Name: 'WBListInfoREQ',
@@ -167,7 +165,7 @@ export class CameraUtil {
         ImgNum,
       }
     }
-    const upData = { data: addData, face: faces, type: 'update-add' }
+    const upData = { data: addData, face: faces, type: 'update-add', device: _id }
     await client.lpush('p2p', JSON.stringify(upData))
     // return await this.addOnePic(face[0].device, pic, face[0].mode, Img, face)
   }
@@ -222,7 +220,7 @@ export class CameraUtil {
         ImgNum,
       }
     }
-    const upData = { data, face, type: 'add' }
+    const upData = { data, face, type: 'add', device: device._id }
     const client = this.redis.getClient()
     await client.lpush('p2p', JSON.stringify(upData))
   }
