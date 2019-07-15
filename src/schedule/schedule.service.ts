@@ -20,6 +20,7 @@ export class ScheduleService {
   ) { }
 
   async handelP2P(data, dataString, client, type) {
+    console.log(data, 'data')
     const isUpload = await client.hget('p2p_listen', data.device)
     console.log(isUpload, 'isUpload')
     if (isUpload === 'loading') {
