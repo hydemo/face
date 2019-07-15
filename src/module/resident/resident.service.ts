@@ -412,10 +412,10 @@ export class ResidentService {
   async addToDevice(zone: IZone, user: IUser, resident: string, expire?: Date) {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
-    // if (!expire) {
-    //   const deviceIds = devices.map(device => String(device.deviceId))
-    //   this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds)
-    // }
+    if (!expire) {
+      const deviceIds = devices.map(device => String(device.deviceId))
+      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds)
+    }
     const img = await this.cameraUtil.getImg(user.faceUrl)
     Promise.all(devices.map(async device => {
       const faceCheck: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, bondToObjectId: resident, })

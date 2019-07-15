@@ -239,7 +239,7 @@ export class ZOCUtil {
     })
       .then(async content => {
         const random = this.getRandom(6)
-        const zipname = `03-${this.config.companyCreditCode}-1.7-${time}-${random}.zip`
+        const zipname = `03-${this.config.companyCreditCode}-1.7.1-${time}-${random}.zip`
         fs.writeFileSync(`./upload/${zipname}`, content)
         await this.uploadZip(zipname)
         return { success: true, zipname }

@@ -272,6 +272,49 @@ export class ZoneService {
     }
 
   }
+
+  // async updateByQrcode(code) {
+  //   const result: any = await this.socUtil.qrcodeAddress(code, '1')
+  //   const list: IZoneProfile[] = result.list
+  //   const page = result.page
+  //   const count = Number(page.tcount)
+  //   const parentProfile: IZoneProfile = list[0];
+  //   const parent: ZoneDTO = {
+  //     name: createZone.name,
+  //     nameLength: createZone.name.length,
+  //     location: `${parentProfile.qxmc}${parentProfile.sqjcwhmc}`,
+  //     zoneLayer: 0,
+  //     zoneType: createZone.zoneType,
+  //     parent: null,
+  //     ancestor: [],
+  //     hasChildren: count > 1,
+  //     houseNumber: createZone.name,
+  //     profile: parentProfile,
+  //     buildingType: parentProfile.dzsx,
+  //     detail,
+  //     propertyCo: {
+  //       name: createZone.propertyCoName,
+  //       contact: createZone.contact,
+  //       contactPhone: createZone.contactPhone,
+  //       creditCode: createZone.creditCode,
+  //       address: createZone.address,
+  //     }
+  //   }
+  //   const createParent: IZone = await new this.zoneModel(parent);
+  //   createParent.zoneId = createParent._id;
+  //   const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, 1, createZone.code)
+  //   createParent.children = children.children
+  //   createParent.hasPartition = children.hasPartition
+  //   await createParent.save()
+  //   // 上报物业信息
+  //   const time = moment().format('YYYYMMDDHHmmss');
+  //   const zip = await this.zocUtil.genZip()
+  //   await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
+  //   const zocResult: any = await this.zocUtil.upload(zip, time)
+  //   if (zocResult.success) {
+  //     await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname })
+  //   }
+  // }
   //获取子集
   async findSubZone(parent: string, type: string, zones: string[]): Promise<IList<IZone>> {
     let condition: any = {};

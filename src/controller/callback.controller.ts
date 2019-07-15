@@ -3,6 +3,7 @@ import {
   Request,
   Post,
   Get,
+  Query,
 } from '@nestjs/common';
 import {
   ApiUseTags,
@@ -130,7 +131,12 @@ export class CallbackController {
   @Post('/test')
 
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
-  async test(@Request() req) {
+  async test(
+    @Request() req,
+    @Query('code') code: string,
+  ) {
+    const data = await this.socUtil.qrcodeAddress(code, '22')
+    console.log(data, 'data')
     // const pub = this.redis.getClient()
     // sub.subscribe('camera_upload', 'camera_delete', function (err, count) {
     //   pub.publish("camera_upload", "Hello world!");
