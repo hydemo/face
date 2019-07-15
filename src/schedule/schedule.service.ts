@@ -19,9 +19,8 @@ export class ScheduleService {
     @Inject(FaceService) private readonly faceService: FaceService,
   ) { }
 
-  async handelP2P(data, dataString, sourceData, client, type) {
+  async handelP2P(data, sourceData, dataString, client, type) {
     const isUpload = await client.hget('p2p_listen', data.device)
-    console.log(isUpload, 'isUpload')
     if (isUpload === 'loading') {
       client.rpush(type, dataString)
       return;
