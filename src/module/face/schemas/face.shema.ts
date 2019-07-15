@@ -20,6 +20,8 @@ export const FaceSchema = new mongoose.Schema(
     expire: Date,
     // 绑定id
     bondToObjectId: ObjectId,
+    // 绑定类型
+    bondType: String,
     // 区域
     zone: ObjectId,
     // 是否删除

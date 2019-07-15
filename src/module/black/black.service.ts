@@ -143,6 +143,7 @@ export class BlackService {
         // flieIndex: '',
         // pic: '',
         bondToObjectId: black._id,
+        bondType: 'black',
         zone: black.zone,
       }
       await this.cameraUtil.addOnePic(device, black, this.config.blackMode, img, face)

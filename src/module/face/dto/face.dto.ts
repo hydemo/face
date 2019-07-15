@@ -23,6 +23,8 @@ export class CreateFaceDTO {
   @ApiModelProperty({ description: '绑定id' })
   readonly bondToObjectId: string;
 
+  readonly bondType: string;
+
   @IsNumber()
   @IsEnum([1, 2, 3])
   @Type(() => Number)

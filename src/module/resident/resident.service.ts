@@ -432,6 +432,7 @@ export class ResidentService {
           // flieIndex: result.FlieIndex,
           // pic: result.Pic,
           bondToObjectId: resident,
+          bondType: 'resident',
           zone: zone.zoneId,
         }
         return await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, face)
@@ -444,6 +445,7 @@ export class ResidentService {
         flieIndex: faceExist.flieIndex,
         pic: faceExist.pic,
         bondToObjectId: resident,
+        bondType: 'resident',
         zone: zone.zoneId,
       }
       if (expire) {
@@ -785,7 +787,6 @@ export class ResidentService {
   // 根据id删除
   async deleteById(resident: string, user: string): Promise<IResident | null> {
     const data: IResident | null = await this.residentModel.findById(resident).lean()
-    console.log(data, 'data')
     if (!data) {
       return null
     }
@@ -793,7 +794,6 @@ export class ResidentService {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident, isDelete: false })
-    console.log(faces, 'faces')
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))

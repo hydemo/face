@@ -81,6 +81,7 @@ export class RoleService {
         // flieIndex: result.FlieIndex,
         // pic: result.Pic,
         bondToObjectId,
+        bondType: 'role',
         zone: zone,
       }
       await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, face)
@@ -101,6 +102,10 @@ export class RoleService {
     if (!exist) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
+    const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: id, bondType: 'role', isDelete: false })
+    await Promise.all(faces.map(async face => {
+      return await this.faceService.delete(face)
+    }))
     return await this.roleModel.findByIdAndUpdate(id, { isDelete: true });
   }
 
