@@ -112,8 +112,8 @@ export class UserController {
     @Body() verify: VerifyUserDTO,
     @Request() req: any
   ) {
-    await this.userService.verify(verify, req.user)
-    return { statusCode: 200, msg: '实名认证成功' };
+    const data = await this.userService.verify(verify, req.user)
+    return { statusCode: 200, msg: '实名认证成功', data };
   }
 
   @Put('/password/forget')
