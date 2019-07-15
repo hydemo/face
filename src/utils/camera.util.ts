@@ -245,7 +245,8 @@ export class CameraUtil {
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
-      if (result.data.ErrorCode === -3 || result.data.ErrorCode === -2) {
+      if (result.data.ErrorCode === -3 || result.data.ErrorCode === -2 || result.data.Code === -6) {
+        console.log(result.data.Code, 'code')
         return
       }
 
@@ -279,7 +280,7 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
-      console.log(result, 'result')
+      console.log(result.data, 'result')
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
