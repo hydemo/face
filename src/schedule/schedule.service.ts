@@ -21,7 +21,7 @@ export class ScheduleService {
 
   async handelP2P(data, sourceData, dataString, client, type) {
     const isUpload = await client.hget('p2p_listen', data.device)
-    console.log(isUpload,'isupload')
+    console.log(isUpload, 'isupload')
     if (isUpload === 'loading') {
       client.rpush(type, dataString)
       return;
@@ -74,9 +74,9 @@ export class ScheduleService {
       }
     } else if (data.type === 'update-delete') {
       type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
-      await Promise.all(data.face.map(async face => {
-        await this.faceService.updateById(face._id, { isDelete: true })
-      }))
+      // await Promise.all(data.face.map(async face => {
+      //   await this.faceService.updateById(face._id, { isDelete: true })
+      // }))
     }
     return await client.hset('p2p_listen', data.device, 'loaded')
   }
