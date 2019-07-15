@@ -399,7 +399,10 @@ export class ResidentService {
   }
   // 上报常住人至智能感知平台
   async uploadToZoc(userId: string, zoneId: string, profile: IZoneProfile, deviceIds: string[]) {
-    const userToZOC = await this.userService.updateById(userId, {})
+    const userToZOC: IUser | null = await this.userService.updateById(userId, {})
+    if (!userToZOC) {
+      return
+    }
     const zoneToZOC = await this.zoneService.findById(zoneId)
     const data = await this.zocUtil.genResidentData(profile, zoneToZOC.detail, userToZOC, deviceIds)
     const time = moment().format('YYYYMMDDHHmmss');

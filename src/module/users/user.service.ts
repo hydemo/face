@@ -108,7 +108,7 @@ export class UserService {
   }
 
   // 根据id修改
-  async updateById(_id: any, user: any): Promise<IUser> {
+  async updateById(_id: any, user: any): Promise<IUser | null> {
     if (user.phone) {
       const existing = await this.userModel.findOne({ _id: { $ne: _id }, phone: user.phone });
       if (existing) {
@@ -116,9 +116,6 @@ export class UserService {
       }
     }
     const newUser = await this.userModel.findByIdAndUpdate(_id, user, { new: true }).exec();
-    if (!newUser) {
-      throw new ApiException('用户不存在', ApiErrorCode.NO_EXIST, 404);
-    }
     return newUser
   }
   // 根据id删除
@@ -325,7 +322,7 @@ export class UserService {
           .select({ password: 0, openId: 0 })
           .lean()
           .exec()
-        await this.userModel.findByIdAndRemove(cardNumberExisting._id)
+        await this.userModel.findByIdAndRemove(user._id)
         newUser.accessToken = await this.jwtService.sign({ id: cardNumberExisting._id, type: 'user' });
         returnUser = newUser;
         faceUser = newUser
