@@ -284,6 +284,7 @@ export class CameraUtil {
         return result.data.AddOnePic;
       }
       if (result.data.ErrorCode === -3 || result.data.ErrorCode === -2 || result.data.Code === -6) {
+        console.log(result.data.Code, 'code')
         return
       }
       const newErrorData = { count: count + 1, upData }

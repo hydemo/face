@@ -21,6 +21,7 @@ export class ScheduleService {
 
   async handelP2P(data, dataString, client, type) {
     const isUpload = await client.hget('p2p_listen', data.device)
+    console.log(isUpload, 'isUpload')
     if (isUpload === 'loading') {
       client.rpush(type, dataString)
       return;
@@ -55,7 +56,6 @@ export class ScheduleService {
         await this.faceService.create(face)
       }
     } else if (data.type === 'delete') {
-      const faceExist = await this.faceService.findById(data.face._id)
       // if (faceExist && !faceExist.isDelete) {
       await this.camera.handleP2P(data)
       // await this.faceService.updateById(data.face._id, { isDelete: true })
