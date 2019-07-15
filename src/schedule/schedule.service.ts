@@ -19,8 +19,7 @@ export class ScheduleService {
     @Inject(FaceService) private readonly faceService: FaceService,
   ) { }
 
-  async handelP2P(data, dataString, client, type) {
-    console.log(data, 'data')
+  async handelP2P(data, dataString, sourceData, client, type) {
     const isUpload = await client.hget('p2p_listen', data.device)
     console.log(isUpload, 'isUpload')
     if (isUpload === 'loading') {
@@ -45,7 +44,7 @@ export class ScheduleService {
           Pic: faceExist.pic,
         }
       } else {
-        result = await this.camera.handleP2P(data)
+        result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
       if (result) {
         const face = {
@@ -58,11 +57,11 @@ export class ScheduleService {
       }
     } else if (data.type === 'delete') {
       // if (faceExist && !faceExist.isDelete) {
-      await this.camera.handleP2P(data)
+      type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       // await this.faceService.updateById(data.face._id, { isDelete: true })
       // }
     } else if (data.type === 'update') {
-      result = await this.camera.handleP2P(data)
+      result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       if (result) {
         const update = {
           libIndex: result.LibIndex,
@@ -74,7 +73,7 @@ export class ScheduleService {
         }))
       }
     } else if (data.type === 'update-delete') {
-      await this.camera.handleP2P(data)
+      type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       await Promise.all(data.face.map(async face => {
         await this.faceService.updateById(face._id, { isDelete: true })
       }))
@@ -109,7 +108,7 @@ export class ScheduleService {
       const dataString: any = await client.rpop('p2p')
       const data = JSON.parse(dataString)
       console.log(data, 'data')
-      await this.handelP2P(data, dataString, client, 'p2p')
+      await this.handelP2P(data, data, dataString, client, 'p2p')
     });
 
     Schedule.scheduleJob('*/10 * * * * *', async () => {
@@ -121,7 +120,7 @@ export class ScheduleService {
       const dataString: any = await client.rpop('p2pError')
       const errorData = JSON.parse(dataString)
       const { upData } = errorData
-      await this.handelP2P(upData, dataString, client, 'p2pError')
+      await this.handelP2P(upData, errorData, dataString, client, 'p2pError')
     });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {
