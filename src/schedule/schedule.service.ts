@@ -21,6 +21,7 @@ export class ScheduleService {
 
   async handelP2P(data, dataString, client, type) {
     const isUpload = await client.hget('p2p_listen', data.device)
+    console.log(isUpload, 'isupload')
     if (isUpload) {
       client.rpush(type, dataString)
       return;
@@ -107,6 +108,7 @@ export class ScheduleService {
       }
       const dataString: any = await client.rpop('p2p')
       const data = JSON.parse(dataString)
+      console.log(data, 'data')
       await this.handelP2P(data, dataString, client, 'p2p')
     });
 
