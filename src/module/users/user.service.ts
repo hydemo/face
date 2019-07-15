@@ -334,12 +334,16 @@ export class UserService {
   async genQrcode(user: IUser) {
     const key = uuid()
     const client = this.redis.getClient()
+    const number = user.cardNumber
+    const replaceStr = number.substring(4, 13);
+    const str = '*'.repeat(replaceStr.length)
+    const cardNumber = number.replace(replaceStr, str)
     const value = {
       _id: user._id,
       username: user.username,
       phone: user.phone,
       faceUrl: user.faceUrl,
-      cardNumber: user.cardNumber,
+      cardNumber: cardNumber,
       isPhoneVerify: user.isPhoneVerify,
       type: 'user',
     }

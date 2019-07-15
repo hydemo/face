@@ -8,9 +8,9 @@ import { ConfigService } from 'src/config/config.service';
 import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 import { IFace } from 'src/module/face/interfaces/face.interfaces';
 import { IUser } from 'src/module/users/interfaces/user.interfaces';
-import { config } from 'rxjs';
 import { IPic } from 'src/common/interface/pic.interface';
 import { PhoneUtil } from './phone.util';
+import { P2PErrorService } from 'src/module/p2pError/p2pError.service';
 
 @Injectable()
 export class CameraUtil {
@@ -18,6 +18,7 @@ export class CameraUtil {
     private readonly config: ConfigService,
     private readonly phoneUtil: PhoneUtil,
     private readonly redis: RedisService,
+    private readonly p2pErrorService: P2PErrorService,
   ) { }
   /**
    * 获取设备白名单
@@ -99,6 +100,7 @@ export class CameraUtil {
   async deleteOnePic(face: IFace) {
     const { device } = face
     const { username, password, deviceUUID, _id } = device
+    const id = String(_id)
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const data = {
@@ -114,9 +116,13 @@ export class CameraUtil {
         Pic: face.pic,
       }
     }
-    const upData = { data, face, type: 'delete', device: _id }
+    const upData = { data, face, type: 'delete', device: id }
     const client = this.redis.getClient()
-    await client.lpush('p2p', JSON.stringify(upData))
+    const poolExist = await client.hget('p2p_pool', id)
+    if (!poolExist) {
+      await client.hset('p2p_pool', id, 1)
+    }
+    await client.lpush(`p2p_${id}`, JSON.stringify(upData))
   }
 
   /**
@@ -132,6 +138,7 @@ export class CameraUtil {
     const face = faces[0]
     // await this.deleteOnePic(face[0])
     const { username, password, deviceUUID, _id } = face.device
+    const id = String(_id)
     const Img = await this.getImg(img)
     const ImgName = user.username;
     const ImgNum = user._id;
@@ -151,7 +158,11 @@ export class CameraUtil {
       }
     }
     const p2pDelete = { data: deleteData, face: faces, type: 'update-delete', device: _id }
-    await client.lpush('p2p', JSON.stringify(p2pDelete))
+    const poolExist = await client.hget('p2p_pool', id)
+    if (!poolExist) {
+      await client.hset('p2p_pool', id, 1)
+    }
+    await client.lpush(`p2p_${id}`, JSON.stringify(p2pDelete))
     const addData = {
       Name: 'WBListInfoREQ',
       TimeStamp: timeStamp,
@@ -166,7 +177,7 @@ export class CameraUtil {
       }
     }
     const upData = { data: addData, face: faces, type: 'update-add', device: _id }
-    await client.lpush('p2p', JSON.stringify(upData))
+    await client.lpush(`p2p_${id}`, JSON.stringify(upData))
     // return await this.addOnePic(face[0].device, pic, face[0].mode, Img, face)
   }
 
@@ -200,7 +211,8 @@ export class CameraUtil {
   * @param face 名单信息
   */
   async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: any) {
-    const { username, password, deviceUUID } = device
+    const { username, password, deviceUUID, _id } = device
+    const id = String(_id)
     // console.log(user.faceUrl, 'facedd')
     // const Img = await this.getImg(`${user.faceUrl}`);
     const ImgName = user.username;
@@ -220,9 +232,13 @@ export class CameraUtil {
         ImgNum,
       }
     }
-    const upData = { data, face, type: 'add', device: device._id }
+    const upData = { data, face, type: 'add', device: id }
     const client = this.redis.getClient()
-    await client.lpush('p2p', JSON.stringify(upData))
+    const poolExist = await client.hget('p2p_pool', id)
+    if (!poolExist) {
+      await client.hset('p2p_pool', id, 1)
+    }
+    await client.lpush(`p2p_${id}`, JSON.stringify(upData))
   }
 
   /**
@@ -234,7 +250,6 @@ export class CameraUtil {
  */
   async handleP2P(upData) {
     const client = this.redis.getClient()
-    console.log(upData.data, 'ssss')
     try {
       const result: any = await axios({
         method: 'post',
@@ -250,13 +265,21 @@ export class CameraUtil {
       }
 
       const errorData = { count: 1, upData }
-      await client.lpush('p2pError', JSON.stringify(errorData))
+      const poolExist = await client.hget('p2pError_pool', upData.device)
+      if (!poolExist) {
+        await client.hset('p2pError_pool', upData.device, 1)
+      }
+      await client.lpush(`p2pError${upData.device}`, JSON.stringify(errorData))
       return false
     } catch (error) {
       // console.log(error)
-      console.log('error')
       const errorData = { count: 1, upData }
-      await client.lpush('p2pError', JSON.stringify(errorData))
+      const poolExist = await client.hget('p2pError_pool', upData.device)
+      if (!poolExist) {
+        await client.hset('p2pError_pool', upData.device, 1)
+      }
+      await client.lpush(`p2pError${upData.device}`, JSON.stringify(errorData))
+      return false
     }
   }
   /**
@@ -271,6 +294,7 @@ export class CameraUtil {
     const { upData, count } = errorData
     if (count > 5) {
       await client.lpush('p2pErrorFinal', JSON.stringify(errorData))
+      await this.p2pErrorService.create(JSON.stringify(upData))
       await this.phoneUtil.sendP2PError()
       return null
     }
@@ -285,16 +309,23 @@ export class CameraUtil {
         return result.data.AddOnePic;
       }
       if (result.data.ErrorCode === -3 || result.data.ErrorCode === -2 || result.data.Code === -6) {
-        console.log(result.data.Code, 'code')
         return
       }
       const newErrorData = { count: count + 1, upData }
-      await client.lpush('p2pError', JSON.stringify(newErrorData))
+      const poolExist = await client.hget('p2pError_pool', upData.device)
+      if (!poolExist) {
+        await client.hset('p2pError_pool', upData.device, 1)
+      }
+      await client.lpush(`p2pError${upData.device}`, JSON.stringify(newErrorData))
       return false
     } catch (error) {
       console.log(error, 'error')
       const newErrorData = { count: count + 1, upData }
-      await client.lpush('p2pError', JSON.stringify(newErrorData))
+      const poolExist = await client.hget('p2pError_pool', upData.device)
+      if (!poolExist) {
+        await client.hset('p2pError_pool', upData.device, 1)
+      }
+      await client.lpush(`p2pError${upData.device}`, JSON.stringify(newErrorData))
     }
     return
   }

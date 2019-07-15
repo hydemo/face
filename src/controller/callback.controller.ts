@@ -27,6 +27,7 @@ import { IZone } from 'src/module/zone/interfaces/zone.interfaces';
 import { ConfigService } from 'src/config/config.service';
 import { IPropertyCo } from 'src/module/zone/interfaces/propertyCo.interface';
 import { ResidentService } from 'src/module/resident/resident.service';
+import { P2PErrorService } from 'src/module/p2pError/p2pError.service';
 
 
 @ApiUseTags('callback')
@@ -45,6 +46,7 @@ export class CallbackController {
     private readonly zoneService: ZoneService,
     private readonly config: ConfigService,
     private readonly redis: RedisService,
+    private readonly p2pErrorService: P2PErrorService,
   ) {
 
   }
@@ -98,11 +100,21 @@ export class CallbackController {
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async send(@Request() req) {
     const client = this.redis.getClient()
-    const p2pCount = await client.llen('p2p')
-    const errCount = await client.llen('p2pError')
+    const pools = await client.hkeys('p2p_pool')
+    const errorPools = await client.hkeys('p2pError_pool')
+    const p2pPools: any = []
+    const p2pErrorPools: any = []
+    await Promise.all(pools.map(async pool => {
+      const count = await client.llen(`p2p_${pool}`)
+      p2pPools.push({ pool, count })
+    }))
+    await Promise.all(errorPools.map(async pool => {
+      const count = await client.llen(`p2pError_${pool}`)
+      p2pPools.push({ pool, count })
+    }))
     const finalCount = await client.llen('p2pErrorFinal')
-    const final = await client.lrange('p2pErrorFinal', 0, 10)
-    return { p2pCount, errCount, finalCount, final }
+    const final = await client.lrange('p2pErrorFinal', 0, finalCount)
+    return { p2pPools, p2pErrorPools, finalCount, final }
 
   }
 
@@ -116,8 +128,8 @@ export class CallbackController {
   async handle(@Request() req) {
     const client = this.redis.getClient()
     await client.del('p2p_listen')
-    await client.lpop('p2pError')
-    await client.lpop('p2pErrorFinal')
+    await client.lpush('p2pErrorFinal', '2')
+    await client.del('p2pErrorFinal')
     // await client.lpush('p2p', '22')
     // await client.lpush('p2p', '33')
     // await client.rpush('p2p', '44')
@@ -135,9 +147,10 @@ export class CallbackController {
     @Request() req,
     @Query('code') code: string,
   ) {
-    const data = await this.socUtil.qrcodeAddress(code, '22')
+    // return await this.p2pErrorService.create(code)
+    const pub = this.redis.getClient()
+    const data = await pub.hget('2', '2')
     console.log(data, 'data')
-    // const pub = this.redis.getClient()
     // sub.subscribe('camera_upload', 'camera_delete', function (err, count) {
     //   pub.publish("camera_upload", "Hello world!");
     //   pub.publish("camera_delete", "Hello again!");

@@ -20,17 +20,21 @@ export class ScheduleService {
   ) { }
 
   async handelP2P(data, sourceData, dataString, client, type) {
-    const isUpload = await client.hget('p2p_listen', data.device)
-    console.log(isUpload, 'isupload')
-    if (isUpload === 'loading') {
+    const listenTime = await client.hget('p2p_listen', data.device)
+    if (listenTime > 10) {
+      await client.hset('p2p_listen', data.device, 0)
+      return
+    }
+    if (listenTime > 0) {
       client.rpush(type, dataString)
+      await client.hincrby('p2p_listen', data.device, 1)
       return;
     }
     if (!data.device) {
       return
     }
     let result: any
-    await client.hset('p2p_listen', data.device, 'loading')
+    await client.hset('p2p_listen', data.device, 1)
     if (data.type === 'add') {
       const faceExist = await this.faceService.findOne({
         user: data.face.user,
@@ -78,7 +82,7 @@ export class ScheduleService {
       //   await this.faceService.updateById(face._id, { isDelete: true })
       // }))
     }
-    return await client.hset('p2p_listen', data.device, 'loaded')
+    return await client.hset('p2p_listen', data.device, 0)
   }
 
   async enableSchedule() {
@@ -101,26 +105,35 @@ export class ScheduleService {
 
     Schedule.scheduleJob('*/8 * * * * *', async () => {
       const client = this.redis.getClient()
-      const length = await client.llen('p2p')
-      if (!length) {
-        return
-      }
-      const dataString: any = await client.rpop('p2p')
-      const data = JSON.parse(dataString)
-      // console.log(data, 'data')
-      await this.handelP2P(data, data, dataString, client, 'p2p')
+      const pools = await client.hkeys('p2p_pool')
+      pools.map(async  pool => {
+        const length = await client.llen(`p2p_${pool}`)
+        if (!length) {
+          await client.hdel('p2p_pool', pool)
+          return
+        }
+        const dataString: any = await client.rpop(`p2p_${pool}`)
+        const data = JSON.parse(dataString)
+        // console.log(data, 'data')
+        await this.handelP2P(data, data, dataString, client, 'p2p')
+      })
+
     });
 
     Schedule.scheduleJob('*/10 * * * * *', async () => {
       const client = this.redis.getClient()
-      const length = await client.llen('p2pError')
-      if (!length) {
-        return
-      }
-      const dataString: any = await client.rpop('p2pError')
-      const errorData = JSON.parse(dataString)
-      const { upData } = errorData
-      await this.handelP2P(upData, errorData, dataString, client, 'p2pError')
+      const pools = await client.hkeys('p2pError_pool')
+      pools.map(async  pool => {
+        const length = await client.llen(`p2pError_${pool}`)
+        if (!length) {
+          await client.hdel('p2pError_pool', pool)
+          return
+        }
+        const dataString: any = await client.rpop(`p2pError_${pool}`)
+        const errorData = JSON.parse(dataString)
+        const { upData } = errorData
+        await this.handelP2P(upData, errorData, dataString, client, 'p2pError')
+      })
     });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {

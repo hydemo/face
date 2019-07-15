@@ -52,6 +52,7 @@ import { MediaController } from './controller/api/media.controller';
 import { PhoneUtil } from './utils/phone.util';
 import { ZOCUtil } from './utils/zoc.util';
 import { PreownerModule } from './module/preowner/preowner.module';
+import { P2PErrorModule } from './module/p2pError/p2pError.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { PreownerModule } from './module/preowner/preowner.module';
     RentModule,
     MediaModule,
     PreownerModule,
+    P2PErrorModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => configService.redis,
