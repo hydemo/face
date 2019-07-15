@@ -307,7 +307,8 @@ export class UserService {
       }
       const cardNumberExisting = await this.userModel.findOne({ _id: { $ne: user._id }, cardNumber: verify.cardNumber });
       if (cardNumberExisting) {
-        throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
+        await this.userModel.findByIdAndUpdate(cardNumberExisting._id, { openId: user.openId, phone: user.phone })
+        await this.userModel.findByIdAndRemove(cardNumberExisting._id)
       }
       await this.phoneUtil.codeCheck(verify.phone, verify.code)
       isPhoneVerify = true
