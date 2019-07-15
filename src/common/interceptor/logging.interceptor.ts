@@ -12,9 +12,9 @@ export class LoggingInterceptor implements NestInterceptor {
 
     const url = request.originalUrl
     Logger.log(url);
-    if (url.indexOf('/faceinfo') === -1 || url.indexOf('/keepalive') === -1) {
+    if (url !== 'faceinfo' && url !== '/keepalive') {
       Logger.log(request.method);
-      Logger.log(request.headers);
+      Logger.log(request['x-real-ip']);
       Logger.log(request.params);
       Logger.log(request.query)
       const body = { ...request.body }
