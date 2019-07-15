@@ -114,7 +114,7 @@ export class CallbackController {
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async handle(@Request() req) {
     const client = this.redis.getClient()
-    await client.hdel('p2p_listen')
+    await client.del('p2p_listen')
     // await client.lpush('p2p', '22')
     // await client.lpush('p2p', '33')
     // await client.rpush('p2p', '44')
