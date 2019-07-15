@@ -21,16 +21,15 @@ export class ScheduleService {
 
   async handelP2P(data, dataString, client, type) {
     const isUpload = await client.hget('p2p_listen', data.device)
-    console.log(isUpload, 'isupload')
-    if (isUpload) {
-      client.rpush(type, dataString)
-      return;
-    }
+    // if (isUpload) {
+    //   client.rpush(type, dataString)
+    //   return;
+    // }
     if (!data.device) {
       return
     }
     let result: any
-    await client.hset('p2p_listen', data.device, true)
+    await client.hset('p2p_listen', data.device, 'loading')
     if (data.type === 'add') {
       const faceExist = await this.faceService.findOne({
         user: data.face.user,
@@ -79,7 +78,7 @@ export class ScheduleService {
         await this.faceService.updateById(face._id, { isDelete: true })
       }))
     }
-    return await client.hset('p2p_listen', data.device, false)
+    return await client.hset('p2p_listen', data.device, 'loaded')
   }
 
   async enableSchedule() {
