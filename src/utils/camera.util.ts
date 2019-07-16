@@ -309,7 +309,7 @@ export class CameraUtil {
       if (result.data.Result === 'ok') {
         return result.data.AddOnePic;
       }
-      if (result.data.ErrorCode === -3 || result.data.ErrorCode === -2 || result.data.Code === -6) {
+      if (result.data.ErrorCode === -3 || result.data.Code === -6) {
         return
       }
       const newErrorData = { count: count + 1, upData }
