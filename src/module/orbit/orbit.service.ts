@@ -54,6 +54,7 @@ export class OrbitService {
       .populate({ path: 'user', model: 'user' })
       .populate({ path: 'device', model: 'device' })
       .populate({ path: 'zone', model: 'zone' })
+      .populate({ path: 'position', model: 'zone' })
       .lean()
       .exec();
     const total = await this.orbitModel.countDocuments(condition);
