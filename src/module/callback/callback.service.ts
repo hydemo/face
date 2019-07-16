@@ -95,8 +95,9 @@ export class CallbackService {
       const zip = await this.zocUtil.genZip()
       await this.zocUtil.genEnRecord(zip, time, zone.detail, user)
       await this.zocUtil.genImage(zip, time, zone.detail, img)
-      await this.zocUtil.upload(zip, time)
-      const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, ...stranger }
+      const data = await this.zocUtil.upload(zip, time)
+      const isZOCPush = data.success ? true : false
+      const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, isZOCPush, ZOCZip: data.zipname, ...stranger, }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
       await this.sendMessage(createOrbit, user, device)
     }

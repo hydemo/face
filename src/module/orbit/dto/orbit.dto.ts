@@ -64,6 +64,10 @@ export class CreateOrbitDTO {
   @Type(() => CreatAttributeDTO)
   @ApiModelProperty({ description: '人脸属性' })
   readonly attribute: CreatAttributeDTO;
+
+  isZOCPush?: boolean;
+  // 智能感知平台包名
+  ZOCZip?: string;
 }
 
 
