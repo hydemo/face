@@ -48,7 +48,7 @@ export class RoleService {
   // 创建数据
   async createByScan(role: CreateRoleByScanDTO): Promise<IRole> {
     const user: IUser = await this.weixinUtil.scan(role.key)
-    const exist: number = await this.roleModel.countDocuments({ user: user._id, role: role.role, zone: role.zone })
+    const exist: number = await this.roleModel.countDocuments({ user: user._id, role: role.role, zone: role.zone, isDelete: false })
     if (exist) {
       throw new ApiException('已有该角色', ApiErrorCode.APPLICATION_EXIST, 406);
     }
