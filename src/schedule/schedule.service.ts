@@ -103,7 +103,7 @@ export class ScheduleService {
       }))
     });
 
-    Schedule.scheduleJob('*/8 * * * * *', async () => {
+    Schedule.scheduleJob('*/16 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
       await Promise.all(pools.map(async  pool => {
@@ -120,7 +120,7 @@ export class ScheduleService {
       }))
     });
 
-    Schedule.scheduleJob('*/10 * * * * *', async () => {
+    Schedule.scheduleJob('*/30 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2pError_pool')
       await Promise.all(pools.map(async  pool => {
