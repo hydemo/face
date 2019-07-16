@@ -15,6 +15,7 @@ import { IDetail } from 'src/module/zone/interfaces/detail.interface';
 import { IPropertyCo } from 'src/module/zone/interfaces/propertyCo.interface';
 import { IUser } from 'src/module/users/interfaces/user.interfaces';
 import { IZoneProfile } from 'src/module/zone/interfaces/zonePrifile.interface';
+import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 
 @Injectable()
 export class ZOCUtil {
@@ -150,7 +151,7 @@ export class ZOCUtil {
     if (result.data.status === 100) {
       const token = result.data.data.token
       const client = this.redis.getClient()
-      client.set('zoc_token', token, 'EX', 60 * 60 * 1)
+      client.set('zoc_token', token, 'EX', 60 * 40)
       return token
     } else {
       return ''
@@ -394,7 +395,7 @@ export class ZOCUtil {
   /**
  * 生成门禁设备信息
  */
-  async genDevice(zip: any, time: String, address: IDetail): Promise<boolean> {
+  async genDevice(zip: any, time: String, address: IDetail, device: IDevice): Promise<boolean> {
     // const url = `${this.config.zocUrl}/api/check/gate/device`;
     // const token = await this.getToken()
     const data = {
@@ -402,13 +403,13 @@ export class ZOCUtil {
       SBXQDZBM: address.SYSTEMID,
       SBDZBM: address.SYSTEMID,
       SBDZMC: address.DZMC,
-      AZDWMS: '前门',
+      AZDWMS: device.description,
       AZDWLX: '小区',
       MAPX: address.MAPX,
       MAPY: address.MAPY,
       MJCSDM: this.config.companyCreditCode,
       MJJLX: '03',
-      MJJBH: '180000001',
+      MJJBH: device.deviceId,
       MJJZT: 'Y',
       CJSJ: this.getTemp(),
       TYSJ: '',
@@ -440,7 +441,7 @@ export class ZOCUtil {
   /**
 * 生成刷卡记录
 */
-  async genEnRecord(zip: any, time: String, detail: IDetail, user: any): Promise<boolean> {
+  async genEnRecord(zip: any, time: String, detail: IDetail, user: any, device: IDevice): Promise<boolean> {
     // const url = `${this.config.zocUrl}/api/check/gate/record`;
     // const token = await this.getToken()
     const data = {
@@ -460,7 +461,7 @@ export class ZOCUtil {
       HZXM: user.username,
       HZSJHM: user.phone,
       HZSFZ: user.cardNumber,
-      MJCSDM: '91440300072526351A',
+      MJCSDM: this.config.companyCreditCode,
       MJJLX: '04',
       MJJBH: '10028839',
       MJJXX: '人脸开门',

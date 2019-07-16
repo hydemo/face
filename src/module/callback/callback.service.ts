@@ -90,14 +90,20 @@ export class CallbackService {
       if (!user) {
         return
       }
-      const zone: IZone = await this.zoneService.findById(device.zone)
-      const time = moment().format('YYYYMMDDHHmmss');
-      const zip = await this.zocUtil.genZip()
-      await this.zocUtil.genEnRecord(zip, time, zone.detail, user)
-      await this.zocUtil.genImage(zip, time, zone.detail, img)
-      const data = await this.zocUtil.upload(zip, time)
-      const isZOCPush = data.success ? true : false
-      const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, isZOCPush, ZOCZip: data.zipname, ...stranger, }
+      let isZOCPush = false
+      let zipname = ''
+      if (device.deviceType === 2) {
+        const zone: IZone = await this.zoneService.findById(device.zone)
+        const time = moment().format('YYYYMMDDHHmmss');
+        const zip = await this.zocUtil.genZip()
+        await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device)
+        await this.zocUtil.genImage(zip, time, zone.detail, img)
+        const data = await this.zocUtil.upload(zip, time)
+        isZOCPush = data.success ? true : false
+        zipname = data.success ? data.zipname : ''
+      }
+
+      const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, isZOCPush, ZOCZip: zipname, ...stranger, }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
       await this.sendMessage(createOrbit, user, device)
     }
@@ -215,4 +221,56 @@ export class CallbackService {
     const client = this.redis.getClient()
     await client.hset('device', DeviceUUID, 0)
   }
+
+  // 心跳包处理
+  async upDeviceToZOC(code: string) {
+    const devices: IDevice[] = await this.deviceService.findByZoneId(code)
+    const zone = await this.zoneService.findById(code)
+    const { detail, propertyCo } = zone
+    await Promise.all(devices.map(async device => {
+      const time = moment().format('YYYYMMDDHHmmss');
+      const zip = await this.zocUtil.genZip()
+      // await this.zocUtil.genResident(zip, time, residents)
+      await this.zocUtil.genBasicAddr(zip, time, detail)
+      await this.zocUtil.genManufacturer(zip, time)
+      await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
+      await this.zocUtil.genDevice(zip, time, detail, device)
+      await this.zocUtil.upload(zip, time)
+    }))
+  }
+
+  // 心跳包处理
+  async upResidentToZOC(zone: string) {
+    const time = moment().format('YYYYMMDDHHmmss');
+    const zip = await this.zocUtil.genZip()
+    const residents: IResident[] = await this.residentService.findByCondition({ zone })
+    const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
+    const deviceIds = devices.map(device => String(device.deviceId))
+    const zoneDetail: IZone = await this.zoneService.findById(zone)
+    const { detail } = zoneDetail
+    const residentDatas: any = []
+    await Promise.all(residents.map(async resident => {
+      const user: IUser | null = await this.userService.updateById(resident.user, {})
+      const address: IZone = await this.zoneService.findById(resident.address)
+
+      if (!user) {
+        return
+      }
+      let phone = user.phone
+      if (!phone) {
+        const owner: IUser | null = await this.userService.findById(resident.reviewer)
+        if (!owner) {
+          return
+        }
+        phone = owner.phone
+      }
+      const data = await this.zocUtil.genResidentData(address.profile, detail, user, deviceIds, phone)
+      residentDatas.push(data)
+
+    }))
+    await this.zocUtil.genResident(zip, time, residentDatas)
+    const data = await this.zocUtil.upload(zip, time)
+    return data
+  }
+
 }

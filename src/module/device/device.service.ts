@@ -28,14 +28,14 @@ export class DeviceService {
     return deviceExist[0].deviceId + 1
   }
   // 上报设备至智能感知平台
-  async uploadToZoc(zoneId: string) {
+  async uploadToZoc(zoneId: string, device: IDevice) {
     const zone = await this.zoneService.findById(zoneId)
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
     await this.zocUtil.genBasicAddr(zip, time, zone.detail)
     await this.zocUtil.genManufacturer(zip, time)
     await this.zocUtil.genPropertyCo(zip, time, zone.propertyCo, zone.detail)
-    await this.zocUtil.genDevice(zip, time, zone.detail)
+    await this.zocUtil.genDevice(zip, time, zone.detail, device)
     await this.zocUtil.upload(zip, time)
   }
 
@@ -45,7 +45,7 @@ export class DeviceService {
     creatDevice.deviceId = await this.getDeviceId()
     await creatDevice.save();
     if (createDeviceDTO.deviceType === 2) {
-      this.uploadToZoc(createDeviceDTO.zone)
+      this.uploadToZoc(createDeviceDTO.zone, creatDevice)
     }
     await this.zoneService.incDeviceCount(creatDevice.zone, 1);
     return creatDevice;

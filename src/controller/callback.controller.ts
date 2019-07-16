@@ -28,6 +28,7 @@ import { ConfigService } from 'src/config/config.service';
 import { IPropertyCo } from 'src/module/zone/interfaces/propertyCo.interface';
 import { ResidentService } from 'src/module/resident/resident.service';
 import { P2PErrorService } from 'src/module/p2pError/p2pError.service';
+import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 
 
 @ApiUseTags('callback')
@@ -147,17 +148,10 @@ export class CallbackController {
     @Request() req,
     @Query('code') code: string,
   ) {
+    await this.callbackService.upDeviceToZOC(code)
+    await this.callbackService.upResidentToZOC(code)
+    return
 
-    const time = moment().format('YYYYMMDDHHmmss');
-    const zone = await this.zoneService.findById(code)
-    const { detail, propertyCo } = zone
-    const zip = await this.zocUtil.genZip()
-    // await this.zocUtil.genResident(zip, time, residents)
-    await this.zocUtil.genBasicAddr(zip, time, detail)
-    await this.zocUtil.genManufacturer(zip, time)
-    await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
-    await this.zocUtil.genDevice(zip, time, detail)
-    await this.zocUtil.upload(zip, time)
   }
 
 }
