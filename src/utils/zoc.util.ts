@@ -248,7 +248,7 @@ export class ZOCUtil {
   /**
    * 生成住户信息数据
    */
-  async genResidentData(profile: IZoneProfile, detail: IDetail, user: IUser, deviceIds: string[]) {
+  async genResidentData(profile: IZoneProfile, detail: IDetail, user: IUser, deviceIds: string[], phone) {
     const order = await this.getOrder()
     const data = {
       SBXXLSH: order,
@@ -272,7 +272,7 @@ export class ZOCUtil {
       JWWGDM: detail.JWWGDM,
       JWWGMC: detail.JWWGMC,
       ZHXM: user.username,
-      ZHSJHM: user.phone,
+      ZHSJHM: phone,
       ZHSFZ: user.cardNumber,
       ZHLX: '03',
       CJSJ: this.getTemp(),

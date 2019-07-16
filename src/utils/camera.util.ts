@@ -269,7 +269,7 @@ export class CameraUtil {
       if (!poolExist) {
         await client.hset('p2pError_pool', upData.device, 1)
       }
-      await client.lpush(`p2pError${upData.device}`, JSON.stringify(errorData))
+      await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
       return false
     } catch (error) {
       // console.log(error)
@@ -278,7 +278,7 @@ export class CameraUtil {
       if (!poolExist) {
         await client.hset('p2pError_pool', upData.device, 1)
       }
-      await client.lpush(`p2pError${upData.device}`, JSON.stringify(errorData))
+      await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
       return false
     }
   }
@@ -316,7 +316,7 @@ export class CameraUtil {
       if (!poolExist) {
         await client.hset('p2pError_pool', upData.device, 1)
       }
-      await client.lpush(`p2pError${upData.device}`, JSON.stringify(newErrorData))
+      await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
       return false
     } catch (error) {
       console.log(error, 'error')
@@ -325,7 +325,7 @@ export class CameraUtil {
       if (!poolExist) {
         await client.hset('p2pError_pool', upData.device, 1)
       }
-      await client.lpush(`p2pError${upData.device}`, JSON.stringify(newErrorData))
+      await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
     }
     return
   }

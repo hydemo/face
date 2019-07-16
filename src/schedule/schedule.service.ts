@@ -106,7 +106,7 @@ export class ScheduleService {
     Schedule.scheduleJob('*/8 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
-      pools.map(async  pool => {
+      await Promise.all(pools.map(async  pool => {
         const length = await client.llen(`p2p_${pool}`)
         if (!length) {
           await client.hdel('p2p_pool', pool)
@@ -114,16 +114,16 @@ export class ScheduleService {
         }
         const dataString: any = await client.rpop(`p2p_${pool}`)
         const data = JSON.parse(dataString)
+        console.log(data, 'data')
         // console.log(data, 'data')
         await this.handelP2P(data, data, dataString, client, 'p2p')
-      })
-
+      }))
     });
 
     Schedule.scheduleJob('*/10 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2pError_pool')
-      pools.map(async  pool => {
+      await Promise.all(pools.map(async  pool => {
         const length = await client.llen(`p2pError_${pool}`)
         if (!length) {
           await client.hdel('p2pError_pool', pool)
@@ -133,7 +133,7 @@ export class ScheduleService {
         const errorData = JSON.parse(dataString)
         const { upData } = errorData
         await this.handelP2P(upData, errorData, dataString, client, 'p2pError')
-      })
+      }))
     });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {

@@ -61,7 +61,6 @@ export class CMSUserController {
       user: id,
       description: '管理员',
       role: 0,
-      zone: ''
     }
     await this.roleService.create(role);
     return { statusCode: 200, msg: '设置成功' };

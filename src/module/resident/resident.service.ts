@@ -398,13 +398,13 @@ export class ResidentService {
     return creatResident;
   }
   // 上报常住人至智能感知平台
-  async uploadToZoc(userId: string, zoneId: string, profile: IZoneProfile, deviceIds: string[]) {
+  async uploadToZoc(userId: string, zoneId: string, profile: IZoneProfile, deviceIds: string[], phone: string) {
     const userToZOC: IUser | null = await this.userService.updateById(userId, {})
     if (!userToZOC) {
       return
     }
     const zoneToZOC = await this.zoneService.findById(zoneId)
-    const data = await this.zocUtil.genResidentData(profile, zoneToZOC.detail, userToZOC, deviceIds)
+    const data = await this.zocUtil.genResidentData(profile, zoneToZOC.detail, userToZOC, deviceIds, phone)
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
     await this.zocUtil.genResident(zip, time, [data])
@@ -416,8 +416,16 @@ export class ResidentService {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
     if (!expire) {
+      let phone = user.phone
+      if (!user.phone) {
+        const owner = await this.userService.findById(zone.owner)
+        if (!owner) {
+          return
+        }
+        phone = user.phone
+      }
       const deviceIds = devices.map(device => String(device.deviceId))
-      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds)
+      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone)
     }
     const img = await this.cameraUtil.getImg(user.faceUrl)
     Promise.all(devices.map(async device => {
