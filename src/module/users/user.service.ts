@@ -356,6 +356,7 @@ export class UserService {
     const key = uuid()
     const client = this.redis.getClient()
     const number = user.cardNumber
+    console.log(user, 'number')
     const replaceStr = number.substring(4, 13);
     const str = '*'.repeat(replaceStr.length)
     const cardNumber = number.replace(replaceStr, str)
