@@ -310,8 +310,8 @@ export class UserService {
         .findOne({ _id: { $ne: user._id }, cardNumber: verify.cardNumber })
         .lean()
         .exec();
-      if(cardNumberExisting.isVerify){
-        throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
+      if (cardNumberExisting && cardNumberExisting.isVerify) {
+        throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
       }
       if (cardNumberExisting) {
         const update = {
