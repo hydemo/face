@@ -250,6 +250,7 @@ export class CameraUtil {
  */
   async handleP2P(upData) {
     const client = this.redis.getClient()
+    console.log(upData.data)
     try {
       const result: any = await axios({
         method: 'post',

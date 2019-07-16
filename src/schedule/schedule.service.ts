@@ -108,13 +108,13 @@ export class ScheduleService {
       const pools = await client.hkeys('p2p_pool')
       await Promise.all(pools.map(async  pool => {
         const length = await client.llen(`p2p_${pool}`)
+        console.log(pool, 'pool')
         if (!length) {
           await client.hdel('p2p_pool', pool)
           return
         }
         const dataString: any = await client.rpop(`p2p_${pool}`)
         const data = JSON.parse(dataString)
-        console.log(data, 'data')
         // console.log(data, 'data')
         await this.handelP2P(data, data, dataString, client, 'p2p')
       }))

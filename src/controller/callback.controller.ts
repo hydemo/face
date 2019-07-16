@@ -110,7 +110,7 @@ export class CallbackController {
     }))
     await Promise.all(errorPools.map(async pool => {
       const count = await client.llen(`p2pError_${pool}`)
-      p2pPools.push({ pool, count })
+      p2pErrorPools.push({ pool, count })
     }))
     const finalCount = await client.llen('p2pErrorFinal')
     const final = await client.lrange('p2pErrorFinal', 0, finalCount)
