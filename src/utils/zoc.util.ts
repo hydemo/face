@@ -218,7 +218,7 @@ export class ZOCUtil {
         sign,
       },
     });
-    console.log(result, 'result')
+    console.log(result.data, 'result')
   }
   /**
    * 生成zip对象

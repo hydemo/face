@@ -105,6 +105,7 @@ export class CallbackService {
 
       const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, isZOCPush, ZOCZip: zipname, ...stranger, }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
+
       await this.sendMessage(createOrbit, user, device)
     }
     return
@@ -172,7 +173,7 @@ export class CallbackService {
         await this.visitorReceivers(resident, zone, receivers)
         await this.residentService.updateById(resident._id, { isMonitor: false })
       } else if (resident.type === 'family' && resident.isMonitor) {
-        await this.familyReceivers(resident, receivers)
+        await this.familyReceivers(user, resident, receivers)
       }
     }))
     return receivers
@@ -200,19 +201,31 @@ export class CallbackService {
   }
 
   // 访客推送人
-  async familyReceivers(resident: IResident, receivers: IReceiver[]): Promise<IReceiver[]> {
-    const residents: IResident[] = await this.residentService.findByCondition({
-      isDelete: false,
-      isPush: true,
-      address: resident.address,
-      checkResult: 2
-    })
-    residents.map(resid => {
-      if (String(resid.user) === String(resident.user)) {
-        return
-      }
-      receivers.push({ id: resid.user, type: 'family' })
-    })
+  async familyReceivers(user: IUser, resident: IResident, receivers: IReceiver[]): Promise<IReceiver[]> {
+    const number = user.cardNumber;
+    const thisYear = moment().format('YYYY')
+    let age;
+    if (number.length > 15) {
+      const birthYear = number.slice(6, 10)
+      age = Number(thisYear) - Number(birthYear)
+    } else {
+      const birthYear = `19${number.slice(6, 8)}`
+      age = Number(thisYear) - Number(birthYear)
+    }
+    if (age < 14 || age > 75) {
+      const residents: IResident[] = await this.residentService.findByCondition({
+        isDelete: false,
+        isPush: true,
+        address: resident.address,
+        checkResult: 2
+      })
+      residents.map(resid => {
+        if (String(resid.user) === String(resident.user)) {
+          return
+        }
+        receivers.push({ id: resid.user, type: 'family' })
+      })
+    }
     return receivers
   }
   // 心跳包处理
