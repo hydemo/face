@@ -70,22 +70,32 @@ export class RoleService {
     Promise.all(devices.map(async device => {
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false })
       if (faceExist) {
-        return
+        const face = {
+          device: device._id,
+          user: user._id,
+          mode: 2,
+          libIndex: faceExist.libIndex,
+          flieIndex: faceExist.flieIndex,
+          pic: faceExist.pic,
+          bondToObjectId,
+          bondType: 'role',
+          zone: zone,
+        }
+        return await this.faceService.create(face);
+      } else {
+        const face = {
+          device: device._id,
+          user: user._id,
+          mode: 2,
+          // libIndex: result.LibIndex,
+          // flieIndex: result.FlieIndex,
+          // pic: result.Pic,
+          bondToObjectId,
+          bondType: 'role',
+          zone: zone,
+        }
+        await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, face)
       }
-
-      const face = {
-        device: device._id,
-        user: user._id,
-        mode: 2,
-        // libIndex: result.LibIndex,
-        // flieIndex: result.FlieIndex,
-        // pic: result.Pic,
-        bondToObjectId,
-        bondType: 'role',
-        zone: zone,
-      }
-      await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, face)
-      // await this.faceService.create(face);
     }))
   }
 
