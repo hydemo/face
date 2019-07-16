@@ -92,21 +92,28 @@ export class CallbackService {
       }
       let isZOCPush = false
       let zipname = ''
+      let phone = user.phone
       if (device.deviceType === 2) {
-        const zone: IZone = await this.zoneService.findById(device.zone)
-        const time = moment().format('YYYYMMDDHHmmss');
-        const zip = await this.zocUtil.genZip()
-        await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device)
-        await this.zocUtil.genImage(zip, time, zone.detail, img)
-        const data = await this.zocUtil.upload(zip, time)
-        isZOCPush = data.success ? true : false
-        zipname = data.success ? data.zipname : ''
+        if (!phone) {
+          const resident = await this.residentService.findByCondition({ user: userId, isDelete: false })
+
+          const owner = await this.userService.findById(resident[0].reviewer)
+          if (owner) {
+            phone = owner.phone
+          }
+          const zone: IZone = await this.zoneService.findById(device.zone)
+          const time = moment().format('YYYYMMDDHHmmss');
+          const zip = await this.zocUtil.genZip()
+          await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, phone)
+          await this.zocUtil.genImage(zip, time, zone.detail, img)
+          const data = await this.zocUtil.upload(zip, time)
+          isZOCPush = data.success ? true : false
+          zipname = data.success ? data.zipname : ''
+        }
+        const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, isZOCPush, ZOCZip: zipname, ...stranger, }
+        const createOrbit: IOrbit = await this.orbitService.create(orbit);
+        await this.sendMessage(createOrbit, user, device)
       }
-
-      const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, isZOCPush, ZOCZip: zipname, ...stranger, }
-      const createOrbit: IOrbit = await this.orbitService.create(orbit);
-
-      await this.sendMessage(createOrbit, user, device)
     }
     return
   }
@@ -256,7 +263,7 @@ export class CallbackService {
   async upResidentToZOC(zone: string) {
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
-    const residents: IResident[] = await this.residentService.findByCondition({ zone })
+    const residents: IResident[] = await this.residentService.findByCondition({ zone, checkResult: 2, isDelete: false })
     const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
     const deviceIds = devices.map(device => String(device.deviceId))
     const zoneDetail: IZone = await this.zoneService.findById(zone)

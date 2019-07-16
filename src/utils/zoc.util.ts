@@ -441,9 +441,12 @@ export class ZOCUtil {
   /**
 * 生成刷卡记录
 */
-  async genEnRecord(zip: any, time: String, detail: IDetail, user: any, device: IDevice): Promise<boolean> {
+  async genEnRecord(zip: any, time: String, detail: IDetail, user: any, device: IDevice, phone: string): Promise<boolean> {
     // const url = `${this.config.zocUrl}/api/check/gate/record`;
     // const token = await this.getToken()
+    if (!phone) {
+      return false
+    }
     const data = {
       DSBM: detail.SYSTEMID,
       DZMC: detail.DZMC,
@@ -459,7 +462,7 @@ export class ZOCUtil {
       ZHJG: '',
       ZHSFZDZ: '',
       HZXM: user.username,
-      HZSJHM: user.phone,
+      HZSJHM: phone,
       HZSFZ: user.cardNumber,
       MJCSDM: this.config.companyCreditCode,
       MJJLX: '04',
