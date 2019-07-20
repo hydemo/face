@@ -174,7 +174,7 @@ export class ScheduleService {
       if (result === 'imgError') {
         await this.sendP2PError(data.username, data.face, client)
       }
-      if (result && result.Pic) {
+      if (result && (result.Pic || result.Pic === 0)) {
         const face = {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
@@ -196,7 +196,7 @@ export class ScheduleService {
       result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       if (result === 'imgError') {
         await this.sendP2PError(data.username, data.face[0], client)
-      } else if (result && result.Pic) {
+      } else if (result && (result.Pic || result.Pic === 0)) {
         const update = {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
