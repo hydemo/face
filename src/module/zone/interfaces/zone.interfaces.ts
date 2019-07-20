@@ -25,7 +25,7 @@ export interface IZone extends Document {
   // 区域Id
   zoneId: string;
   // 父级区域
-  readonly parent?: string;
+  readonly parent: string | null;
   // 设备数
   readonly deviceCount: number;
   // 业主
