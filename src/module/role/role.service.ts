@@ -38,10 +38,6 @@ export class RoleService {
       return null
     }
     const creatRole = await this.roleModel.create(role);
-    if (!role.zone) {
-      return null
-    }
-    await this.addToDevice(role.zone, user, creatRole._id)
     return creatRole;
   }
 
