@@ -58,7 +58,7 @@ export class ResidentController {
   @ApiOperation({ title: '业主审核列表', description: '业主审核列表' })
   ownerReviews(
     @Query() pagination: Pagination,
-    @Query('checkResult') checkResult: string,
+    @Query('checkResult') checkResult: number,
     @Request() req: any
   ) {
     return this.residentService.ownerReviews(pagination, req.user._id, checkResult);
