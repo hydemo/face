@@ -331,7 +331,7 @@ export class ScheduleService {
           const device: IDevice | null = await this.deviceService.findByUUID(key)
           if (!device) return
           const zoneName = device.position.houseNumber.split('-')
-          await this.phone.sendDeviceError(zoneName[0], key)
+          // await this.phone.sendDeviceError(zoneName[0], key)
         }
       }))
     });
