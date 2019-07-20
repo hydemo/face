@@ -108,6 +108,7 @@ export class RoleService {
       }
     }))
     const result = await this.faceService.checkResult(bondToObjectId)
+    console.log(result, 'roleResult')
     const checkResult = result.length ? 4 : 2
     await this.roleModel.findByIdAndUpdate(bondToObjectId, { checkResult })
   }
