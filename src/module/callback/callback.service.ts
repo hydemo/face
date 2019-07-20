@@ -239,7 +239,7 @@ export class CallbackService {
     const { DeviceUUID } = body;
     const client = this.redis.getClient()
     const exist = await client.hget('device', DeviceUUID)
-    if (!exist) {
+    if (!exist || Number(exist) > 5) {
       const device: IDevice | null = await this.deviceService.findByUUID(DeviceUUID)
       if (!device) {
         return
