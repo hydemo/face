@@ -475,6 +475,7 @@ export class ResidentService {
     }))
     const result = await this.faceService.checkResult(resident)
     const checkResult = result.length ? 4 : 2
+    console.log(result, 'residentRes')
     return await this.residentModel.findByIdAndUpdate(resident, { checkResult });
   }
 
