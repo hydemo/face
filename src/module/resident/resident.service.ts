@@ -476,7 +476,9 @@ export class ResidentService {
     const result = await this.faceService.checkResult(resident)
     const checkResult = result.length ? 4 : 2
     console.log(checkResult, resident, 'residentRes')
-    return await this.residentModel.findByIdAndUpdate(resident, { checkResult });
+    await this.residentModel.findByIdAndUpdate(resident, { checkResult });
+    const ddd = await this.residentModel.findById(resident)
+    console.log(ddd, 'ddd')
   }
 
   // 物业通过业主审核
