@@ -236,11 +236,14 @@ export class ScheduleService {
           return
         }
         const device: IDevice = await this.deviceService.findById(pool)
+        console.log(device, 'device')
         if (!device) {
           await client.hdel('p2p_pool', pool)
           return
         }
-        const alive = await client.hget('device', pool)
+
+        const alive = await client.hget('device', device.deviceUUID)
+        console.log(alive, 'alive')
         if (!alive || Number(alive) > 5) {
           await client.hdel('p2p_pool', pool)
           return
@@ -266,7 +269,7 @@ export class ScheduleService {
           await client.hdel('p2p_pool', pool)
           return
         }
-        const alive = await client.hget('device', pool)
+        const alive = await client.hget('device', device.deviceUUID)
         if (!alive || Number(alive) > 5) {
           await client.hdel('p2p_pool', pool)
           return
