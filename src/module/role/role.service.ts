@@ -75,7 +75,7 @@ export class RoleService {
     const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
     console.log(devices, 'devices')
     const img = await this.cameraUtil.getImg(user.faceUrl)
-    Promise.all(devices.map(async device => {
+    await Promise.all(devices.map(async device => {
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: true })
       if (faceExist) {
         const face = {
@@ -104,7 +104,7 @@ export class RoleService {
           faceUrl: user.faceUrl
         }
         const createFace = await this.faceService.create(face);
-        await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, createFace)
+        this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, createFace)
       }
     }))
     const result = await this.faceService.checkResult(bondToObjectId)

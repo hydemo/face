@@ -432,7 +432,7 @@ export class ResidentService {
     //   this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
     // }
     const img = await this.cameraUtil.getImg(user.faceUrl)
-    Promise.all(devices.map(async device => {
+    await Promise.all(devices.map(async device => {
       const faceCheck: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, bondToObjectId: resident, })
       if (faceCheck) {
         return
