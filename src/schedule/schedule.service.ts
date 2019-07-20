@@ -170,11 +170,11 @@ export class ScheduleService {
       } else {
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
-      console.log(result, 'result')
+      console.log(result, 'resultsss')
       if (result === 'imgError') {
         await this.sendP2PError(data.username, data.face, client)
       }
-      if (result && (result.Pic || result.Pic === 0)) {
+      if (result && result.Pic) {
         const face = {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
@@ -194,9 +194,10 @@ export class ScheduleService {
       }
     } else if (data.type === 'update-add') {
       result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+      console.log(result, 'resultssss')
       if (result === 'imgError') {
         await this.sendP2PError(data.username, data.face[0], client)
-      } else if (result && (result.Pic || result.Pic === 0)) {
+      } else if (result && result.Pic) {
         const update = {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
