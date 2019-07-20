@@ -102,10 +102,10 @@ export class ScheduleService {
       return
     }
     const send = await client.get(openId.openId)
-    if (!send) {
+    console.log(send, 'send')
+    if (send) {
       return
     }
-    console.log(send, 'send')
     if (!send && openId) {
       const message: ApplicationDTO = {
         first: {

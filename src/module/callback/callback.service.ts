@@ -247,7 +247,7 @@ export class CallbackService {
       await client.hset('p2p_pool', String(device._id), 1)
       await client.hset('p2pError_pool', String(device._id), 1)
     }
-    await client.hset('device', DeviceUUID, 0)
+    await client.hset('device', DeviceUUID, 1)
 
   }
 
