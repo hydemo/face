@@ -17,6 +17,8 @@ export class CreateRoleDTO {
   @Type(() => String)
   @ApiModelProperty({ description: '描述' })
   readonly description: string;
+
+  reviewer: string;
 }
 
 export class RoleDTO {
@@ -40,6 +42,14 @@ export class RoleDTO {
   @Type(() => Number)
   @ApiModelProperty({ description: '角色' })
   readonly role: number;
+
+  @IsNumber()
+  @IsEnum([1, 2, 3, 4, 5])
+  @Type(() => Number)
+  @ApiModelProperty({ description: '同步结果' })
+  readonly checkResult: number;
+
+  reviewer: string;
 }
 
 export class CreateRoleByScanDTO {
@@ -63,6 +73,14 @@ export class CreateRoleByScanDTO {
   @Type(() => Number)
   @ApiModelProperty({ description: '角色' })
   readonly role: number;
+
+  @IsNumber()
+  @IsEnum([1, 2, 3, 4, 5])
+  @Type(() => Number)
+  @ApiModelProperty({ description: '同步结果' })
+  readonly checkResult: number;
+
+  reviewer: string;
 }
 
 

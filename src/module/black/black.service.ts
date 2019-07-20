@@ -15,6 +15,7 @@ import { CreateFaceDTO } from '../face/dto/face.dto';
 import { FaceService } from '../face/face.service';
 import { IUser } from '../users/interfaces/user.interfaces';
 import { UserService } from '../users/user.service';
+import { IFace } from '../face/interfaces/face.interfaces';
 
 @Injectable()
 export class BlackService {
@@ -110,6 +111,9 @@ export class BlackService {
     return { list, total };
   }
 
+  async findByCondition(condition: any) {
+    return await this.blackModel.find(condition).populate({ path: 'zone', model: 'zone' }).lean().exec()
+  }
 
   // 根据id查询
   async findById(id: string): Promise<IBlack | null> {
@@ -133,7 +137,7 @@ export class BlackService {
     if (!user) {
       return
     }
-    const img = await this.cameraUtil.getImg(user.faceUrl)
+    const img = await this.cameraUtil.getImg(black.faceUrl)
     devices.map(async device => {
       const face = {
         device: device._id,
@@ -145,11 +149,14 @@ export class BlackService {
         bondToObjectId: black._id,
         bondType: 'black',
         zone: black.zone,
+        checkResult: false,
+        faceUrl: black.faceUrl
       }
-      await this.cameraUtil.addOnePic(device, black, this.config.blackMode, img, face)
+      const createFace: IFace = await this.faceService.create(face);
+      await this.cameraUtil.addOnePic(device, black, this.config.blackMode, img, createFace)
     })
     await this.blackModel.findByIdAndUpdate(id, {
-      checkResult: 2,
+      checkResult: 4,
       checkTime: new Date(),
       reviewer: userId,
     })
@@ -164,5 +171,10 @@ export class BlackService {
       reviewer,
     })
     return true;
+  }
+
+  // 根据id修改
+  async updateById(id: string, update: any): Promise<IBlack | null> {
+    return await this.blackModel.findByIdAndUpdate(id, update)
   }
 }

@@ -24,8 +24,12 @@ export const FaceSchema = new mongoose.Schema(
     bondType: String,
     // 区域
     zone: ObjectId,
+    // 上传结果 1:待审核，2：通过，3:拒绝，4:同步中，5:同步失败
+    checkResult: { type: Boolean, default: false },
     // 是否删除
-    isDelete: { type: Boolean, default: false }
+    isDelete: { type: Boolean, default: false },
+    // 人脸链接
+    faceUrl: String,
   },
   { collection: 'face', versionKey: false, timestamps: true },
 );

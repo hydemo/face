@@ -124,11 +124,11 @@ export class FaceService {
     const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
     const deviceFaces: any = []
     for (let face of faces) {
+      await this.faceModel.findByIdAndUpdate(face._id, { checkResult: false, faceUrl: img })
       this.genFaces(deviceFaces, String(face.device._id), face)
     }
-    console.log(deviceFaces, 'deviceFaces')
-    deviceFaces.map(deviceFace => {
-      this.cameraUtil.updateOnePic(deviceFace.faces, user, img, deviceFace.mode)
+    deviceFaces.map(async deviceFace => {
+      await this.cameraUtil.updateOnePic(deviceFace.faces, user, img, deviceFace.mode)
     })
   }
 
@@ -138,8 +138,15 @@ export class FaceService {
     const faceToDelete: IFace | null = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
     if (faceCount === 1 && faceToDelete) {
       await this.cameraUtil.deleteOnePic(faceToDelete)
+      return false
     }
     await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true })
+    return true
+  }
+
+  // 根据id删除
+  async checkResult(bondToObjectId: string) {
+    return await this.faceModel.find({ bondToObjectId, checkResult: false })
   }
 
   async updateByCondition(condition: any, update: any) {

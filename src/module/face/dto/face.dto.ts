@@ -34,20 +34,25 @@ export class CreateFaceDTO {
   @IsNumber()
   @Type(() => Number)
   @ApiModelProperty({ description: '库索引' })
-  readonly libIndex: number;
+  readonly libIndex?: number;
 
   @IsNumber()
   @Type(() => Number)
   @ApiModelProperty({ description: '图片索引' })
-  readonly flieIndex: number;
+  readonly flieIndex?: number;
 
   @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '图片名' })
-  readonly pic: string;
+  readonly pic?: string;
 
   @IsDate()
   @Type(() => Date)
   @ApiModelProperty({ description: '申请时间' })
   expire?: Date;
+
+  readonly checkResult: boolean;
+
+  // 人脸链接
+  readonly faceUrl: string;
 }

@@ -74,8 +74,9 @@ export class RoleController {
   @ApiOperation({ title: '扫码添加工作人员', description: '扫码添加工作人员' })
   async addManagement(
     @Body() role: CreateRoleByScanDTO,
+    @Request() req: any,
   ) {
-    await this.roleService.createByScan(role);
+    await this.roleService.createByScan(role, req.user._id);
     return { statusCode: 200, msg: '添加成功' };
   }
 

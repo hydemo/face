@@ -197,7 +197,6 @@ export class ZoneService {
   // 获取子集
   async getChildren(children: IChildren, parent: IZone, pno: number, code: string): Promise<IChildren> {
     const result: any = await this.socUtil.qrcodeAddress(code, String(pno))
-    console.log(result, 're')
     const list: IZoneProfile[] = result.list
     const page = result.page
     const totalPage = page.tsize
@@ -231,7 +230,6 @@ export class ZoneService {
   // 二维码添加小区
   async addByQrcode(createZone: CreateZoneByScanDTO) {
     const result: any = await this.socUtil.qrcodeAddress(createZone.code, '1')
-    console.log(result, 'result')
     // const detail: IDetail = await this.socUtil.address(createZone.code)
     // console.log(detail, 'detail')
     const list: IZoneProfile[] = result.list

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, Inject } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, Inject, Request } from '@nestjs/common';
 import {
   ApiUseTags,
   ApiOkResponse,
@@ -73,8 +73,9 @@ export class CMSZoneController {
   async addManagement(
     @Body() role: CreateRoleDTO,
     @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
   ) {
-    const createRole: RoleDTO = { ...role, role: 1 }
+    const createRole: RoleDTO = { ...role, role: 1, reviewer: req.user._id, checkResult: 4 }
     return await this.roleService.create(createRole);
   }
 

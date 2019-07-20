@@ -46,7 +46,12 @@ export class RoleService {
   }
 
   // 创建数据
-  async createByScan(role: CreateRoleByScanDTO): Promise<IRole> {
+  async findById(id: string): Promise<IRole | null> {
+    return await this.roleModel.findById(id).lean().exec()
+  }
+
+  // 创建数据
+  async createByScan(role: CreateRoleByScanDTO, reviewer: string): Promise<IRole> {
     const user: IUser = await this.weixinUtil.scan(role.key)
     const exist: number = await this.roleModel.countDocuments({ user: user._id, role: role.role, zone: role.zone, isDelete: false })
     if (exist) {
@@ -56,7 +61,9 @@ export class RoleService {
       user: user._id,
       zone: role.zone,
       role: role.role,
-      description: role.description
+      description: role.description,
+      checkResult: 4,
+      reviewer
     }
     const result = await this.roleModel.create(createRole);
     await this.addToDevice(role.zone, user, result._id)
@@ -66,9 +73,11 @@ export class RoleService {
   // 添加人员到设备
   async addToDevice(zone: string, user: IUser, bondToObjectId: string) {
     const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
+    console.log(devices, 'devices')
     const img = await this.cameraUtil.getImg(user.faceUrl)
     Promise.all(devices.map(async device => {
-      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false })
+
+      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: true })
       if (faceExist) {
         const face = {
           device: device._id,
@@ -80,23 +89,28 @@ export class RoleService {
           bondToObjectId,
           bondType: 'role',
           zone: zone,
+          checkResult: true,
+          faceUrl: user.faceUrl,
         }
         return await this.faceService.create(face);
       } else {
-        const face = {
+        const face: CreateFaceDTO = {
           device: device._id,
           user: user._id,
           mode: 2,
-          // libIndex: result.LibIndex,
-          // flieIndex: result.FlieIndex,
-          // pic: result.Pic,
+          checkResult: false,
           bondToObjectId,
           bondType: 'role',
           zone: zone,
+          faceUrl: user.faceUrl
         }
-        await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, face)
+        const createFace = await this.faceService.create(face);
+        await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, createFace)
       }
     }))
+    const result = await this.faceService.checkResult(bondToObjectId)
+    const checkResult = result.length ? 4 : 2
+    await this.roleModel.findByIdAndUpdate(bondToObjectId, { checkResult })
   }
 
   // 删除数据
@@ -112,11 +126,13 @@ export class RoleService {
     if (!exist) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: id, bondType: 'role', isDelete: false })
+    const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: id, isDelete: false })
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
-    return await this.roleModel.findByIdAndUpdate(id, { isDelete: true });
+    const result = await this.faceService.checkResult(id)
+    const checkResult = result.length ? 4 : 2
+    return await this.roleModel.findByIdAndUpdate(id, { isDelete: true, checkResult });
   }
 
   // 删除物业
@@ -270,10 +286,15 @@ export class RoleService {
   }
 
   async findByCondition(condition: any) {
-    return await this.roleModel.find(condition).populate({ path: 'zone', model: 'zones' }).lean().exec()
+    return await this.roleModel.find(condition).populate({ path: 'zone', model: 'zone' }).lean().exec()
   }
 
   async findOneAndDelete(condition: any) {
     return await this.roleModel.findOneAndUpdate(condition, { isDelete: true })
+  }
+
+  // 根据id修改
+  async updateById(id: string, update: any): Promise<IRole | null> {
+    return await this.roleModel.findByIdAndUpdate(id, update)
   }
 }

@@ -56,11 +56,15 @@ export class CMSUserController {
   })
   @ApiCreatedResponse({ description: '设为管理员' })
   @ApiOperation({ title: '设为管理员', description: '设为管理员' })
-  async setAdmin(@Param('id', new MongodIdPipe()) id: string) {
+  async setAdmin(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any) {
     const role: RoleDTO = {
       user: id,
       description: '管理员',
       role: 0,
+      checkResult: 2,
+      reviewer: req.user._id
     }
     await this.roleService.create(role);
     return { statusCode: 200, msg: '设置成功' };

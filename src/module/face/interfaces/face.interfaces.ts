@@ -18,4 +18,6 @@ export interface IFace extends Document {
   // 区域
   readonly zone: string;
   isDelete: boolean;
+  bondType: string;
+  bondToObjectId: string;
 }

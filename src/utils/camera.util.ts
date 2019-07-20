@@ -11,6 +11,7 @@ import { IUser } from 'src/module/users/interfaces/user.interfaces';
 import { IPic } from 'src/common/interface/pic.interface';
 import { PhoneUtil } from './phone.util';
 import { P2PErrorService } from 'src/module/p2pError/p2pError.service';
+import { P2PErrorDTO } from 'src/module/p2pError/dto/p2pError.dto';
 
 @Injectable()
 export class CameraUtil {
@@ -176,7 +177,7 @@ export class CameraUtil {
         ImgNum,
       }
     }
-    const upData = { data: addData, face: faces, type: 'update-add', device: _id }
+    const upData = { data: addData, face: faces, type: 'update-add', device: _id, username: user.username }
     await client.lpush(`p2p_${id}`, JSON.stringify(upData))
     // return await this.addOnePic(face[0].device, pic, face[0].mode, Img, face)
   }
@@ -211,6 +212,7 @@ export class CameraUtil {
   * @param face 名单信息
   */
   async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: any) {
+    console.log(222)
     const { username, password, deviceUUID, _id } = device
     const id = String(_id)
     // console.log(user.faceUrl, 'facedd')
@@ -232,7 +234,7 @@ export class CameraUtil {
         ImgNum,
       }
     }
-    const upData = { data, face, type: 'add', device: id }
+    const upData = { data, face, type: 'add', device: id, username: user.username }
     const client = this.redis.getClient()
     const poolExist = await client.hget('p2p_pool', id)
     if (!poolExist) {
@@ -256,14 +258,16 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
-      console.log(result.data, 'result')
       if (result.data.Result === 'ok') {
-        return result.data.AddOnePic;
+        return upData.data === 'AddOnePic' ? result.data.AddOnePic : true;
       }
-      if (result.data.ErrorCode === -3 || result.data.ErrorCode === -2 || result.data.Code === -6) {
-        return
+      if (result.data.ErrorCode === -3 || result.data.Code === -6) {
+        console.log(result.data)
+        return true
       }
-
+      if (result.data.ErrorCode === -15) {
+        return 'imgError'
+      }
       const errorData = { count: 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)
       if (!poolExist) {
@@ -294,7 +298,12 @@ export class CameraUtil {
     const { upData, count } = errorData
     if (count > 5) {
       await client.lpush('p2pErrorFinal', JSON.stringify(errorData))
-      await this.p2pErrorService.create(JSON.stringify(upData))
+      const imgUrl = upData.type === 'add' ? upData.face.imgUrl : upData.face[0].imgUrl
+      const error: P2PErrorDTO = {
+        face: upData.face,
+        imgUrl,
+      }
+      await this.p2pErrorService.create(error)
       await this.phoneUtil.sendP2PError()
       return null
     }
@@ -304,12 +313,15 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
-      console.log(result.data, 'result')
       if (result.data.Result === 'ok') {
-        return result.data.AddOnePic;
+        return upData.data === 'AddOnePic' ? result.data.AddOnePic : true;
       }
       if (result.data.ErrorCode === -3 || result.data.Code === -6) {
-        return
+        console.log(result.data)
+        return true
+      }
+      if (result.data.ErrorCode === -15) {
+        return 'imgError'
       }
       const newErrorData = { count: count + 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)

@@ -129,7 +129,7 @@ export class ResidentService {
   }
 
   // 申请列表
-  async ownerReviews(pagination: Pagination, user: string, checkResult: string) {
+  async ownerReviews(pagination: Pagination, user: string, checkResult: number) {
     if (!pagination.zone) {
       return { list: [], total: 0 }
     }
@@ -228,7 +228,7 @@ export class ResidentService {
     const creatResident = await this.residentModel.create(resident);
     const message: ApplicationDTO = {
       first: {
-        value: `您收到一条${zone.houseNumber}的家人申请`,
+        value: `您收到一条${zone.houseNumber}的访客申请`,
         color: "#173177"
       },
       keyword1: {
@@ -307,7 +307,7 @@ export class ResidentService {
       zone: zone.zoneId,
       address: zone._id,
       user: user._id,
-      checkResult: 2,
+      checkResult: 4,
       applicationTime: new Date(),
       isMonitor: false,
       type: 'visitor',
@@ -327,7 +327,7 @@ export class ResidentService {
       zone: address.zoneId,
       address: address._id,
       user: user._id,
-      checkResult: 2,
+      checkResult: 4,
       isMonitor: true,
       applicationTime: new Date(),
       addTime: new Date(),
@@ -384,7 +384,7 @@ export class ResidentService {
       zone: zone.zoneId,
       address: zone._id,
       user: user._id,
-      checkResult: 2,
+      checkResult: 4,
       applicationTime: new Date(),
       isMonitor,
       isPush,
@@ -437,20 +437,23 @@ export class ResidentService {
       if (faceCheck) {
         return
       }
-      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false })
+      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: true })
       if (!faceExist) {
-        const face = {
+        const face: CreateFaceDTO = {
           device: device._id,
           user: user._id,
           mode: 2,
-          // libIndex: result.LibIndex,
-          // flieIndex: result.FlieIndex,
-          // pic: result.Pic,
           bondToObjectId: resident,
           bondType: 'resident',
           zone: zone.zoneId,
+          checkResult: false,
+          faceUrl: user.faceUrl,
         }
-        return await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, face)
+        if (expire) {
+          face.expire = expire;
+        }
+        const createFace = await this.faceService.create(face)
+        return await this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, createFace)
       }
       const face: CreateFaceDTO = {
         device: device._id,
@@ -462,12 +465,17 @@ export class ResidentService {
         bondToObjectId: resident,
         bondType: 'resident',
         zone: zone.zoneId,
+        checkResult: true,
+        faceUrl: user.faceUrl,
       }
       if (expire) {
         face.expire = expire;
       }
       await this.faceService.create(face);
     }))
+    const result = await this.faceService.checkResult(resident)
+    const checkResult = result.length ? 4 : 2
+    return await this.residentModel.findByIdAndUpdate(resident, { checkResult });
   }
 
   // 物业通过业主审核
@@ -510,7 +518,7 @@ export class ResidentService {
     }
     await this.addToDevice(resident.address, resident.user, id)
     await this.residentModel.findByIdAndUpdate(id, {
-      checkResult: 2,
+      checkResult: 4,
       addTime: new Date(),
       checkTime: new Date(),
       reviewer,
@@ -520,6 +528,8 @@ export class ResidentService {
       description: '业主',
       user: resident.user._id,
       zone: resident.address._id,
+      checkResult: 2,
+      reviewer,
     }
     await this.zoneService.updateOwner(resident.address._id, resident.user._id)
     await this.roleService.create(role)
@@ -563,11 +573,38 @@ export class ResidentService {
 
   // 业主审核不通过
   async rejectOwner(id: string, reviewer: string): Promise<boolean> {
-    await this.residentModel.findByIdAndUpdate(id, {
+    const resident: any = await this.residentModel.findByIdAndUpdate(id, {
       checkResult: 3,
       checkTime: new Date(),
       reviewer,
     })
+    const message: ApplicationDTO = {
+      first: {
+        value: `您提交的${resident.address.houseNumber}业主申请已审核`,
+        color: "#173177"
+      },
+      keyword1: {
+        value: '审核不通过',
+        color: "#173177"
+      },
+      keyword2: {
+        value: '物业',
+        color: "#173177"
+      },
+      keyword3: {
+        value: moment().format('YYYY:MM:DD HH:mm:ss'),
+        color: "#173177"
+      },
+      keyword4: {
+        value: '无',
+        color: "#173177"
+      },
+      remark: {
+        value: '请核对提交信息是否准确，确定无误后可再发出申请',
+        color: "#173177"
+      },
+    }
+    this.weixinUtil.sendVerifyMessage(resident.user.openId, message)
     return true;
   }
 
@@ -587,7 +624,7 @@ export class ResidentService {
     await this.residentModel.findByIdAndUpdate(id, {
       isPush: agree.isMonitor,
       isMonitor: agree.isPush,
-      checkResult: 2,
+      checkResult: 4,
       addTime: new Date(),
       checkTime: new Date(),
     })
@@ -613,7 +650,7 @@ export class ResidentService {
         color: "#173177"
       },
       remark: {
-        value: '您现在可以刷脸进出小区',
+        value: '人脸同步成功后，可以刷脸进出小区',
         color: "#173177"
       },
     }
@@ -637,7 +674,7 @@ export class ResidentService {
     await this.residentModel.findByIdAndUpdate(id, {
       isPush: agree.isMonitor,
       isMonitor: agree.isPush,
-      checkResult: 2,
+      checkResult: 4,
       addTime: new Date(),
       checkTime: new Date(),
     })
@@ -661,7 +698,7 @@ export class ResidentService {
     await this.addToDevice(resident.address, resident.user, id, expireTime)
     await this.residentModel.findByIdAndUpdate(id, {
       expireTime,
-      checkResult: 2,
+      checkResult: 4,
       addTime: new Date(),
       checkTime: new Date(),
     })
@@ -687,7 +724,7 @@ export class ResidentService {
         color: "#173177"
       },
       remark: {
-        value: `您现在可以刷脸进出小区，有效期至${moment(expireTime).format('YYYY:MM:DD HH:mm:ss')} `,
+        value: `人脸同步成功后可以刷脸进出小区，有效期至${moment(expireTime).format('YYYY:MM:DD HH:mm:ss')} `,
         color: "#173177"
       },
     }
@@ -713,11 +750,11 @@ export class ResidentService {
     })
     const message: ApplicationDTO = {
       first: {
-        value: `您提交的${resident.address.houseNumber} ${resident.tpye === 'family' ? '家人人' : '访客'} 申请已审核`,
+        value: `您提交的${resident.address.houseNumber} ${resident.tpye === 'family' ? '家人' : '访客'} 申请已审核`,
         color: "#173177"
       },
       keyword1: {
-        value: '审核通过',
+        value: '审核不通过',
         color: "#173177"
       },
       keyword2: {
@@ -812,7 +849,9 @@ export class ResidentService {
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
-    return await this.residentModel.findByIdAndUpdate(resident, { isDelete: true }).lean().exec();
+    const result = await this.faceService.checkResult(resident)
+    const checkResult = result.length ? 4 : 2
+    return await this.residentModel.findByIdAndUpdate(resident, { isDelete: true, checkResult })
   }
 
   // 根据id修改
@@ -910,16 +949,18 @@ export class ResidentService {
     await Promise.all(residents.map(async resident => {
       if (resident.type === 'visitor') {
         const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident._id, isDelete: false })
-        faces.map(face => this.faceService.delete(face._id))
-        return await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
+        await Promise.all(faces.map(async face => await this.faceService.delete(face._id)))
+        const result = await this.faceService.checkResult(resident._id)
+        const checkResult = result.length ? 4 : 2
+        return await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true, checkResult })
       }
-      return await this.residentModel.findByIdAndUpdate(resident._id, { isDisable: true })
+      return await this.residentModel.findByIdAndUpdate(resident._id, { isDisable: true, checkResult: 2 })
     }))
     const createResident: ResidentDTO = {
       zone: address.zoneId,
       address: address._id,
       user: tenant._id,
-      checkResult: 2,
+      checkResult: 4,
       applicationTime: new Date(),
       isMonitor: false,
       isPush: true,
@@ -935,6 +976,8 @@ export class ResidentService {
       description: '租客',
       user: resident.user._id,
       zone: resident.address._id,
+      checkResult: 2,
+      reviewer: address.owner,
     }
     await this.roleService.create(role)
     return await this.addToDevice(address, tenant, resident._id)
@@ -964,7 +1007,9 @@ export class ResidentService {
       await Promise.all(faces.map(async face => {
         return await this.faceService.delete(face)
       }))
-      await this.residentModel.findByIdAndUpdate(visitor._id, { isDelete: true }).lean().exec();
+      const result = await this.faceService.checkResult(visitor._id)
+      const checkResult = result.length ? 4 : 2
+      return await this.residentModel.findByIdAndUpdate(visitor._id, { isDelete: true, checkResult })
     }))
   }
 
