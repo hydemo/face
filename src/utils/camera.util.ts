@@ -40,7 +40,6 @@ export class CameraUtil {
    * @param Mode 模式 device: IDevice, Mode: numbers
    */
   async getList(ip): Promise<any> {
-    console.log(222)
     const { username = 'admin', password = 'oyxj19891024', deviceUUID = 'umettw42g7iu' } = {}
     const timeStamp: string = Date.now().toString()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
@@ -212,7 +211,6 @@ export class CameraUtil {
   * @param face 名单信息
   */
   async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: any) {
-    console.log(222)
     const { username, password, deviceUUID, _id } = device
     const id = String(_id)
     // console.log(user.faceUrl, 'facedd')
@@ -263,7 +261,6 @@ export class CameraUtil {
       }
       console.log(result.data)
       if (result.data.ErrorCode === -3 || result.data.Code === -6) {
-        console.log(result.data)
         return true
       }
       if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
@@ -314,11 +311,11 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
+      console.log(result.data, 'result')
       if (result.data.Result === 'ok') {
         return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;
       }
       if (result.data.ErrorCode === -3 || result.data.Code === -6) {
-        console.log(result.data)
         return true
       }
       if (result.data.ErrorCode === -15) {

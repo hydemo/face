@@ -69,7 +69,6 @@ export class RoleService {
   // 添加人员到设备
   async addToDevice(zone: string, user: IUser, bondToObjectId: string) {
     const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
-    console.log(devices, 'devices')
     const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: true })
@@ -104,7 +103,6 @@ export class RoleService {
       }
     }))
     const result = await this.faceService.checkResult(bondToObjectId)
-    console.log(result, 'roleResult')
     const checkResult = result.length ? 4 : 2
     await this.roleModel.findByIdAndUpdate(bondToObjectId, { checkResult })
   }

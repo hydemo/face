@@ -475,10 +475,8 @@ export class ResidentService {
     }))
     const result = await this.faceService.checkResult(resident)
     const checkResult = result.length ? 4 : 2
-    console.log(checkResult, resident, 'residentRes')
     await this.residentModel.findByIdAndUpdate(resident, { checkResult });
     const ddd = await this.residentModel.findById(resident)
-    console.log(ddd, 'ddd')
   }
 
   // 物业通过业主审核
@@ -519,9 +517,14 @@ export class ResidentService {
     if (owner) {
       throw new ApiException('该房屋已有业主', ApiErrorCode.NO_PERMISSION, 403);
     }
+    await this.residentModel.findByIdAndUpdate(id, {
+      addTime: new Date(),
+      checkTime: new Date(),
+      reviewer,
+      checkResult: 4,
+    })
     await this.addToDevice(resident.address, resident.user, id)
     await this.residentModel.findByIdAndUpdate(id, {
-      checkResult: 4,
       addTime: new Date(),
       checkTime: new Date(),
       reviewer,
@@ -623,7 +626,6 @@ export class ResidentService {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     await this.isOwner(resident.address._id, user._id)
-    await this.addToDevice(resident.address, resident.user, id)
     await this.residentModel.findByIdAndUpdate(id, {
       isPush: agree.isMonitor,
       isMonitor: agree.isPush,
@@ -631,6 +633,7 @@ export class ResidentService {
       addTime: new Date(),
       checkTime: new Date(),
     })
+    await this.addToDevice(resident.address, resident.user, id)
     const message: ApplicationDTO = {
       first: {
         value: `您提交的${resident.address.houseNumber}家人申请已审核`,
@@ -673,14 +676,15 @@ export class ResidentService {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     await this.isOwner(resident.address._id, userId)
-    await this.addToDevice(resident.address, resident.user, id)
     await this.residentModel.findByIdAndUpdate(id, {
       isPush: agree.isMonitor,
       isMonitor: agree.isPush,
-      checkResult: 4,
       addTime: new Date(),
       checkTime: new Date(),
+      checkResult: 4,
     })
+    await this.addToDevice(resident.address, resident.user, id)
+
     return true;
   }
 
@@ -698,13 +702,14 @@ export class ResidentService {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     await this.isOwner(resident.address._id, user._id)
-    await this.addToDevice(resident.address, resident.user, id, expireTime)
     await this.residentModel.findByIdAndUpdate(id, {
       expireTime,
-      checkResult: 4,
       addTime: new Date(),
       checkTime: new Date(),
+      checkResult: 4,
     })
+    await this.addToDevice(resident.address, resident.user, id, expireTime)
+
     const message: ApplicationDTO = {
       first: {
         value: `您提交的${resident.address.houseNumber}访客申请已审核`,
@@ -993,8 +998,8 @@ export class ResidentService {
       if (resident.type === 'owner') {
         await this.roleService.findOneAndDelete({ role: 5, user: resident.user, zone: resident.address })
       }
+      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true, checkResult: 4 })
       await this.deleteById(resident._id, resident.reviewer)
-      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true })
 
     }))
     await this.residentModel.findOneAndUpdate({ isDisable: true, type: 'owner', address: address._id, user: address.owner }, { isDisable: false, isDelete: false })

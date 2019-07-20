@@ -89,7 +89,6 @@ export class CallbackController {
 
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async keeplive(@Request() req) {
-    console.log(req.body, 'req.body')
     await this.callbackService.keepalive(req.body)
     return { status: 200 }
   }

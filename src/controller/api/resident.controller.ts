@@ -99,7 +99,6 @@ export class ResidentController {
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any,
   ) {
-    console.log(222)
     await this.residentService.deleteById(id, req.user._id);
     return { statusCode: 200, msg: '删除成功' };
   }

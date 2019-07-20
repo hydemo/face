@@ -299,7 +299,6 @@ export class ZOCUtil {
    * 生成住户信息
    */
   async genResident(zip: any, time: String, data: any): Promise<boolean> {
-    console.log(data, data.length, 'data')
     const json = JSON.stringify(data)
     const filename = `Resident-${time}.json`
     const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)

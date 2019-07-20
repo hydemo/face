@@ -37,7 +37,6 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) { }
 
   async handleConnection(client) {
-    console.log(client.handshake.query.token, 'token')
     const media: any = await this.jwtService.verify(
       client.handshake.query.token,
     )
@@ -51,7 +50,6 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } else {
       this.connectedMedias[index] = { id: String(media.id), client }
     }
-    console.log(this.connectedMedias, 'sss')
     client.emit('connect', '连接成功')
   }
 
@@ -64,8 +62,6 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return
     }
     this.connectedMedias = this.connectedMedias.filter(v => v.id !== String(mediaExist.id))
-    console.log(this.connectedMedias, 'mediaExist')
-    console.log(111)
 
   }
 

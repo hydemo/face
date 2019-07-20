@@ -129,7 +129,6 @@ export class WeixinUtil {
     }
 
     async sendVerifyMessage(openId: string, data: ApplicationDTO) {
-        console.log(openId, data, 'ddd')
         const token = await this.access_token()
         const result = await axios({
             method: 'post',
@@ -141,7 +140,6 @@ export class WeixinUtil {
                 data,
             }
         });
-        console.log(result, 're')
     }
 
     async sendApplicationMessage(openId: string, data: ApplicationDTO) {

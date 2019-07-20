@@ -97,12 +97,10 @@ export class ScheduleService {
 
   async sendP2PError(username, face: IFace, client) {
     const openId = await this.getOpenId(face)
-    console.log(openId, 'openId')
     if (!openId) {
       return
     }
     const send = await client.get(openId.openId)
-    console.log(send, 'send')
     if (send) {
       return
     }
@@ -170,7 +168,6 @@ export class ScheduleService {
       } else {
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
-      console.log(result, 'resultsss')
       if (result === 'imgError') {
         await this.sendP2PError(data.username, data.face, client)
       }
@@ -194,7 +191,6 @@ export class ScheduleService {
       }
     } else if (data.type === 'update-add') {
       result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
-      console.log(result, 'resultssss')
       if (result === 'imgError') {
         await this.sendP2PError(data.username, data.face[0], client)
       } else if (result && result.Pic) {
@@ -245,14 +241,12 @@ export class ScheduleService {
           return
         }
         const device: IDevice = await this.deviceService.findById(pool)
-        console.log(device, 'device')
         if (!device) {
           await client.hdel('p2p_pool', pool)
           return
         }
 
         const alive = await client.hget('device', device.deviceUUID)
-        console.log(alive, 'alive')
         if (!alive || Number(alive) > 5) {
           await client.hdel('p2p_pool', pool)
           return
@@ -290,32 +284,32 @@ export class ScheduleService {
       }))
     });
 
-    // Schedule.scheduleJob('*/60 * * * * *', async () => {
-    //   const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
-    //   const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
-    //   const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
-    //   await Promise.all(residents.map(async resident => {
-    //     const result = await this.faceService.checkResult(resident._id)
-    //     if (!result.length) {
-    //       return await this.residentService.updateById(resident._id, { checkResult: 2 });
+    Schedule.scheduleJob('*/60 * * * * *', async () => {
+      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
+      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
+      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
+      await Promise.all(residents.map(async resident => {
+        const result = await this.faceService.checkResult(resident._id)
+        if (!result.length) {
+          return await this.residentService.updateById(resident._id, { checkResult: 2 });
 
-    //     }
-    //   }))
-    //   await Promise.all(roles.map(async role => {
-    //     const result = await this.faceService.checkResult(role._id)
-    //     if (!result.length) {
-    //       return await this.roleService.updateById(role._id, { checkResult: 2 });
+        }
+      }))
+      await Promise.all(roles.map(async role => {
+        const result = await this.faceService.checkResult(role._id)
+        if (!result.length) {
+          return await this.roleService.updateById(role._id, { checkResult: 2 });
 
-    //     }
-    //   }))
-    //   await Promise.all(blacks.map(async black => {
-    //     const result = await this.faceService.checkResult(black._id)
-    //     if (!result.length) {
-    //       return await this.blackService.updateById(black._id, { checkResult: 2 });
+        }
+      }))
+      await Promise.all(blacks.map(async black => {
+        const result = await this.faceService.checkResult(black._id)
+        if (!result.length) {
+          return await this.blackService.updateById(black._id, { checkResult: 2 });
 
-    //     }
-    //   }))
-    // });
+        }
+      }))
+    });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {
     //   const client = this.redis.getClient()
