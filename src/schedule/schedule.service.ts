@@ -108,8 +108,17 @@ export class ScheduleService {
       const pools = await client.hkeys('p2p_pool')
       await Promise.all(pools.map(async  pool => {
         const length = await client.llen(`p2p_${pool}`)
-        console.log(pool, 'pool')
         if (!length) {
+          await client.hdel('p2p_pool', pool)
+          return
+        }
+        const device: IDevice = await this.deviceService.findById(pool)
+        if (!device) {
+          await client.hdel('p2p_pool', pool)
+          return
+        }
+        const alive = await client.hget('device', pool)
+        if (!alive || Number(alive) > 5) {
           await client.hdel('p2p_pool', pool)
           return
         }
@@ -127,6 +136,16 @@ export class ScheduleService {
         const length = await client.llen(`p2pError_${pool}`)
         if (!length) {
           await client.hdel('p2pError_pool', pool)
+          return
+        }
+        const device: IDevice = await this.deviceService.findById(pool)
+        if (!device) {
+          await client.hdel('p2p_pool', pool)
+          return
+        }
+        const alive = await client.hget('device', pool)
+        if (!alive || Number(alive) > 5) {
+          await client.hdel('p2p_pool', pool)
           return
         }
         const dataString: any = await client.rpop(`p2pError_${pool}`)

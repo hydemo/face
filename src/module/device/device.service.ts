@@ -36,7 +36,10 @@ export class DeviceService {
     await this.zocUtil.genManufacturer(zip, time)
     await this.zocUtil.genPropertyCo(zip, time, zone.propertyCo, zone.detail)
     await this.zocUtil.genDevice(zip, time, zone.detail, device)
-    await this.zocUtil.upload(zip, time)
+    const result = await this.zocUtil.upload(zip, time)
+    if (result.success) {
+      await this.deviceModel.findByIdAndUpdate(device._id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
+    }
   }
 
   // 创建数据
@@ -44,9 +47,7 @@ export class DeviceService {
     const creatDevice = new this.deviceModel(createDeviceDTO);
     creatDevice.deviceId = await this.getDeviceId()
     await creatDevice.save();
-    if (createDeviceDTO.deviceType === 2) {
-      this.uploadToZoc(createDeviceDTO.zone, creatDevice)
-    }
+    // this.uploadToZoc(createDeviceDTO.zone, creatDevice)
     await this.zoneService.incDeviceCount(creatDevice.zone, 1);
     return creatDevice;
   }

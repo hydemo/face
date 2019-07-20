@@ -68,6 +68,7 @@ export class CreateOrbitDTO {
   isZOCPush?: boolean;
   // 智能感知平台包名
   ZOCZip?: string;
+  upTime?: number;
 }
 
 

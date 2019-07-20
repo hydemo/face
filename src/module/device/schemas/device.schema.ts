@@ -37,7 +37,13 @@ export const DeviceSchema = new mongoose.Schema(
     // 广告机
     media: ObjectId,
     // 设备id
-    deviceId: { type: Number, unique: true }
+    deviceId: { type: Number, unique: true },
+    // 是否推送到智能感知平台
+    isZOCPush: { type: Boolean, defaut: false },
+    // 智能感知平台包名
+    ZOCZip: String,
+    // 智能感知平台上传时间
+    upTime: Date,
   },
   { collection: 'device', versionKey: false, timestamps: true },
 );

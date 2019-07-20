@@ -398,7 +398,7 @@ export class ResidentService {
     return creatResident;
   }
   // 上报常住人至智能感知平台
-  async uploadToZoc(userId: string, zoneId: string, profile: IZoneProfile, deviceIds: string[], phone: string) {
+  async uploadToZoc(userId: string, zoneId: string, profile: IZoneProfile, deviceIds: string[], phone: string, resident: string) {
     const userToZOC: IUser | null = await this.userService.updateById(userId, {})
     if (!userToZOC) {
       return
@@ -408,25 +408,29 @@ export class ResidentService {
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
     await this.zocUtil.genResident(zip, time, [data])
-    await this.zocUtil.upload(zip, time)
+    const result = await this.zocUtil.upload(zip, time)
+    if (result.success) {
+      await this.residentModel.findByIdAndUpdate(resident, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
+    }
+
   }
 
   // 添加人员到设备
   async addToDevice(zone: IZone, user: IUser, resident: string, expire?: Date) {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
-    if (!expire) {
-      let phone = user.phone
-      if (!phone) {
-        const owner = await this.userService.findById(zone.owner)
-        if (!owner) {
-          return
-        }
-        phone = owner.phone
-      }
-      const deviceIds = devices.map(device => String(device.deviceId))
-      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone)
-    }
+    // if (!expire) {
+    //   let phone = user.phone
+    //   if (!phone) {
+    //     const owner = await this.userService.findById(zone.owner)
+    //     if (!owner) {
+    //       return
+    //     }
+    //     phone = owner.phone
+    //   }
+    //   const deviceIds = devices.map(device => String(device.deviceId))
+    //   this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
+    // }
     const img = await this.cameraUtil.getImg(user.faceUrl)
     Promise.all(devices.map(async device => {
       const faceCheck: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, bondToObjectId: resident, })

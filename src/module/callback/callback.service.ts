@@ -94,23 +94,23 @@ export class CallbackService {
       let zipname = ''
       let phone = user.phone
 
-      if (!phone) {
-        const resident = await this.residentService.findByCondition({ user: userId, isDelete: false })
+      // if (!phone) {
+      //   const resident = await this.residentService.findByCondition({ user: userId, isDelete: false })
 
-        const owner = await this.userService.findById(resident[0].reviewer)
-        if (owner) {
-          phone = owner.phone
-        }
-        const zone: IZone = await this.zoneService.findById(device.zone)
-        const time = moment().format('YYYYMMDDHHmmss');
-        const zip = await this.zocUtil.genZip()
-        await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, phone)
-        await this.zocUtil.genImage(zip, time, zone.detail, img)
-        const data = await this.zocUtil.upload(zip, time)
-        isZOCPush = data.success ? true : false
-        zipname = data.success ? data.zipname : ''
-      }
-      const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, isZOCPush, ZOCZip: zipname, ...stranger, }
+      //   const owner = await this.userService.findById(resident[0].reviewer)
+      //   if (owner) {
+      //     phone = owner.phone
+      //   }
+      //   const zone: IZone = await this.zoneService.findById(device.zone)
+      //   const time = moment().format('YYYYMMDDHHmmss');
+      //   const zip = await this.zocUtil.genZip()
+      //   await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, phone)
+      //   await this.zocUtil.genImage(zip, time, zone.detail, img)
+      //   const data = await this.zocUtil.upload(zip, time)
+      //   isZOCPush = data.success ? true : false
+      //   zipname = data.success ? data.zipname : ''
+      // }
+      const orbit: CreateOrbitDTO = { user: user._id, mode: body.WBMode, isZOCPush, ZOCZip: zipname, ...stranger, upTime: Date.now() }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
       await this.sendMessage(createOrbit, user, device)
     }
@@ -238,7 +238,17 @@ export class CallbackService {
   async keepalive(body: any) {
     const { DeviceUUID } = body;
     const client = this.redis.getClient()
+    const exist = await client.hget('device', DeviceUUID)
+    if (!exist) {
+      const device: IDevice | null = await this.deviceService.findByUUID(DeviceUUID)
+      if (!device) {
+        return
+      }
+      await client.hset('p2p_pool', String(device._id), 1)
+      await client.hset('p2pError_pool', String(device._id), 1)
+    }
     await client.hset('device', DeviceUUID, 0)
+
   }
 
   // 心跳包处理

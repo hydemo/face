@@ -42,6 +42,8 @@ export const ResidentSchema = new mongoose.Schema(
     isZOCPush: { type: Boolean, defaut: false },
     // 智能感知平台包名
     ZOCZip: String,
+    // 智能感知平台上传时间
+    upTime: Date,
   },
   { collection: 'resident', versionKey: false, timestamps: true },
 );
