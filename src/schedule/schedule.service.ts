@@ -290,32 +290,32 @@ export class ScheduleService {
       }))
     });
 
-    Schedule.scheduleJob('*/60 * * * * *', async () => {
-      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
-      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
-      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
-      await Promise.all(residents.map(async resident => {
-        const result = await this.faceService.checkResult(resident._id)
-        if (!result.length) {
-          return await this.residentService.updateById(resident._id, { checkResult: 2 });
+    // Schedule.scheduleJob('*/60 * * * * *', async () => {
+    //   const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
+    //   const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
+    //   const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
+    //   await Promise.all(residents.map(async resident => {
+    //     const result = await this.faceService.checkResult(resident._id)
+    //     if (!result.length) {
+    //       return await this.residentService.updateById(resident._id, { checkResult: 2 });
 
-        }
-      }))
-      await Promise.all(roles.map(async role => {
-        const result = await this.faceService.checkResult(role._id)
-        if (!result.length) {
-          return await this.roleService.updateById(role._id, { checkResult: 2 });
+    //     }
+    //   }))
+    //   await Promise.all(roles.map(async role => {
+    //     const result = await this.faceService.checkResult(role._id)
+    //     if (!result.length) {
+    //       return await this.roleService.updateById(role._id, { checkResult: 2 });
 
-        }
-      }))
-      await Promise.all(blacks.map(async black => {
-        const result = await this.faceService.checkResult(black._id)
-        if (!result.length) {
-          return await this.blackService.updateById(black._id, { checkResult: 2 });
+    //     }
+    //   }))
+    //   await Promise.all(blacks.map(async black => {
+    //     const result = await this.faceService.checkResult(black._id)
+    //     if (!result.length) {
+    //       return await this.blackService.updateById(black._id, { checkResult: 2 });
 
-        }
-      }))
-    });
+    //     }
+    //   }))
+    // });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {
     //   const client = this.redis.getClient()
