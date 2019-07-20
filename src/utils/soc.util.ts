@@ -39,7 +39,7 @@ export class SOCUtil {
         appid: this.config.socAppId,
       },
       data: json,
-    });
+    })
     return JSON.parse(decodeURIComponent(result.data))
   }
 

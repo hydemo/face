@@ -197,6 +197,7 @@ export class ZoneService {
   // 获取子集
   async getChildren(children: IChildren, parent: IZone, pno: number, code: string): Promise<IChildren> {
     const result: any = await this.socUtil.qrcodeAddress(code, String(pno))
+    console.log(result, 're')
     const list: IZoneProfile[] = result.list
     const page = result.page
     const totalPage = page.tsize
@@ -230,7 +231,9 @@ export class ZoneService {
   // 二维码添加小区
   async addByQrcode(createZone: CreateZoneByScanDTO) {
     const result: any = await this.socUtil.qrcodeAddress(createZone.code, '1')
-    const detail: IDetail = await this.socUtil.address(createZone.code)
+    console.log(result, 'result')
+    // const detail: IDetail = await this.socUtil.address(createZone.code)
+    // console.log(detail, 'detail')
     const list: IZoneProfile[] = result.list
     const page = result.page
     const count = Number(page.tcount)
@@ -247,7 +250,7 @@ export class ZoneService {
       houseNumber: createZone.name,
       profile: parentProfile,
       buildingType: parentProfile.dzsx,
-      detail,
+      // detail,
       propertyCo: {
         name: createZone.propertyCoName,
         contact: createZone.contact,
@@ -258,18 +261,19 @@ export class ZoneService {
     }
     const createParent: IZone = await new this.zoneModel(parent);
     createParent.zoneId = createParent._id;
+    await createParent.save()
     const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, 1, createZone.code)
     createParent.children = children.children
     createParent.hasPartition = children.hasPartition
-    await createParent.save()
+    await this.zoneModel.findByIdAndUpdate(createParent._id, { children: children.children, hasPartition: children.hasPartition })
     // 上报物业信息
-    const time = moment().format('YYYYMMDDHHmmss');
-    const zip = await this.zocUtil.genZip()
-    await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
-    const zocResult: any = await this.zocUtil.upload(zip, time)
-    if (zocResult.success) {
-      await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname })
-    }
+    // const time = moment().format('YYYYMMDDHHmmss');
+    // const zip = await this.zocUtil.genZip()
+    // await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
+    // const zocResult: any = await this.zocUtil.upload(zip, time)
+    // if (zocResult.success) {
+    //   await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname })
+    // }
 
   }
 

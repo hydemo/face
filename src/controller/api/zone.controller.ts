@@ -29,7 +29,7 @@ import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 
 @ApiUseTags('zones')
 @ApiBearerAuth()
-@UseGuards(AuthGuard(), UserRolesGuard)
+// @UseGuards(AuthGuard(), UserRolesGuard)
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/zones')
 export class ZoneController {
@@ -74,7 +74,7 @@ export class ZoneController {
     type: CreateZoneDTO,
     isArray: true,
   })
-  @UserRoles(0)
+  // @UserRoles(0)
   @Post('/qrcode')
   @ApiOperation({ title: '二维码添加小区', description: '二维码添加小区' })
   async addByQrcode(
