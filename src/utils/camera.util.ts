@@ -266,7 +266,7 @@ export class CameraUtil {
         console.log(result.data)
         return true
       }
-      if (result.data.ErrorCode === -15) {
+      if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
         return 'imgError'
       }
       const errorData = { count: 1, upData }

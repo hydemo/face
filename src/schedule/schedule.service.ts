@@ -105,6 +105,7 @@ export class ScheduleService {
     if (!send) {
       return
     }
+    console.log(send, 'send')
     if (!send && openId) {
       const message: ApplicationDTO = {
         first: {
