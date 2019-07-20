@@ -76,7 +76,6 @@ export class RoleService {
     console.log(devices, 'devices')
     const img = await this.cameraUtil.getImg(user.faceUrl)
     Promise.all(devices.map(async device => {
-
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: true })
       if (faceExist) {
         const face = {

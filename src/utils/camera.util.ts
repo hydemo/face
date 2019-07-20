@@ -261,6 +261,7 @@ export class CameraUtil {
       if (result.data.Result === 'ok') {
         return upData.data === 'AddOnePic' ? result.data.AddOnePic : true;
       }
+      console.log(result.data)
       if (result.data.ErrorCode === -3 || result.data.Code === -6) {
         console.log(result.data)
         return true

@@ -97,6 +97,7 @@ export class ScheduleService {
 
   async sendP2PError(username, face: IFace, client) {
     const openId = await this.getOpenId(face)
+    console.log(openId, 'openId')
     if (!openId) {
       return
     }
@@ -168,6 +169,7 @@ export class ScheduleService {
       } else {
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
+      console.log(result, 'result')
       if (result === 'imgError') {
         await this.sendP2PError(data.username, data.face, client)
       }
