@@ -129,7 +129,7 @@ export class ScheduleService {
           color: "#173177"
         },
         remark: {
-          value: `请核对提交信息是否准确，确定无误后可再发出申请`,
+          value: `请在实名认证页面重新上传头像`,
           color: "#173177"
         },
       }
@@ -184,7 +184,11 @@ export class ScheduleService {
         await this.faceService.updateById(data.face._id, face)
       }
     } else if (data.type === 'delete') {
-      const result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+      const faceExist: IFace | null = await this.faceService.findById(data.face._id)
+      let result = true
+      if (faceExist && !faceExist.checkResult) {
+        result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+      }
       if (result) {
         await this.faceService.updateById(data.face._id, { checkResult: true })
       }
@@ -204,7 +208,10 @@ export class ScheduleService {
         }))
       }
     } else if (data.type === 'update-delete') {
-      type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+      const faceExist: IFace | null = await this.faceService.findById(data.face._id)
+      if (faceExist && !faceExist.checkResult) {
+        type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+      }
     }
     return await client.hset('p2p_listen', data.device, 0)
   }

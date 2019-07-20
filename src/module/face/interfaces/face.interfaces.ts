@@ -20,4 +20,5 @@ export interface IFace extends Document {
   isDelete: boolean;
   bondType: string;
   bondToObjectId: string;
+  checkResult: boolean;
 }
