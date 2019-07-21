@@ -135,7 +135,7 @@ export class ResidentService {
   // 业主存在确认
   async hasOwner(address: string) {
     return await this.residentModel
-      .findOne({ address, isDelete: false, isDisable: false, checkResult: { $or: [2, 4, 5] }, type: 'owner' })
+      .findOne({ address, isDelete: false, isDisable: false, checkResult: { $in: [2, 4, 5] }, type: 'owner' })
       .exec()
   }
 
@@ -151,7 +151,7 @@ export class ResidentService {
   // 是否是业主本人
   async isOwner(address: string, user: string) {
     const owner: IResident | null = await this.residentModel
-      .findOne({ user, address, isDelete: false, isDisable: false, type: 'owner', checkResult: { $or: [2, 4, 5] } })
+      .findOne({ user, address, isDelete: false, isDisable: false, type: 'owner', checkResult: { $in: [2, 4, 5] } })
     if (!owner) {
       throw new ApiException('无权限操作该房屋', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -160,7 +160,7 @@ export class ResidentService {
   // 获取审核人
   async getReviewers(address: string) {
     const reviewers: IResident[] = await this.residentModel
-      .find({ address, isDelete: false, type: { $or: ['family', 'owner'] }, isDisable: false, checkResult: { $or: [2, 4, 5] } })
+      .find({ address, isDelete: false, type: { $in: ['family', 'owner'] }, isDisable: false, checkResult: { $in: [2, 4, 5] } })
       .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
@@ -170,7 +170,7 @@ export class ResidentService {
   // 获取审核人
   async getMyHouses(user: string) {
     const residents: IResident[] = await this.residentModel
-      .find({ user, isDelete: false, type: { $or: ['family', 'owner'] }, isDisable: false, checkResult: { $or: [2, 4, 5] } })
+      .find({ user, isDelete: false, type: { $in: ['family', 'owner'] }, isDisable: false, checkResult: { $in: [2, 4, 5] } })
       .lean()
       .exec()
     return residents.map(reviewer => reviewer.address)
@@ -586,7 +586,7 @@ export class ResidentService {
   }
 
   // 我的待审列表
-  async myApplications(pagination: Pagination, user: string): Promise<IList<IResident>> {
+  async myReviews(pagination: Pagination, user: string): Promise<IList<IResident>> {
     const houses = await this.getMyHouses(user)
     const condition: any = { address: { $in: houses }, isDelete: false, checkResult: 1, type: { $ne: 'owner' } };
     const list: IResident[] = await this.residentModel
@@ -743,7 +743,7 @@ export class ResidentService {
     }
     let check: any = checkResult
     if (checkResult === 2) {
-      check = { $or: [2, 4, 5] }
+      check = { $in: [2, 4, 5] }
     }
     const condition = { isDelete: false, type: 'owner', zone, checkResult: check, isRent: { $exists: false } }
     const list: IResident[] = await this.residentModel
@@ -866,7 +866,7 @@ export class ResidentService {
         }
       }
       if (search.length) {
-        condition.$or = search;
+        condition.$in = search;
       }
     }
     const list = await this.residentModel
@@ -906,7 +906,7 @@ export class ResidentService {
   // 常住人列表
   async families(user: string): Promise<any> {
     const houses: IResident[] = await this.residentModel
-      .find({ user, isDelete: false, type: { $or: ['family', 'owner'] }, checkResult: { $or: [2, 4, 5] } })
+      .find({ user, isDelete: false, type: { $in: ['family', 'owner'] }, checkResult: { $in: [2, 4, 5] } })
       .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
       .lean()
       .exec()
@@ -915,8 +915,8 @@ export class ResidentService {
         address: house.address._id,
         owner: house.owner,
         isDelete: false,
-        type: { $or: ['family', 'owner'] },
-        checkResult: { $or: [2, 4, 5] },
+        type: { $in: ['family', 'owner'] },
+        checkResult: { $in: [2, 4, 5] },
       };
       const users: IResident[] = await this.residentModel
         .find(condition)
@@ -931,7 +931,7 @@ export class ResidentService {
   // 访客列表
   async visitors(user: string): Promise<any> {
     const houses: IResident[] = await this.residentModel
-      .find({ user, isDelete: false, type: { $or: ['family', 'owner'] }, checkResult: { $or: [2, 4, 5] } })
+      .find({ user, isDelete: false, type: { $in: ['family', 'owner'] }, checkResult: { $in: [2, 4, 5] } })
       .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
       .lean()
       .exec()
@@ -941,7 +941,7 @@ export class ResidentService {
         owner: house.owner,
         isDelete: false,
         type: 'visitor',
-        checkResult: { $or: [2, 4, 5] },
+        checkResult: { $in: [2, 4, 5] },
       };
       const users: IResident[] = await this.residentModel
         .find(condition)

@@ -312,6 +312,6 @@ export class ResidentController {
     @Query() pagination: Pagination,
     @Request() req: any
   ) {
-    return this.residentService.myApplications(pagination, req.user._id);
+    return this.residentService.myReviews(pagination, req.user._id);
   }
 }
