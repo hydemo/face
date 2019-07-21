@@ -24,6 +24,11 @@ export class ResidentDTO {
   @ApiModelProperty({ description: '审核人' })
   readonly reviewer?: string;
 
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '归属人' })
+  readonly owner: string;
+
   @IsNumber()
   @IsEnum([1, 2, 3])
   @Type(() => Number)

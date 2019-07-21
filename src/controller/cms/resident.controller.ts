@@ -72,18 +72,6 @@ export class CMSResidentController {
     return { statusCode: 200, msg: '申请成功' };
   }
 
-  @Post('/family')
-  @ApiOkResponse({
-    description: '申请常住人',
-  })
-  @ApiOperation({ title: '申请常住人', description: '申请常住人' })
-  async familyApplication(
-    @Body() resident: CreateResidentDTO,
-    @Request() req: any
-  ) {
-    await this.residentService.familyApplication(resident, req.user);
-    return { statusCode: 200, msg: '申请成功' };
-  }
 
   @Get('/:id')
   @ApiOkResponse({

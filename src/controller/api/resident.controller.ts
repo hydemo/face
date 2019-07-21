@@ -24,30 +24,73 @@ export class ResidentController {
     @Inject(ResidentService) private residentService: ResidentService,
   ) { }
 
+  /**
+   * 申请相关接口
+   */
+  @Post('/owner')
   @ApiOkResponse({
-    description: '业主申请列表',
-    isArray: true,
+    description: '申请业主',
   })
-  @Get('/applications/owner')
-  @ApiOperation({ title: '业主申请列表', description: '业主申请列表' })
-  ownerApplications(
-    @Query() pagination: Pagination,
+  @ApiOperation({ title: '申请业主', description: '申请业主' })
+  async ownerApplication(
+    @Body() resident: CreateResidentDTO,
     @Request() req: any
   ) {
-    return this.residentService.getApplications(pagination, req.user._id, 'owner');
+    await this.residentService.ownerApply(resident, req.user);
+    return { statusCode: 200, msg: '申请成功' };
   }
 
+  @Post('/applications/family')
   @ApiOkResponse({
-    description: '常住人申请列表',
+    description: '申请常住人',
+  })
+  @ApiOperation({ title: '申请常住人', description: '申请常住人' })
+  async familyApplication(
+    @Body() resident: CreateResidentDTO,
+    @Request() req: any
+  ) {
+    await this.residentService.familyApply(resident, req.user);
+    return { statusCode: 200, msg: '申请成功' };
+  }
+
+  @Post('/applications/visitor')
+  @ApiOkResponse({
+    description: '申请访客',
+  })
+  @ApiOperation({ title: '申请访客', description: '申请访客' })
+  async visitorApplication(
+    @Body() visitor: CreateResidentDTO,
+    @Request() req: any
+  ) {
+    await this.residentService.visitorApply(visitor, req.user);
+    return { statusCode: 200, msg: '申请成功' };
+  }
+
+
+  @ApiOkResponse({
+    description: '我的申请列表',
     isArray: true,
   })
   @Get('/applications/family')
-  @ApiOperation({ title: '常住人申请列表', description: '常住人申请列表' })
+  @ApiOperation({ title: '我的申请列表', description: '我的申请列表' })
   familyApplications(
     @Query() pagination: Pagination,
     @Request() req: any
   ) {
     return this.residentService.getApplications(pagination, req.user._id, 'family');
+  }
+
+  @ApiOkResponse({
+    description: '我的申请列表',
+    isArray: true,
+  })
+  @Get('/applications/visitor')
+  @ApiOperation({ title: '我的申请列表', description: '我的申请列表' })
+  visitorApplications(
+    @Query() pagination: Pagination,
+    @Request() req: any
+  ) {
+    return this.residentService.getApplications(pagination, req.user._id, 'visitor');
   }
 
   @ApiOkResponse({
@@ -61,34 +104,9 @@ export class ResidentController {
     @Query('checkResult') checkResult: number,
     @Request() req: any
   ) {
-    return this.residentService.ownerReviews(pagination, req.user._id, checkResult);
+    return this.residentService.ownerApplications(pagination, req.user._id, checkResult);
   }
 
-  @ApiOkResponse({
-    description: '访客申请列表',
-    isArray: true,
-  })
-  @Get('/applications/visitor')
-  @ApiOperation({ title: '访客申请列表', description: '访客申请列表' })
-  visitorApplications(
-    @Query() pagination: Pagination,
-    @Request() req: any
-  ) {
-    return this.residentService.getApplications(pagination, req.user._id, 'visitor');
-  }
-
-  @Post('/owner')
-  @ApiOkResponse({
-    description: '申请业主',
-  })
-  @ApiOperation({ title: '申请业主', description: '申请业主' })
-  async ownerApplication(
-    @Body() resident: CreateResidentDTO,
-    @Request() req: any
-  ) {
-    await this.residentService.ownerApplication(resident, req.user);
-    return { statusCode: 200, msg: '申请成功' };
-  }
 
   @Delete('/:id')
   @ApiOkResponse({
@@ -165,7 +183,7 @@ export class ResidentController {
     @Request() req: any
   ) {
     const clientIp = req.headers['x-real-ip'] ? req.headers['x-real-ip'] : req.ip.replace(/::ffff:/, '');
-    await this.residentService.addFamilyByOwner(resident, req.user._id, clientIp);
+    await this.residentService.addFamilyByInput(resident, req.user._id, clientIp);
     return { statusCode: 200, msg: '添加常住人成功' };
   }
 
@@ -204,7 +222,7 @@ export class ResidentController {
     @Query('address', new MongodIdPipe()) address: string,
     @Request() req: any
   ) {
-    const data = await this.residentService.getVisitorQrCode(address, req.user);
+    const data = await this.residentService.getVisitorLink(address, req.user);
     return { statusCode: 200, data };
   }
 
@@ -219,45 +237,6 @@ export class ResidentController {
   ) {
     await this.residentService.addVisitorByLink(key.key, req.user);
     return { statusCode: 200, msg: '添加访客成功' };
-  }
-
-  @Post('/applications/family')
-  @ApiOkResponse({
-    description: '申请常住人',
-  })
-  @ApiOperation({ title: '申请常住人', description: '申请常住人' })
-  async familyApplication(
-    @Body() resident: CreateResidentDTO,
-    @Request() req: any
-  ) {
-    await this.residentService.familyApplication(resident, req.user);
-    return { statusCode: 200, msg: '申请成功' };
-  }
-
-  @Post('/applications/visitor')
-  @ApiOkResponse({
-    description: '申请访客',
-  })
-  @ApiOperation({ title: '申请访客', description: '申请访客' })
-  async visitorApplication(
-    @Body() visitor: CreateResidentDTO,
-    @Request() req: any
-  ) {
-    await this.residentService.visitorApplication(visitor, req.user);
-    return { statusCode: 200, msg: '申请成功' };
-  }
-
-  @Post('/applications/visitor/scan')
-  @ApiOkResponse({
-    description: '扫码访问',
-  })
-  @ApiOperation({ title: '扫码访问', description: '扫码访问' })
-  async scanToVisitor(
-    @Body() visitor: CreateVisitorByScanDTO,
-    @Request() req: any
-  ) {
-    await this.residentService.scanToVisitor(visitor, req.user);
-    return { statusCode: 200, msg: '扫码访问' };
   }
 
   @Put('/applications/:id/agree-family')
@@ -327,8 +306,8 @@ export class ResidentController {
     return { statusCode: 200, msg: '拒绝常住人申请成功' };
   }
 
-  @Get('/applications')
-  @ApiOperation({ title: '获取申请列表', description: '获取申请列表' })
+  @Get('/reviews')
+  @ApiOperation({ title: '获取审核列表', description: '获取审核列表' })
   applications(
     @Query() pagination: Pagination,
     @Request() req: any

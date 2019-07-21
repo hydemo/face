@@ -27,5 +27,6 @@ export interface IResident extends Document {
   readonly expireTime: Date;
   // 审核人
   readonly reviewer: string;
-
+  // 归属人
+  readonly owner: string;
 }

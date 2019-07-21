@@ -28,6 +28,8 @@ export const ResidentSchema = new mongoose.Schema(
     checkTime: Date,
     // 审核人
     reviewer: ObjectId,
+    // 归属人
+    owner: ObjectId,
     // 有效期
     expireTime: Date,
     // 是否出租
