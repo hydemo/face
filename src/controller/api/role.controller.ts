@@ -90,11 +90,10 @@ export class RoleController {
   async myRole(
     @Request() req: any,
   ) {
-    const hasApplication = await this.residentService.findByCondition({ user: req.user._id })
+    const applications = await this.residentService.findByCondition({ user: req.user._id })
     const myHouses = await this.residentService.getMyHouses(req.user._id)
     const owner = await this.residentService.getMyOwnerHouses(req.user._id)
     const data = await this.roleService.myRoles(req.user._id);
-    return { statusCode: 200, data: { ...data, hasApplication, isFamily: myHouses.length > 0, owner } };
+    return { statusCode: 200, data: { ...data, hasApplication: applications.length > 0, isFamily: myHouses.length > 0, owner } };
   }
-
 }
