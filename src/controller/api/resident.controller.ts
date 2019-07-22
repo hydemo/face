@@ -104,7 +104,7 @@ export class ResidentController {
     @Query('checkResult') checkResult: number,
     @Request() req: any
   ) {
-    return this.residentService.ownerApplications(pagination, req.user._id, checkResult);
+    return this.residentService.ownerApplications(pagination, req.user._id, Number(checkResult));
   }
 
 
