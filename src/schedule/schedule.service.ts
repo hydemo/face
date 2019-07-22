@@ -143,12 +143,13 @@ export class ScheduleService {
   async handelP2P(data, sourceData, dataString, client, type) {
     console.log(data, 'data')
     const listenTime = await client.hget('p2p_listen', data.device)
-    if (listenTime > 10) {
+    console.log(listenTime, 'listenTime')
+    if (listenTime > 5) {
       await client.hset('p2p_listen', data.device, 0)
       return
     }
     if (listenTime > 0) {
-      client.rpush(type, dataString)
+      client.rpush(`p2p_${data.device}`, dataString)
       await client.hincrby('p2p_listen', data.device, 1)
       return;
     }
