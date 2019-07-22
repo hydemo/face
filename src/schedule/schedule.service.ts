@@ -96,11 +96,14 @@ export class ScheduleService {
   }
 
   async sendP2PError(username, face: IFace, client) {
+    console.log(333)
     const openId = await this.getOpenId(face)
+    console.log(openId, 'opwneId')
     if (!openId) {
       return
     }
     const send = await client.get(openId.openId)
+    console.log(send, 'send')
     if (send) {
       return
     }
@@ -132,6 +135,7 @@ export class ScheduleService {
         },
       }
       this.weixinUtil.sendVerifyMessage(openId.openId, message)
+      console.log(openId)
       await client.set(openId.openId, 1, 'EX', 60 * 2)
     }
   }
@@ -237,20 +241,24 @@ export class ScheduleService {
     Schedule.scheduleJob('*/16 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
+      console.log(pools, 'pools')
       await Promise.all(pools.map(async  pool => {
         console.log(pool, 'pool2')
         const length = await client.llen(`p2p_${pool}`)
+        console.log(length, 'length')
         if (!length) {
           await client.hdel('p2p_pool', pool)
           return
         }
         const device: IDevice = await this.deviceService.findById(pool)
+        console.log(device, 'device')
         if (!device) {
           await client.hdel('p2p_pool', pool)
           return
         }
 
         const alive = await client.hget('device', device.deviceUUID)
+        console.log(alive, 'alive')
         if (!alive || Number(alive) > 5) {
           await client.hdel('p2p_pool', pool)
           return
@@ -273,12 +281,12 @@ export class ScheduleService {
         }
         const device: IDevice = await this.deviceService.findById(pool)
         if (!device) {
-          await client.hdel('p2p_pool', pool)
+          await client.hdel('p2pError_pool', pool)
           return
         }
         const alive = await client.hget('device', device.deviceUUID)
         if (!alive || Number(alive) > 5) {
-          await client.hdel('p2p_pool', pool)
+          await client.hdel('p2pError_pool', pool)
           return
         }
         const dataString: any = await client.rpop(`p2pError_${pool}`)
