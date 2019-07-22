@@ -284,11 +284,29 @@ export class ScheduleService {
         const { upData } = errorData
         await this.handelP2P(upData, errorData, dataString, client, 'p2pError')
       }))
+
+
     });
 
-    // Schedule.scheduleJob('*/60 * * * * *', async () => {
+    Schedule.scheduleJob('*/30 * * * * *', async () => {
+      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
+      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
+      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
+      await Promise.all(residents.map(async resident => {
+        const checkResult = await this.faceService.checkResult(resident._id)
+        return await this.residentService.updateById(resident._id, { checkResult });
 
-    // });
+      }))
+      await Promise.all(roles.map(async role => {
+        const checkResult = await this.faceService.checkResult(role._id)
+        return await this.roleService.updateById(role._id, { checkResult });
+      }))
+      await Promise.all(blacks.map(async black => {
+        const checkResult = await this.faceService.checkResult(black._id)
+        return await this.blackService.updateById(black._id, { checkResult });
+
+      }))
+    });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {
     //   const client = this.redis.getClient()
@@ -312,24 +330,6 @@ export class ScheduleService {
           const zoneName = device.position.houseNumber.split('-')
           // await this.phone.sendDeviceError(zoneName[0], key)
         }
-      }))
-
-      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
-      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
-      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
-      await Promise.all(residents.map(async resident => {
-        const checkResult = await this.faceService.checkResult(resident._id)
-        return await this.residentService.updateById(resident._id, { checkResult });
-
-      }))
-      await Promise.all(roles.map(async role => {
-        const checkResult = await this.faceService.checkResult(role._id)
-        return await this.roleService.updateById(role._id, { checkResult });
-      }))
-      await Promise.all(blacks.map(async black => {
-        const checkResult = await this.faceService.checkResult(black._id)
-        return await this.blackService.updateById(black._id, { checkResult });
-
       }))
     });
   }
