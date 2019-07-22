@@ -14,6 +14,7 @@ import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { CreateRoleByScanDTO } from 'src/module/role/dto/role.dto';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
 import { UserRoles } from 'src/common/decorator/roles.decorator';
+import { ResidentService } from 'src/module/resident/resident.service';
 
 @ApiUseTags('roles')
 @ApiBearerAuth()
@@ -23,6 +24,7 @@ import { UserRoles } from 'src/common/decorator/roles.decorator';
 export class RoleController {
   constructor(
     @Inject(RoleService) private roleService: RoleService,
+    @Inject(ResidentService) private residentService: ResidentService,
   ) { }
 
   @ApiOkResponse({
@@ -88,8 +90,11 @@ export class RoleController {
   async myRole(
     @Request() req: any,
   ) {
+    const hasApplication = await this.residentService.findByCondition({ user: req.user._id })
+    const myHouses = await this.residentService.getMyHouses(req.user._id)
+    const owner = await this.residentService.getMyOwnerHouses(req.user._id)
     const data = await this.roleService.myRoles(req.user._id);
-    return { statusCode: 200, data };
+    return { statusCode: 200, data: { ...data, hasApplication, isFamily: myHouses.length > 0, owner } };
   }
 
 }

@@ -32,7 +32,7 @@ import { CreateUserDTO } from '../users/dto/users.dto';
 import { WeixinUtil } from 'src/utils/weixin.util';
 import { IFace } from '../face/interfaces/face.interfaces';
 import { RoleService } from '../role/role.service';
-import { RoleDTO } from '../role/dto/role.dto';
+// import { RoleDTO } from '../role/dto/role.dto';
 import { ConfigService } from 'src/config/config.service';
 import { ApplicationDTO } from 'src/common/dto/Message.dto';
 import { PreownerService } from '../preowner/preowner.service';
@@ -174,6 +174,21 @@ export class ResidentService {
       .lean()
       .exec()
     return residents.map(reviewer => reviewer.address)
+  }
+
+  // 获取审核人
+  async getMyOwnerHouses(user: string) {
+    const owner: any = []
+    const myOwnerHouses: IZone[] = await this.zoneService.findByCondition({ owner: user })
+    await Promise.all(myOwnerHouses.map(async myOwnerHouse => {
+      const resident: IResident | null = await this.residentModel.findOne({ user, address: myOwnerHouse._id, })
+      if (!resident) {
+        return
+      }
+      let isRent = resident.isDisable
+      owner.push({ ...myOwnerHouse, isRent })
+    }))
+    return owner
   }
 
   // 上报常住人至智能感知平台

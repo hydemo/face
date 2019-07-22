@@ -201,8 +201,8 @@ export class RoleService {
     return { list, total };
   }
   // 查询全部数据
-  async myRoles(userId: string, condition?: any) {
-    const cond = { ...condition, user: userId, isDelete: false }
+  async myRoles(userId: string) {
+    const cond = { user: userId, isDelete: false }
     let owner = [];
     let guard = [];
     let management = [];
@@ -245,20 +245,20 @@ export class RoleService {
           break;
         case 3: guard = role.zones || [];
           break;
-        case 4: {
-          owner = await Promise.all(role.zones.map(async zone => {
-            const rentCount = await this.roleModel.countDocuments({ zone: zone._id, role: 5, isDelete: false })
-            return { ...zone, isRent: rentCount > 0 }
-          }))
-        };
-          break;
-        case 5: rent = role.zones || [];
-          break;
+        // case 4: {
+        //   owner = await Promise.all(role.zones.map(async zone => {
+        //     const rentCount = await this.roleModel.countDocuments({ zone: zone._id, role: 5, isDelete: false })
+        //     return { ...zone, isRent: rentCount > 0 }
+        //   }))
+        // };
+        //   break;
+        // case 5: rent = role.zones || [];
+        //   break;
         default:
           break;
       }
     }));
-    return { owner, guard, management, worker, rent, isAdmin }
+    return { guard, management, worker, isAdmin }
   }
 
   async checkRoles(condition: any) {
