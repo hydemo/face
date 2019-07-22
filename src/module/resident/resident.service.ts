@@ -490,6 +490,7 @@ export class ResidentService {
     if (String(createUser._id) === String(userId)) {
       throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
     }
+    await this.residentExist(family.address, createUser._id)
     return await this.addFamily(family.isMonitor, false, createUser, zone, owner.user, userId)
   }
 
@@ -901,12 +902,12 @@ export class ResidentService {
   }
 
   // 根据id删除
-  async deleteById(resident: string, user: string): Promise<IResident | null> {
+  async deleteById(resident: string, user: string, isRent?: boolean): Promise<IResident | null> {
     const data: IResident | null = await this.residentModel.findById(resident).lean()
     if (!data) {
       return null
     }
-    if (data.type === 'owner') {
+    if (data.type === 'owner' && !isRent) {
       throw new ApiException('业主不可删除', ApiErrorCode.NO_PERMISSION, 403);
     }
     await this.isFamily(data.address, user)
@@ -1017,7 +1018,7 @@ export class ResidentService {
       //   await this.roleService.findOneAndDelete({ role: 5, user: resident.user, zone: resident.address })
       // }
       await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true, checkResult: 4 })
-      await this.deleteById(resident._id, resident.owner)
+      await this.deleteById(resident._id, resident.owner, true)
     }))
     await this.residentModel.findOneAndUpdate({ isDisable: true, type: 'owner', address: address._id, user: address.owner }, { isDisable: false })
     await this.residentModel.update({ owner: address.owner, isDelete: false }, { isDisable: false })
