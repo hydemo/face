@@ -142,7 +142,7 @@ export class ResidentService {
   // 是否家人
   async isFamily(address: string, user: string) {
     const family: IResident | null = await this.residentModel
-      .findOne({ user, address, type: { $ne: 'visitor' }, isDelete: false checkResult: 2 })
+      .findOne({ user, address, type: { $ne: 'visitor' }, isDelete: false, checkResult: 2 })
     if (!family) {
       throw new ApiException('无权限操作该房屋', ApiErrorCode.NO_PERMISSION, 403);
     }
