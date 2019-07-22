@@ -53,10 +53,10 @@ export class ScheduleService {
             return null
           }
           openId = review.openId
-          return { openId, type }
+          return { openId, type, isMe: false }
         }
         openId = user.openId;
-        return { openId, type }
+        return { openId, type, isMe: true }
       }
       case 'role': {
         const role: IRole | null = await this.roleService.findById(face.bondToObjectId)
@@ -127,7 +127,7 @@ export class ScheduleService {
           color: "#173177"
         },
         remark: {
-          value: `请在实名认证页面重新上传头像`,
+          value: openId.isMe ? `请在实名认证页面重新上传头像` : `请在${openId.type}管理页面修改头像`,
           color: "#173177"
         },
       }
@@ -157,7 +157,7 @@ export class ScheduleService {
         user: data.face.user,
         device: data.face.device,
         isDelete: false,
-        checkResult: true,
+        checkResult: 2,
       })
       if (faceExist) {
         result = {
@@ -169,6 +169,7 @@ export class ScheduleService {
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
       if (result === 'imgError') {
+        await this.faceService.updateById(data.face._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face, client)
       }
       if (result && result.Pic) {
@@ -176,7 +177,7 @@ export class ScheduleService {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
           pic: result.Pic,
-          checkResult: true
+          checkResult: 2
         }
         await this.faceService.updateById(data.face._id, face)
       }
@@ -187,18 +188,19 @@ export class ScheduleService {
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
       if (result) {
-        await this.faceService.updateById(data.face._id, { checkResult: true })
+        await this.faceService.updateById(data.face._id, { checkResult: 2 })
       }
     } else if (data.type === 'update-add') {
       result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       if (result === 'imgError') {
+        await this.faceService.updateById(data.face[0]._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face[0], client)
       } else if (result && result.Pic) {
         const update = {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
           pic: result.Pic,
-          checkResult: true
+          checkResult: 2
         }
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, update)
@@ -247,7 +249,7 @@ export class ScheduleService {
         }
 
         const alive = await client.hget('device', device.deviceUUID)
-        if (!alive || Number(alive) > 5) {
+        if (!alive || Number(alive) > 4) {
           await client.hdel('p2p_pool', pool)
           return
         }
@@ -284,32 +286,9 @@ export class ScheduleService {
       }))
     });
 
-    Schedule.scheduleJob('*/60 * * * * *', async () => {
-      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
-      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
-      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
-      await Promise.all(residents.map(async resident => {
-        const result = await this.faceService.checkResult(resident._id)
-        if (!result.length) {
-          return await this.residentService.updateById(resident._id, { checkResult: 2 });
+    // Schedule.scheduleJob('*/60 * * * * *', async () => {
 
-        }
-      }))
-      await Promise.all(roles.map(async role => {
-        const result = await this.faceService.checkResult(role._id)
-        if (!result.length) {
-          return await this.roleService.updateById(role._id, { checkResult: 2 });
-
-        }
-      }))
-      await Promise.all(blacks.map(async black => {
-        const result = await this.faceService.checkResult(black._id)
-        if (!result.length) {
-          return await this.blackService.updateById(black._id, { checkResult: 2 });
-
-        }
-      }))
-    });
+    // });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {
     //   const client = this.redis.getClient()
@@ -333,6 +312,24 @@ export class ScheduleService {
           const zoneName = device.position.houseNumber.split('-')
           // await this.phone.sendDeviceError(zoneName[0], key)
         }
+      }))
+
+      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
+      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
+      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
+      await Promise.all(residents.map(async resident => {
+        const checkResult = await this.faceService.checkResult(resident._id)
+        return await this.residentService.updateById(resident._id, { checkResult });
+
+      }))
+      await Promise.all(roles.map(async role => {
+        const checkResult = await this.faceService.checkResult(role._id)
+        return await this.roleService.updateById(role._id, { checkResult });
+      }))
+      await Promise.all(blacks.map(async black => {
+        const checkResult = await this.faceService.checkResult(black._id)
+        return await this.blackService.updateById(black._id, { checkResult });
+
       }))
     });
   }

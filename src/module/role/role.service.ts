@@ -71,7 +71,7 @@ export class RoleService {
     const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
     const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
-      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: true })
+      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: 2 })
       if (faceExist) {
         const face = {
           device: device._id,
@@ -83,7 +83,7 @@ export class RoleService {
           bondToObjectId,
           bondType: 'role',
           zone: zone,
-          checkResult: true,
+          checkResult: 2,
           faceUrl: user.faceUrl,
         }
         return await this.faceService.create(face);
@@ -92,7 +92,7 @@ export class RoleService {
           device: device._id,
           user: user._id,
           mode: 2,
-          checkResult: false,
+          checkResult: 1,
           bondToObjectId,
           bondType: 'role',
           zone: zone,
@@ -102,8 +102,7 @@ export class RoleService {
         this.cameraUtil.addOnePic(device, user, this.config.whiteMode, img, createFace)
       }
     }))
-    const result = await this.faceService.checkResult(bondToObjectId)
-    const checkResult = result.length ? 4 : 2
+    const checkResult = await this.faceService.checkResult(bondToObjectId)
     await this.roleModel.findByIdAndUpdate(bondToObjectId, { checkResult })
   }
 
@@ -124,8 +123,7 @@ export class RoleService {
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
-    const result = await this.faceService.checkResult(id)
-    const checkResult = result.length ? 4 : 2
+    const checkResult: number = await this.faceService.checkResult(id)
     return await this.roleModel.findByIdAndUpdate(id, { isDelete: true, checkResult });
   }
 

@@ -124,7 +124,7 @@ export class FaceService {
     const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
     const deviceFaces: any = []
     for (let face of faces) {
-      await this.faceModel.findByIdAndUpdate(face._id, { checkResult: false, faceUrl: img })
+      await this.faceModel.findByIdAndUpdate(face._id, { checkResult: 1, faceUrl: img })
       this.genFaces(deviceFaces, String(face.device._id), face)
     }
     deviceFaces.map(async deviceFace => {
@@ -145,8 +145,16 @@ export class FaceService {
   }
 
   // 根据id删除
-  async checkResult(bondToObjectId: string) {
-    return await this.faceModel.find({ bondToObjectId, checkResult: false })
+  async checkResult(bondToObjectId: string): Promise<number> {
+    const isFail = await this.faceModel.find({ bondToObjectId, checkResult: 3 })
+    const isPending = await this.faceModel.find({ bondToObjectId, checkResult: 1 })
+    if (isFail) {
+      return 5
+    }
+    if (isPending) {
+      return 4
+    }
+    return 2
   }
 
   async updateByCondition(condition: any, update: any) {

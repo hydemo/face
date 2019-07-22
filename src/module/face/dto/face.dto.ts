@@ -51,7 +51,7 @@ export class CreateFaceDTO {
   @ApiModelProperty({ description: '申请时间' })
   expire?: Date;
 
-  readonly checkResult: boolean;
+  readonly checkResult: number;
 
   // 人脸链接
   readonly faceUrl: string;

@@ -230,7 +230,7 @@ export class ResidentService {
       if (faceCheck) {
         return
       }
-      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: true })
+      const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: 2 })
       if (!faceExist) {
         const face: CreateFaceDTO = {
           device: device._id,
@@ -239,7 +239,7 @@ export class ResidentService {
           bondToObjectId: resident,
           bondType: 'resident',
           zone: zone.zoneId,
-          checkResult: false,
+          checkResult: 1,
           faceUrl: user.faceUrl,
         }
         if (expire) {
@@ -258,7 +258,7 @@ export class ResidentService {
         bondToObjectId: resident,
         bondType: 'resident',
         zone: zone.zoneId,
-        checkResult: true,
+        checkResult: 2,
         faceUrl: user.faceUrl,
       }
       if (expire) {
@@ -266,8 +266,7 @@ export class ResidentService {
       }
       await this.faceService.create(face);
     }))
-    const result = await this.faceService.checkResult(resident)
-    const checkResult = result.length ? 4 : 2
+    const checkResult = await this.faceService.checkResult(resident)
     await this.residentModel.findByIdAndUpdate(resident, { checkResult });
   }
 
@@ -915,8 +914,7 @@ export class ResidentService {
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
-    const result = await this.faceService.checkResult(resident)
-    const checkResult = result.length ? 4 : 2
+    const checkResult = await this.faceService.checkResult(resident)
     return await this.residentModel.findByIdAndUpdate(resident, { isDelete: true, checkResult })
   }
 
@@ -978,8 +976,7 @@ export class ResidentService {
       if (resident.type === 'visitor') {
         const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident._id, isDelete: false })
         await Promise.all(faces.map(async face => await this.faceService.delete(face._id)))
-        const result = await this.faceService.checkResult(resident._id)
-        const checkResult = result.length ? 4 : 2
+        const checkResult = await this.faceService.checkResult(resident._id)
         return await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true, checkResult })
       }
       return await this.residentModel.findByIdAndUpdate(resident._id, { isDisable: true, checkResult: 2 })
@@ -1035,8 +1032,7 @@ export class ResidentService {
       await Promise.all(faces.map(async face => {
         return await this.faceService.delete(face)
       }))
-      const result = await this.faceService.checkResult(visitor._id)
-      const checkResult = result.length ? 4 : 2
+      const checkResult = await this.faceService.checkResult(visitor._id)
       return await this.residentModel.findByIdAndUpdate(visitor._id, { isDelete: true, checkResult })
     }))
   }

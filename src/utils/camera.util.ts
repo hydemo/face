@@ -294,7 +294,7 @@ export class CameraUtil {
   async handleP2PEroor(errorData: any) {
     const client = this.redis.getClient()
     const { upData, count } = errorData
-    if (count > 5) {
+    if (count > 10) {
       await client.lpush('p2pErrorFinal', JSON.stringify(errorData))
       const imgUrl = upData.type === 'add' ? upData.face.imgUrl : upData.face[0].imgUrl
       const error: P2PErrorDTO = {
@@ -329,13 +329,15 @@ export class CameraUtil {
       await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
       return false
     } catch (error) {
-      console.log(error, 'error')
+      // console.log(error, 'error')
+      
       const newErrorData = { count: count + 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)
       if (!poolExist) {
         await client.hset('p2pError_pool', upData.device, 1)
       }
       await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
+      await this.phoneUtil.sendP2PError()
     }
     return
   }

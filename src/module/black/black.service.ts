@@ -149,7 +149,7 @@ export class BlackService {
         bondToObjectId: black._id,
         bondType: 'black',
         zone: black.zone,
-        checkResult: false,
+        checkResult: 1,
         faceUrl: black.faceUrl
       }
       const createFace: IFace = await this.faceService.create(face);

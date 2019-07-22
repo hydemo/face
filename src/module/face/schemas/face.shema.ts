@@ -24,8 +24,8 @@ export const FaceSchema = new mongoose.Schema(
     bondType: String,
     // 区域
     zone: ObjectId,
-    // 上传结果 1:待审核，2：通过，3:拒绝，4:同步中，5:同步失败
-    checkResult: { type: Boolean, default: false },
+    // 上传结果 1:同步中，2：通过，3:失败
+    checkResult: { type: Number, default: 1, enum: [1, 2, 3] },
     // 是否删除
     isDelete: { type: Boolean, default: false },
     // 人脸链接
