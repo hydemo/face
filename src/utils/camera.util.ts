@@ -122,6 +122,7 @@ export class CameraUtil {
     if (!poolExist) {
       await client.hset('p2p_pool', id, 1)
     }
+    console.log(upData, 'updata')
     await client.lpush(`p2p_${id}`, JSON.stringify(upData))
   }
 

@@ -141,9 +141,8 @@ export class FaceService {
     if (faceCount === 1 && faceToDelete) {
       console.log(222)
       await this.cameraUtil.deleteOnePic(faceToDelete)
-      return false
     }
-    await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true })
+    await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true, checkResult: 1 })
     return true
   }
 

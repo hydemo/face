@@ -189,8 +189,9 @@ export class ScheduleService {
       }
     } else if (data.type === 'delete') {
       const faceExist: IFace | null = await this.faceService.findById(data.face._id)
+      console.log(faceExist, 'faceExist')
       let result = true
-      if (faceExist && faceExist.checkResult !== 2) {
+      if (faceExist && faceExist.checkResult === 1) {
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
       if (result) {
@@ -214,7 +215,7 @@ export class ScheduleService {
       }
     } else if (data.type === 'update-delete') {
       const faceExist: IFace | null = await this.faceService.findById(data.face._id)
-      if (faceExist && faceExist.checkResult !== 2) {
+      if (faceExist && faceExist.checkResult === 1) {
         type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
     }
