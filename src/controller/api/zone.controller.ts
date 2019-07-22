@@ -206,6 +206,7 @@ export class ZoneController {
     @Query() pagination: Pagination,
     @Request() req: any
   ) {
+    console.log(req.user, 'user')
     return await this.rentService.findMyRent(pagination, req.user._id, id);
   }
 
