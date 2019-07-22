@@ -249,7 +249,7 @@ export class ScheduleService {
         }
 
         const alive = await client.hget('device', device.deviceUUID)
-        if (!alive || Number(alive) > 4) {
+        if (!alive || Number(alive) > 5) {
           await client.hdel('p2p_pool', pool)
           return
         }

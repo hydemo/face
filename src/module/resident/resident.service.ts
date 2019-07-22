@@ -170,7 +170,7 @@ export class ResidentService {
   // 获取审核人
   async getMyHouses(user: string) {
     const residents: IResident[] = await this.residentModel
-      .find({ user, isDelete: false, type: { $in: ['family', 'owner'] }, isDisable: false, checkResult: { $in: [2, 4, 5] } })
+      .find({ user, isDelete: false, type: { $in: ['family', 'owner'] }, checkResult: { $in: [2, 4, 5] } })
       .lean()
       .exec()
     return residents.map(reviewer => reviewer.address)
