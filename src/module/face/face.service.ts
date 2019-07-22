@@ -146,8 +146,8 @@ export class FaceService {
 
   // 根据id删除
   async checkResult(bondToObjectId: string): Promise<number> {
-    const isFail = await this.faceModel.find({ bondToObjectId, checkResult: 3 })
-    const isPending = await this.faceModel.find({ bondToObjectId, checkResult: 1 })
+    const isFail = await this.faceModel.findOne({ bondToObjectId, checkResult: 3 })
+    const isPending = await this.faceModel.findOne({ bondToObjectId, checkResult: 1 })
     if (isFail) {
       return 5
     }
