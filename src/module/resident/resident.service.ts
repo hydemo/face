@@ -906,6 +906,7 @@ export class ResidentService {
   // 根据id删除
   async deleteById(resident: string, user: string, isRent?: boolean): Promise<IResident | null> {
     const data: IResident | null = await this.residentModel.findById(resident).lean()
+    console.log(data, 'data')
     if (!data) {
       return null
     }
@@ -914,6 +915,7 @@ export class ResidentService {
     }
     await this.isFamily(data.address, user)
     const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident, isDelete: false })
+    console.log(faces, 'faces')
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
