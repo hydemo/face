@@ -320,10 +320,11 @@ export class ZoneService {
   //获取子集
   async findSubZone(parent: string): Promise<IList<IZone>> {
     let condition: any = { parent, isDelete: false, buildingType: { $ne: '61' } };
+
     const list = await this.zoneModel
       .find(condition)
       .select({ name: 1, _id: 1, hasChildren: 1, houseNumber: 1, owner: 1 })
-      .sort({ name: 1 })
+      .sort({ nameLength: 1, name: 1 })
     const total = await this.zoneModel
       .countDocuments(condition)
       .exec()
