@@ -486,6 +486,8 @@ export class ResidentService {
         isPhoneVerify: false,
       }
       createUser = await this.userService.create(createUserDto)
+    } else {
+      await this.userService.updateById(createUser._id, { faceUrl: family.user.faceUrl })
     }
     if (String(createUser._id) === String(userId)) {
       throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
