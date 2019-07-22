@@ -164,7 +164,7 @@ export class ResidentService {
       .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
-    return reviewers.map(reviewer => reviewer.address)
+    return reviewers.map(reviewer => reviewer.user)
   }
 
   // 获取审核人
