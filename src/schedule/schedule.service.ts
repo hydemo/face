@@ -137,6 +137,7 @@ export class ScheduleService {
   }
 
   async handelP2P(data, sourceData, dataString, client, type) {
+    console.log(data, 'data')
     const listenTime = await client.hget('p2p_listen', data.device)
     if (listenTime > 10) {
       await client.hset('p2p_listen', data.device, 0)
@@ -237,6 +238,7 @@ export class ScheduleService {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
       await Promise.all(pools.map(async  pool => {
+        console.log(pool, 'pool2')
         const length = await client.llen(`p2p_${pool}`)
         if (!length) {
           await client.hdel('p2p_pool', pool)

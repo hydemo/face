@@ -211,6 +211,7 @@ export class CameraUtil {
   * @param face 名单信息
   */
   async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: any) {
+    console.log(22)
     const { username, password, deviceUUID, _id } = device
     const id = String(_id)
     // console.log(user.faceUrl, 'facedd')
@@ -256,6 +257,7 @@ export class CameraUtil {
         url: this.config.p2pUrl,
         data: upData.data,
       })
+      console.log(result, 'result')
       if (result.data.Result === 'ok') {
         return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;
       }
@@ -330,7 +332,7 @@ export class CameraUtil {
       return false
     } catch (error) {
       // console.log(error, 'error')
-      
+
       const newErrorData = { count: count + 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)
       if (!poolExist) {
