@@ -320,7 +320,7 @@ export class CameraUtil {
       if (result.data.ErrorCode === -3 || result.data.Code === -6) {
         return true
       }
-      if (result.data.ErrorCode === -15) {
+      if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
         return 'imgError'
       }
       const newErrorData = { count: count + 1, upData }

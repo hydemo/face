@@ -226,7 +226,7 @@ export class ResidentService {
     // }
     const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
-      const faceCheck: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, bondToObjectId: resident, })
+      const faceCheck: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, bondToObjectId: resident, isDelete: false })
       if (faceCheck) {
         return
       }
@@ -487,7 +487,7 @@ export class ResidentService {
       }
       createUser = await this.userService.create(createUserDto)
     } else {
-      await this.userService.updateById(createUser._id, { faceUrl: family.user.faceUrl })
+      await this.userService.updateById(createUser._id, { faceUrl: family.user.faceUrl, username: family.user.username })
     }
     if (String(createUser._id) === String(userId)) {
       throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
