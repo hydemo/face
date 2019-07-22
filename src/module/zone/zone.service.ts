@@ -318,22 +318,12 @@ export class ZoneService {
   //   }
   // }
   //获取子集
-  async findSubZone(parent: string, type: string, zones: string[]): Promise<IList<IZone>> {
-    let condition: any = {};
-    switch (type) {
-      case 'owner': condition = await this.findOwnerSubZone(parent)
-        break;
-      case 'family': condition = await this.findFamilySubZone(parent, zones)
-        break;
-      case 'show': condition = await this.findShowSubZone(parent)
-        break;
-      default: condition = { parent, isDelete: false, buildingType: { $ne: '61' } }
-        break;
-    }
+  async findSubZone(parent: string): Promise<IList<IZone>> {
+    let condition: any = { parent, isDelete: false, buildingType: { $ne: '61' } };
     const list = await this.zoneModel
       .find(condition)
-      .select({ name: 1, _id: 1, hasChildren: 1, houseNumber: 1 })
-      .sort({ partitionSort: 1, nameLength: 1, name: 1 })
+      .select({ name: 1, _id: 1, hasChildren: 1, houseNumber: 1, owner: 1 })
+      .sort({ name: 1 })
     const total = await this.zoneModel
       .countDocuments(condition)
       .exec()

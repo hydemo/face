@@ -121,16 +121,16 @@ export class ZoneController {
     @Request() req: any,
   ) {
     let zones: string[] = []
-    if (type === 'family') {
-      const residents: IResident[] = await this.residentService.findByCondition({
-        user: req.user._id,
-        isDelete: false,
-        isDisable: false,
-        checkResult: { $lt: 3 }
-      })
-      zones = residents.map(resident => resident.address)
-    }
-    return await this.zoneService.findSubZone(id, type, zones);
+    // if (type === 'family') {
+    //   const residents: IResident[] = await this.residentService.findByCondition({
+    //     user: req.user._id,
+    //     isDelete: false,
+    //     isDisable: false,
+    //     checkResult: { $lt: 3 }
+    //   })
+    //   zones = residents.map(resident => resident.address)
+    // }
+    return await this.zoneService.findSubZone(id);
   }
 
   @Get('/:id/qrcode')
