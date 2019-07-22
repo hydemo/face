@@ -164,7 +164,7 @@ export class ResidentService {
       .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
-    return reviewers.map(reviewer => reviewer.user)
+    return reviewers.map(reviewer => reviewer.address)
   }
 
   // 获取审核人
@@ -603,6 +603,7 @@ export class ResidentService {
   // 我的待审列表
   async myReviews(pagination: Pagination, user: string): Promise<IList<IResident>> {
     const houses = await this.getMyHouses(user)
+    console.log(houses, 'house')
     const condition: any = { address: { $in: houses }, isDelete: false, checkResult: 1, type: { $ne: 'owner' } };
     const list: IResident[] = await this.residentModel
       .find(condition)
