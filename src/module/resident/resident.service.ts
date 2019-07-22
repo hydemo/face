@@ -488,6 +488,9 @@ export class ResidentService {
       }
       createUser = await this.userService.create(createUserDto)
     }
+    if (String(createUser._id) === String(userId)) {
+      throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
+    }
     return await this.addFamily(family.isMonitor, false, createUser, zone, owner.user, userId)
   }
 
