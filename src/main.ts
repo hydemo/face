@@ -58,8 +58,8 @@ async function bootstrap() {
     .setSchemes('http', 'https')
     .build();
 
-  initService.init();
-  scheduleService.enableSchedule()
+  // initService.init();
+  // scheduleService.enableSchedule()
 
   const ApiDocument = SwaggerModule.createDocument(app, ApiOptions, {
     include: [

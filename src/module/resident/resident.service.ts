@@ -486,11 +486,10 @@ export class ResidentService {
         isPhoneVerify: false,
       }
       createUser = await this.userService.create(createUserDto)
+    } else if (String(createUser._id) === String(userId)) {
+      throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
     } else {
       await this.userService.updateById(createUser._id, { faceUrl: family.user.faceUrl, username: family.user.username })
-    }
-    if (String(createUser._id) === String(userId)) {
-      throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
     }
     await this.residentExist(family.address, createUser._id)
     return await this.addFamily(family.isMonitor, false, createUser, zone, owner.user, userId)
@@ -1050,5 +1049,11 @@ export class ResidentService {
   // 根据id修改
   async updateById(id: string, update: any): Promise<IResident | null> {
     return await this.residentModel.findByIdAndUpdate(id, update)
+  }
+
+  // 根据id修改
+  async fix() {
+    const residents = await this.residentModel.find({ isDelete: false });
+    // await Promise.all(residents.map(async))
   }
 }

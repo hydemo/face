@@ -48,6 +48,7 @@ export class CallbackController {
     private readonly config: ConfigService,
     private readonly redis: RedisService,
     private readonly p2pErrorService: P2PErrorService,
+    private readonly residentService: ResidentService,
   ) {
 
   }
@@ -148,8 +149,9 @@ export class CallbackController {
     @Request() req,
     @Query('code') code: string,
   ) {
-    await this.callbackService.upDeviceToZOC(code)
-    await this.callbackService.upResidentToZOC(code)
+    // await this.callbackService.upDeviceToZOC(code)
+    // await this.callbackService.upResidentToZOC(code)
+    const residents = await this.residentService.fix()
     return
 
   }
