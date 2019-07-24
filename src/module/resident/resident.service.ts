@@ -489,6 +489,7 @@ export class ResidentService {
     } else if (String(createUser._id) === String(userId)) {
       throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
     } else {
+      console.log(222)
       await this.userService.updateById(createUser._id, { faceUrl: family.user.faceUrl, username: family.user.username })
     }
     await this.residentExist(family.address, createUser._id)
