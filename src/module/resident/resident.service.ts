@@ -546,7 +546,7 @@ export class ResidentService {
   // 生成访问链接
   async getVisitorLink(address: string, user: IUser) {
     const zone: IZone = await this.zoneService.findById(address)
-    await this.isOwner(zone._id, user._id)
+    await this.isFamily(zone._id, user._id)
     const key = uuid()
     const client = this.redis.getClient()
     const value = {
@@ -906,16 +906,16 @@ export class ResidentService {
   // 根据id删除
   async deleteById(resident: string, user: string, isRent?: boolean): Promise<IResident | null> {
     const data: IResident | null = await this.residentModel.findById(resident).lean()
-    console.log(data, 'data')
     if (!data) {
       return null
     }
     if (data.type === 'owner' && !isRent) {
       throw new ApiException('业主不可删除', ApiErrorCode.NO_PERMISSION, 403);
     }
-    await this.isFamily(data.address, user)
+    if (!isRent) {
+      await this.isFamily(data.address, user)
+    }
     const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resident, isDelete: false })
-    console.log(faces, 'faces')
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
@@ -1054,7 +1054,14 @@ export class ResidentService {
 
   // 根据id修改
   async fix() {
-    const residents = await this.residentModel.find({ isDelete: false });
-    // await Promise.all(residents.map(async))
+    const array: any = []
+    const residents = await this.residentModel.find({ isDelete: false }).populate({ path: 'user', model: 'user' });
+    await Promise.all(residents.map(async resident => {
+      const count = await this.faceService.count({ bondToObjectId: resident._id })
+      if (count < 6) {
+        array.push(resident)
+      }
+    }))
+
   }
 }
