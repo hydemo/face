@@ -381,6 +381,7 @@ export class CameraUtil {
           return 'imgError'
         }
       } else if (upData.version === '1.1.0') {
+
         if (result.data.Code === 1) {
           return true;
         }
@@ -397,7 +398,6 @@ export class CameraUtil {
         await client.hset('p2pError_pool', upData.device, 1)
       }
       await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
-      return false
     } catch (error) {
       // console.log(error)
       const errorData = { count: 1, upData }
@@ -428,7 +428,7 @@ export class CameraUtil {
       }
       await this.p2pErrorService.create(error)
       await this.phoneUtil.sendP2PError()
-      return null
+      return false
     }
     try {
       const result: any = await axios({
@@ -442,7 +442,7 @@ export class CameraUtil {
         if (result.data.Result === 'ok') {
           return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;
         }
-        if (result.data.ErrorCode === -3 || result.data.Code === -6) {
+        if (result.data.ErrorCode === -3 || result.data.Code === -6 || result.data.ErrorCode === -6) {
           return true
         }
         if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
@@ -465,7 +465,6 @@ export class CameraUtil {
         await client.hset('p2pError_pool', upData.device, 1)
       }
       await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
-      return false
     } catch (error) {
       // console.log(error, 'error')
 
