@@ -243,7 +243,7 @@ export class CameraUtil {
       await client.lpush(`p2p_${id}`, JSON.stringify(upData))
     } else if (version === '1.1.0') {
       const data = {
-        Name: "personListResponse",
+        Name: "personListRequest",
         TimeStamp: timeStamp,
         Sign: sign,
         UUID: deviceUUID,
@@ -326,7 +326,7 @@ export class CameraUtil {
       }
     } else if (version === '1.1.0') {
       data = {
-        Name: "personListResponse",
+        Name: "personListRequest",
         TimeStamp: timeStamp,
         Sign: sign,
         UUID: deviceUUID,
