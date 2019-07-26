@@ -250,15 +250,13 @@ export class CallbackService {
   async keepalive(body: any) {
     const { Name } = body
     let uuid: string = ''
-    console.log(Name)
-    if (Name === 'keepalive') {
+    if (Name === 'KeepAlive') {
       const { DeviceUUID } = body;
       uuid = DeviceUUID
     } else if (Name === 'heartbeatRequest') {
       const { DeviceUUID } = body.Data.DeviceInfo
       uuid = DeviceUUID
     }
-    console.log(uuid, 'uuid')
     const client = this.redis.getClient()
     const exist = await client.hget('device', uuid)
     if (!exist || Number(exist) > 4) {
