@@ -21,6 +21,15 @@ export class CameraUtil {
     private readonly redis: RedisService,
     private readonly p2pErrorService: P2PErrorService,
   ) { }
+
+  /**
+   * 获取10位时间戳
+   */
+  getTemp(): number {
+    let tmp = Date.now().toString();
+    tmp = tmp.substr(0, 10);
+    return Number(tmp);
+  }
   /**
    * 获取设备白名单
    *
@@ -93,14 +102,16 @@ export class CameraUtil {
   }
 
   async getPersionInfo(PersonId: string, device: any, PersonType: number) {
-    // const { username, password, deviceUUID } = device
-    const deviceUUID = 'umet9bgg8bqu'
-    const username = 'admin'
-    const password = 'oyxj19891024'
-    const timeStamp: number = Date.now()
+    const { username, password, deviceUUID, session } = device
+    // const deviceUUID = 'umet9bgg8bqu'
+    // const username = 'admin'
+    // const password = 'oyxj19891024'
+    const timeStamp = this.getTemp()
+    // const session = 'null_1564132555'
     const Sign = this.sign(username, password, deviceUUID, timeStamp)
     const data = {
       Name: 'personListRequest',
+      Session: session,
       UUID: deviceUUID,
       TimeStamp: timeStamp,
       Sign,
@@ -117,7 +128,12 @@ export class CameraUtil {
       url: this.config.p2pUrl2,
       data
     });
-    console.log(result, 'persionresult')
+    if (result.data.Code === 1106) {
+      return false
+    } else if (result.data.Code === 1) {
+      return true
+    }
+    return false
   }
 
   /**
@@ -127,7 +143,7 @@ export class CameraUtil {
    */
   async deleteOnePic(face: IFace) {
     const { device } = face
-    const { username, password, deviceUUID, _id, version } = device
+    const { username, password, deviceUUID, _id, version, session } = device
     const id = String(_id)
     const timeStamp: number = Date.now()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
@@ -148,21 +164,20 @@ export class CameraUtil {
       }
     } else if (version === '1.1.0') {
       data = {
-        Name: 'WBListInfoREQ',
+        Name: 'personListRequest',
         TimeStamp: timeStamp,
         Sign: sign,
-        Mode: face.mode,
+        Session: session,
         Action: 'DeleteOnePic',
         UUID: deviceUUID,
-        DeleteOnePic: {
-          LibIndex: face.libIndex,
-          FlieIndex: face.flieIndex,
-          Pic: face.pic,
+        Data: {
+          Action: 'deletePersonList',
+          PersonType: face.mode,
+          PersonId: face.user,
         }
       }
     }
-
-    const upData = { data, face, type: 'delete', device: id }
+    const upData = { data, face, type: 'delete', device: id, version }
     const client = this.redis.getClient()
     const poolExist = await client.hget('p2p_pool', id)
     if (!poolExist) {
@@ -184,47 +199,73 @@ export class CameraUtil {
     const client = this.redis.getClient()
     const face = faces[0]
     // await this.deleteOnePic(face[0])
-    const { username, password, deviceUUID, _id } = face.device
+    const { username, password, deviceUUID, _id, version, session } = face.device
     const id = String(_id)
     const Img = await this.getImg(img)
     const ImgName = user.username;
     const ImgNum = user._id;
     const timeStamp: number = Date.now()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
-    const deleteData = {
-      Name: 'WBListInfoREQ',
-      TimeStamp: timeStamp,
-      Sign: sign,
-      Mode,
-      Action: 'DeleteOnePic',
-      UUID: deviceUUID,
-      DeleteOnePic: {
-        LibIndex: face.libIndex,
-        FlieIndex: face.flieIndex,
-        Pic: face.pic,
+    if (version === '1.0.0') {
+      const deleteData = {
+        Name: 'WBListInfoREQ',
+        TimeStamp: timeStamp,
+        Sign: sign,
+        Mode,
+        Action: 'DeleteOnePic',
+        UUID: deviceUUID,
+        DeleteOnePic: {
+          LibIndex: face.libIndex,
+          FlieIndex: face.flieIndex,
+          Pic: face.pic,
+        }
       }
-    }
-    const p2pDelete = { data: deleteData, face: faces, type: 'update-delete', device: _id }
-    const poolExist = await client.hget('p2p_pool', id)
-    if (!poolExist) {
-      await client.hset('p2p_pool', id, 1)
-    }
-    await client.lpush(`p2p_${id}`, JSON.stringify(p2pDelete))
-    const addData = {
-      Name: 'WBListInfoREQ',
-      TimeStamp: timeStamp,
-      Sign: sign,
-      Mode,
-      Action: 'AddOnePic',
-      UUID: deviceUUID,
-      AddOnePic: {
-        Img,
-        ImgName,
-        ImgNum,
+      const p2pDelete = { data: deleteData, face: faces, type: 'update-delete', device: _id, version }
+      const poolExist = await client.hget('p2p_pool', id)
+      if (!poolExist) {
+        await client.hset('p2p_pool', id, 1)
       }
+      await client.lpush(`p2p_${id}`, JSON.stringify(p2pDelete))
+      const addData = {
+        Name: 'WBListInfoREQ',
+        TimeStamp: timeStamp,
+        Sign: sign,
+        Mode,
+        Action: 'AddOnePic',
+        UUID: deviceUUID,
+        AddOnePic: {
+          Img,
+          ImgName,
+          ImgNum,
+        }
+      }
+      const upData = { data: addData, face: faces, type: 'update-add', device: _id, username: user.username, version }
+      await client.lpush(`p2p_${id}`, JSON.stringify(upData))
+    } else if (version === '1.1.0') {
+      const data = {
+        Name: "personListResponse",
+        TimeStamp: timeStamp,
+        Sign: sign,
+        UUID: deviceUUID,
+        Session: session,
+        Data: {
+          Action: 'editPerson',
+          PersonType: Mode,
+          PersonInfo: {
+            PersonId: user._id,
+            PersonName: user.username,
+            PersonPhoto: Img
+          }
+        }
+      }
+      const upData = { data, face, type: 'update', device: id, username: user.username, version }
+      const client = this.redis.getClient()
+      const poolExist = await client.hget('p2p_pool', id)
+      if (!poolExist) {
+        await client.hset('p2p_pool', id, 1)
+      }
+      await client.lpush(`p2p_${id}`, JSON.stringify(upData))
     }
-    const upData = { data: addData, face: faces, type: 'update-add', device: _id, username: user.username }
-    await client.lpush(`p2p_${id}`, JSON.stringify(upData))
     // return await this.addOnePic(face[0].device, pic, face[0].mode, Img, face)
   }
 
@@ -257,9 +298,9 @@ export class CameraUtil {
   * @param user 用户信息
   * @param face 名单信息
   */
-  async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: any) {
+  async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: IFace) {
     console.log(22)
-    const { username, password, deviceUUID, _id, version } = device
+    const { username, password, deviceUUID, _id, version, session } = device
     const id = String(_id)
     const timeStamp: number = Date.now()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
@@ -288,6 +329,7 @@ export class CameraUtil {
         TimeStamp: timeStamp,
         Sign: sign,
         UUID: deviceUUID,
+        Session: session,
         Data: {
           Action: 'addPerson',
           PersonType: Mode,
@@ -310,12 +352,12 @@ export class CameraUtil {
   }
 
   /**
- * 添加单张图片
- * 
- * @param username 设备信息
- * @param user 用户信息
- * @param face 名单信息
- */
+  * 添加单张图片
+  * 
+  * @param username 设备信息
+  * @param user 用户信息
+  * @param face 名单信息
+  */
   async handleP2P(upData) {
     const client = this.redis.getClient()
     try {
@@ -325,15 +367,26 @@ export class CameraUtil {
         data: upData.data,
       })
       console.log(result, 'result')
-      if (result.data.Result === 'ok') {
-        return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;
-      }
-      console.log(result.data)
-      if (result.data.ErrorCode === -3 || result.data.Code === -6) {
-        return true
-      }
-      if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
-        return 'imgError'
+      if (upData.version === '1.0.0') {
+        if (result.data.Result === 'ok') {
+          return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;
+        }
+        if (result.data.ErrorCode === -3 || result.data.Code === -6) {
+          return true
+        }
+        if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
+          return 'imgError'
+        }
+      } else if (upData.version === '1.1.0') {
+        if (result.data.Code === 1) {
+          return true;
+        }
+        if (result.data.Result === -3 || result.data.Result === -21) {
+          return true
+        }
+        if (result.data.Result === -15 || result.data.Result === -13) {
+          return 'imgError'
+        }
       }
       const errorData = { count: 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)
@@ -381,14 +434,27 @@ export class CameraUtil {
         data: upData.data,
       })
       console.log(result.data, 'result')
-      if (result.data.Result === 'ok') {
-        return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;
-      }
-      if (result.data.ErrorCode === -3 || result.data.Code === -6) {
-        return true
-      }
-      if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
-        return 'imgError'
+
+      if (upData.version === '1.0.0') {
+        if (result.data.Result === 'ok') {
+          return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;
+        }
+        if (result.data.ErrorCode === -3 || result.data.Code === -6) {
+          return true
+        }
+        if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
+          return 'imgError'
+        }
+      } else if (upData.version === '1.1.0') {
+        if (result.data.Code === 1) {
+          return true;
+        }
+        if (result.data.Result === -3 || result.data.Result === -21) {
+          return true
+        }
+        if (result.data.Result === -15 || result.data.Result === -13) {
+          return 'imgError'
+        }
       }
       const newErrorData = { count: count + 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)

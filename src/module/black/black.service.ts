@@ -128,7 +128,7 @@ export class BlackService {
 
   // 接受黑名单申请
   async agree(id: string, userId: string) {
-    const black: IBlack = await this.blackModel
+    const black: any = await this.blackModel
       .findById(id)
       .lean()
       .exec()
@@ -152,8 +152,7 @@ export class BlackService {
         checkResult: 1,
         faceUrl: black.faceUrl
       }
-      const createFace: IFace = await this.faceService.create(face);
-      await this.cameraUtil.addOnePic(device, black, this.config.blackMode, img, createFace)
+      return await this.faceService.addOnePic(face, device, black, this.config.blackMode, img)
     })
     await this.blackModel.findByIdAndUpdate(id, {
       checkResult: 4,

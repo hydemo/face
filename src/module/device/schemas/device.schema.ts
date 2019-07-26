@@ -38,6 +38,8 @@ export const DeviceSchema = new mongoose.Schema(
     media: ObjectId,
     // 版本
     version: { type: String, default: '1.1.0' },
+    // session
+    session: String,
     // 设备id
     deviceId: { type: Number, unique: true },
     // 是否推送到智能感知平台

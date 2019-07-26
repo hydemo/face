@@ -4,6 +4,7 @@ import {
   Post,
   Get,
   Query,
+  Response,
 } from '@nestjs/common';
 import {
   ApiUseTags,
@@ -100,10 +101,13 @@ export class CallbackController {
   @Post('/register')
 
   @ApiOperation({ title: '设备注册', description: '设备注册' })
-  async register(@Request() req) {
-    const result = await this.callbackService.register(req.body)
-    console.log(result, 'result')
-    return result
+  async register(
+    @Request() req,
+    @Response() res
+  ) {
+    const result = this.callbackService.register(req.body)
+    res.setHeader("Content-Type", "text/json;charset=UTF-8")
+    res.end(JSON.stringify(result))
   }
 
   @ApiOkResponse({
@@ -154,7 +158,7 @@ export class CallbackController {
   @ApiOkResponse({
     description: '心跳数据',
   })
-  @Post('/test')
+  @Post('/tests')
 
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async test(

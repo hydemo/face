@@ -81,10 +81,10 @@ export class ZOCUtil {
   /**
    * 获取10位时间戳
    */
-  getTemp(): string {
+  getTemp(): number {
     let tmp = Date.now().toString();
     tmp = tmp.substr(0, 10);
-    return tmp;
+    return Number(tmp);
   }
   /**
    * 获取签名

@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as moment from 'moment';
+import * as uuid from 'uuid/v4'
 import { RedisService } from 'nestjs-redis';
 import { UserService } from '../users/user.service';
 import { DeviceService } from '../device/device.service';
@@ -247,19 +248,15 @@ export class CallbackService {
   }
   // 心跳包处理
   async keepalive(body: any) {
-    console.log(body, 'bodh')
     const { Name } = body
-    console.log(Name, 'jnaa')
     let uuid: string = ''
     if (Name === 'keepalive') {
       const { DeviceUUID } = body;
       uuid = DeviceUUID
     } else if (Name === 'heartbeatRequest') {
       const { DeviceUUID } = body.Data.DeviceInfo
-      console.log(DeviceUUID, 'ss')
       uuid = DeviceUUID
     }
-    console.log(uuid, 'uuid')
     const client = this.redis.getClient()
     const exist = await client.hget('device', uuid)
     if (!exist || Number(exist) > 4) {
@@ -282,21 +279,20 @@ export class CallbackService {
   async register(body: any) {
     console.log(body, 'body')
     const { TimeStamp } = body
-    console.log(TimeStamp)
+    const session = `${uuid()}_${TimeStamp}`
     const { DeviceUUID } = body.Data.DeviceInfo;
-    console.log(DeviceUUID)
-    const data = {
+    await this.deviceService.updateSession(DeviceUUID, session)
+    return {
       code: 1,
       data:
       {
-        session: `${DeviceUUID}_${TimeStamp}`,
+        session,
       },
-      message: "success",
-      name: "registerResponse",
-      timeStamp: String(TimeStamp)
+      message: 'success',
+      name: 'registerResponse',
+      timeStamp: TimeStamp,
     }
-    console.log(data, 'data')
-    return JSON.parse(JSON.stringify(data))
+
 
     // const client = this.redis.getClient()
     // const exist = await client.hget('device', DeviceUUID)

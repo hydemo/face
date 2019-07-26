@@ -36,4 +36,6 @@ export interface IDevice extends Document {
 
   readonly version: string;
 
+  readonly session: string;
+
 }

@@ -120,4 +120,8 @@ export class DeviceService {
   async unbindMedia(_id: string) {
     return await this.deviceModel.findByIdAndUpdate(_id, { $unset: { media: 1 } });
   }
+  // 更新session
+  async updateSession(deviceUUID: String, session: string) {
+    return await this.deviceModel.findOneAndUpdate({ deviceUUID }, { session });
+  }
 }

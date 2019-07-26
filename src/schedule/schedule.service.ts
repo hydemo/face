@@ -177,8 +177,9 @@ export class ScheduleService {
       if (result === 'imgError') {
         await this.faceService.updateById(data.face._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face, client)
-      }
-      if (result && result.Pic) {
+      } else if (result && data.version === '1.1.0') {
+        await this.faceService.updateById(data.face._id, { checkResult: 2 })
+      } else if (result && result.Pic && data.version === '1.0.0') {
         const face = {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
@@ -202,7 +203,7 @@ export class ScheduleService {
       if (result === 'imgError') {
         await this.faceService.updateById(data.face[0]._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face[0], client)
-      } else if (result && result.Pic) {
+      } else if (result && result.Pic && data.version === '1.0.0') {
         const update = {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
@@ -212,11 +213,24 @@ export class ScheduleService {
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, update)
         }))
+      } else if (result && result.Pic && data.version === '1.1.0') {
+        await Promise.all(data.face.map(async face => {
+          await this.faceService.updateById(face._id, { checkResult: 2 })
+        }))
       }
     } else if (data.type === 'update-delete') {
       const faceExist: IFace | null = await this.faceService.findById(data.face._id)
       if (faceExist && faceExist.checkResult === 1) {
         type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+      }
+    } else if (data.type === 'update') {
+      const faceExist: IFace | null = await this.faceService.findById(data.face._id)
+      let result = true
+      if (faceExist && faceExist.checkResult === 1) {
+        result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+      }
+      if (result) {
+        await this.faceService.updateById(data.face._id, { checkResult: 2 })
       }
     }
     return await client.hset('p2p_listen', data.device, 0)
