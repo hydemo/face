@@ -260,7 +260,7 @@ export class CameraUtil {
           }
         }
       }
-      const upData = { data, face, type: 'update', device: id, username: user.username, version }
+      const upData = { data, face: faces, type: 'update', device: id, username: user.username, version }
       const client = this.redis.getClient()
       const poolExist = await client.hget('p2p_pool', id)
       if (!poolExist) {
