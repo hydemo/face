@@ -384,10 +384,10 @@ export class CameraUtil {
         if (result.data.Code === 1) {
           return true;
         }
-        if (result.data.Result === -3 || result.data.Result === -21) {
+        if (result.data.Data.Result === -3 || result.data.Data.Result === -21) {
           return true
         }
-        if (result.data.Result === -15 || result.data.Result === -13) {
+        if (result.data.Data.Result === -15 || result.data.Data.Result === -13) {
           return 'imgError'
         }
       }
