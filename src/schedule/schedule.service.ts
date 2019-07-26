@@ -221,19 +221,29 @@ export class ScheduleService {
     } else if (data.type === 'update-delete') {
       const faceExist: any = await this.faceService.findById(data.face[0]._id)
       if (faceExist && faceExist.checkResult === 1) {
-        await this.residentService.updateByUser(faceExist.user)
+        const result = await this.residentService.updateByUser(faceExist.user)
+        console.log(result, 'result')
         type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
     } else if (data.type === 'update') {
       const faceExist: any = await this.faceService.findById(data.face._id)
-
-      let result = true
+      let result: any = true
       if (faceExist && faceExist.checkResult === 1) {
         await this.residentService.updateByUser(faceExist.user)
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
-      if (result) {
-        await this.faceService.updateById(data.face._id, { checkResult: 2 })
+      console.log(result, 'ss')
+      if (result === 'imgError') {
+        await this.faceService.updateById(data.face[0]._id, { checkResult: 3 })
+        await this.sendP2PError(data.username, data.face[0], client)
+      } else if (result === true) {
+        await Promise.all(data.face.map(async face => {
+          await this.faceService.updateById(face._id, { checkResult: 2 })
+        }))
+      } else {
+        await Promise.all(data.face.map(async face => {
+          await this.faceService.updateById(face._id, { checkResult: 3 })
+        }))
       }
     }
     return await client.hset('p2p_listen', data.device, 0)
@@ -262,15 +272,12 @@ export class ScheduleService {
       const pools = await client.hkeys('p2p_pool')
       console.log(pools, 'pools')
       await Promise.all(pools.map(async  pool => {
-        console.log(pool, 'pool2')
         const length = await client.llen(`p2p_${pool}`)
-        console.log(length, 'length')
         if (!length) {
           await client.hdel('p2p_pool', pool)
           return
         }
         const device: IDevice = await this.deviceService.findById(pool)
-        console.log(device, 'device')
         if (!device) {
           await client.hdel('p2p_pool', pool)
           return
@@ -323,7 +330,6 @@ export class ScheduleService {
       const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
       await Promise.all(residents.map(async resident => {
         const checkResult = await this.faceService.checkResult(resident._id)
-        console.log(checkResult, resident, 'ss')
         return await this.residentService.updateById(resident._id, { checkResult });
 
       }))

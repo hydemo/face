@@ -230,7 +230,7 @@ export class ResidentService {
     // }
     const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
-      const faceCheck: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, bondToObjectId: resident, isDelete: false })
+      const faceCheck: IFace | null = await this.faceService.findOne({ bondToObjectId: resident, isDelete: false })
       if (faceCheck) {
         return
       }
