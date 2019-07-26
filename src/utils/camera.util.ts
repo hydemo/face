@@ -364,7 +364,7 @@ export class CameraUtil {
     try {
       const result: any = await axios({
         method: 'post',
-        url: this.config.p2pUrl,
+        url: upData.version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
         data: upData.data,
       })
       console.log(result, 'result')
@@ -431,7 +431,7 @@ export class CameraUtil {
     try {
       const result: any = await axios({
         method: 'post',
-        url: this.config.p2pUrl,
+        url: upData.version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
         data: upData.data,
       })
       console.log(result.data, 'result')
