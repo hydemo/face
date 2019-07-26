@@ -50,7 +50,7 @@ export class CameraUtil {
    */
   async getList(ip): Promise<any> {
     const { username = 'admin', password = 'oyxj19891024', deviceUUID = 'umettw42g7iu' } = {}
-    const timeStamp: number = Date.now()
+    const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const result = await axios({
       method: 'post',
@@ -76,7 +76,7 @@ export class CameraUtil {
   async getOnePic(face: IFace, Mode: number): Promise<boolean> {
     const { device } = face
     const { username, password, deviceUUID } = device
-    const timeStamp: number = Date.now()
+    const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const result = await axios({
       method: 'post',
@@ -145,7 +145,7 @@ export class CameraUtil {
     const { device } = face
     const { username, password, deviceUUID, _id, version, session } = device
     const id = String(_id)
-    const timeStamp: number = Date.now()
+    const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     let data: any;
     if (version === '1.0.0') {
@@ -204,7 +204,7 @@ export class CameraUtil {
     const Img = await this.getImg(img)
     const ImgName = user.username;
     const ImgNum = user._id;
-    const timeStamp: number = Date.now()
+    const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     if (version === '1.0.0') {
       const deleteData = {
@@ -276,7 +276,7 @@ export class CameraUtil {
    */
   async getDeviceInfo(device: IDevice): Promise<any> {
     const { username, password, deviceUUID } = device
-    const timeStamp: number = Date.now()
+    const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const result = await axios({
       method: 'post',
@@ -302,7 +302,7 @@ export class CameraUtil {
     console.log(22)
     const { username, password, deviceUUID, _id, version, session } = device
     const id = String(_id)
-    const timeStamp: number = Date.now()
+    const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     let data: any
     console.log(version, 'version')
