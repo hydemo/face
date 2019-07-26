@@ -96,7 +96,6 @@ export class ScheduleService {
   }
 
   async sendP2PError(username, face: IFace, client) {
-    console.log(333)
     const openId = await this.getOpenId(face)
     console.log(openId, 'opwneId')
     if (!openId) {
@@ -174,6 +173,7 @@ export class ScheduleService {
       } else {
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
+      console.log(result, 'p2presult')
       if (result === 'imgError') {
         await this.faceService.updateById(data.face._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face, client)
@@ -203,7 +203,7 @@ export class ScheduleService {
       if (result === 'imgError') {
         await this.faceService.updateById(data.face[0]._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face[0], client)
-      } else if (result && result.Pic && data.version === '1.0.0') {
+      } else if (result && result.Pic) {
         const update = {
           libIndex: result.LibIndex,
           flieIndex: result.FlieIndex,
@@ -213,9 +213,9 @@ export class ScheduleService {
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, update)
         }))
-      } else if (result && result.Pic && data.version === '1.1.0') {
+      } else if (!result) {
         await Promise.all(data.face.map(async face => {
-          await this.faceService.updateById(face._id, { checkResult: 2 })
+          await this.faceService.updateById(face._id, { checkResult: 3 })
         }))
       }
     } else if (data.type === 'update-delete') {

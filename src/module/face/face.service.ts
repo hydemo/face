@@ -135,12 +135,12 @@ export class FaceService {
 
   // 根据条件更新
   async addOnePic(face: CreateFaceDTO, device: IDevice, user: IUser, mode: number, img: string, ) {
-    if (device.version === '1.1.0') {
-      const exist = await this.cameraUtil.getPersionInfo(user._id, device, mode)
-      if (exist) {
-        return await this.faceModel.create({ ...face, checkResult: 2 })
-      }
-    }
+    // if (device.version === '1.1.0') {
+    //   // const exist = await this.cameraUtil.getPersionInfo(user._id, device, mode)
+    //   // if (exist) {
+    //     return await this.faceModel.create({ ...face, checkResult: 2 })
+    //   }
+    // }
     const createFace = await this.faceModel.create(face)
     return await this.cameraUtil.addOnePic(device, user, mode, img, createFace)
   }
@@ -150,10 +150,10 @@ export class FaceService {
     const faceCount: number = await this.count({ isDelete: false, device: face.device, user: face.user, checkResult: 2 })
     const faceToDelete: any = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
     if (faceCount === 1 && faceToDelete) {
-      const exist = await this.cameraUtil.getPersionInfo(faceToDelete.user, faceToDelete.device, faceToDelete.mode)
-      if (exist) {
-        await this.cameraUtil.deleteOnePic(faceToDelete)
-      }
+      // const exist = await this.cameraUtil.getPersionInfo(faceToDelete.user, faceToDelete.device, faceToDelete.mode)
+      // if (exist) {
+      await this.cameraUtil.deleteOnePic(faceToDelete)
+      // }
     }
     await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true, checkResult: 1 })
     return true

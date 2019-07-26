@@ -123,11 +123,13 @@ export class CameraUtil {
         GetPhoto: 0
       }
     }
+    // console.log(data, 'data')
     const result = await axios({
       method: 'post',
       url: this.config.p2pUrl2,
       data
     });
+    console.log(result.data, 'data')
     if (result.data.Code === 1106) {
       return false
     } else if (result.data.Code === 1) {
@@ -205,6 +207,7 @@ export class CameraUtil {
     const ImgNum = user._id;
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
+    console.log(version, 'version')
     if (version === '1.0.0') {
       const deleteData = {
         Name: 'WBListInfoREQ',
