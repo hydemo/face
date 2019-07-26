@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { IFace } from './interfaces/face.interfaces';
 import { CreateFaceDTO } from './dto/face.dto';
 import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
@@ -9,12 +9,14 @@ import { IList } from 'src/common/interface/list.interface';
 import { CameraUtil } from 'src/utils/camera.util';
 import { IUser } from '../users/interfaces/user.interfaces';
 import { IDevice } from '../device/interfaces/device.interfaces';
+import { ResidentService } from '../resident/resident.service';
 
 @Injectable()
 export class FaceService {
   constructor(
     @Inject('FaceModelToken') private readonly faceModel: Model<IFace>,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
+    @Inject(forwardRef(() => ResidentService)) private readonly residentService: ResidentService,
   ) { }
 
   // 创建数据
@@ -121,8 +123,9 @@ export class FaceService {
     return
   }
   // 根据条件更新
-  async updatePic(condition: any, user: IUser, img: string) {
-    const faces: IFace[] = await this.faceModel.find(condition).populate({ path: 'device', model: 'device' })
+  async updatePic(user: IUser, img: string) {
+    await this.residentService.updateByUser(user._id)
+    const faces: IFace[] = await this.faceModel.find({ user: user._id, isDelete: false }).populate({ path: 'device', model: 'device' })
     const deviceFaces: any = []
     for (let face of faces) {
       await this.faceModel.findByIdAndUpdate(face._id, { checkResult: 1, faceUrl: img })

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { ResidentService } from './resident.service';
 import { residentsProviders } from './resident.providers';
@@ -32,7 +32,7 @@ import { CryptoUtil } from 'src/utils/crypto.util';
     DatabaseModule,
     ZoneModule,
     UserModule,
-    FaceModule,
+    forwardRef(() => FaceModule),
     RoleModule,
     ConfigModule,
     PreownerModule,

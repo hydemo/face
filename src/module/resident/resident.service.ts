@@ -1,6 +1,6 @@
 import { Model } from 'mongoose';
 import * as moment from 'moment';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { IResident } from './interfaces/resident.interfaces';
 import {
   CreateResidentDTO,
@@ -47,7 +47,7 @@ export class ResidentService {
     @Inject(UserService) private readonly userService: UserService,
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
-    @Inject(FaceService) private readonly faceService: FaceService,
+    @Inject(forwardRef(() => FaceService)) private readonly faceService: FaceService,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
     @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
     @Inject(RoleService) private readonly roleService: RoleService,
@@ -55,6 +55,10 @@ export class ResidentService {
     @Inject(PreownerService) private readonly preownerService: PreownerService,
     private readonly redis: RedisService,
   ) { }
+
+  async updateByUser(user: string) {
+    await this.residentModel.updateMany({ user, isDelete: false }, { checkResult: 4 })
+  }
 
   async sendVerifyMessage(house: string, reviewer: string, type, openId: string) {
     // 发送审核通过消息
@@ -579,7 +583,7 @@ export class ResidentService {
         throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
       }
       if (resident.user.faceUrl) {
-        await this.faceService.updatePic({ bondToObjectId: id, isDelete: false }, user, resident.user.faceUrl)
+        await this.faceService.updatePic(user, resident.user.faceUrl)
       }
     }
     return await this.residentModel.findByIdAndUpdate(id, { isMonitor: update.isMonitor, isPush: update.isPush })

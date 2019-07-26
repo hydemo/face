@@ -321,6 +321,7 @@ export class ScheduleService {
       const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
       await Promise.all(residents.map(async resident => {
         const checkResult = await this.faceService.checkResult(resident._id)
+        console.log(checkResult, resident, 'ss')
         return await this.residentService.updateById(resident._id, { checkResult });
 
       }))

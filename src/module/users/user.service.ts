@@ -332,7 +332,7 @@ export class UserService {
       }
     }
     if (verify.faceUrl) {
-      await this.faceService.updatePic({ user: faceUser._id, isDelete: false }, faceUser, verify.faceUrl)
+      await this.faceService.updatePic(faceUser, verify.faceUrl)
     }
     if (!returnUser) {
       await this.userModel.findByIdAndUpdate(user._id, { ...verify, isVerify: true, isPhoneVerify }).lean().exec()
