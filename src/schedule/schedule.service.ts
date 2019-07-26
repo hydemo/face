@@ -140,7 +140,7 @@ export class ScheduleService {
   }
 
   async handelP2P(data, sourceData, dataString, client, type) {
-    console.log(data, 'data')
+    // console.log(data, 'data')
     const listenTime = await client.hget('p2p_listen', data.device)
     console.log(listenTime, 'listenTime')
     if (listenTime > 5) {
@@ -221,9 +221,10 @@ export class ScheduleService {
     } else if (data.type === 'update-delete') {
       const faceExist: any = await this.faceService.findById(data.face[0]._id)
       if (faceExist && faceExist.checkResult === 1) {
-        const result = await this.residentService.updateByUser(faceExist.user)
+        await this.residentService.updateByUser(faceExist.user)
+        const result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
         console.log(result, 'result')
-        type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+
       }
     } else if (data.type === 'update') {
       const faceExist: any = await this.faceService.findById(data.face._id)
@@ -240,7 +241,8 @@ export class ScheduleService {
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, { checkResult: 2 })
         }))
-      } else {
+      } else if (!result) {
+        console.log(data.face)
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, { checkResult: 3 })
         }))
