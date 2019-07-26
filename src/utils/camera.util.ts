@@ -183,7 +183,6 @@ export class CameraUtil {
     if (!poolExist) {
       await client.hset('p2p_pool', id, 1)
     }
-    console.log(upData, 'updata')
     await client.lpush(`p2p_${id}`, JSON.stringify(upData))
   }
 
@@ -299,7 +298,6 @@ export class CameraUtil {
   * @param face 名单信息
   */
   async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: IFace) {
-    console.log(22)
     const { username, password, deviceUUID, _id, version, session } = device
     const id = String(_id)
     const timeStamp: number = this.getTemp()
@@ -367,7 +365,8 @@ export class CameraUtil {
         url: upData.version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
         data: upData.data,
       })
-      console.log(result, 'result')
+      console.log(result.data, 'result')
+      console.log(upData.version, 'upData.version')
       if (upData.version === '1.0.0') {
         if (result.data.Result === 'ok') {
           return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;

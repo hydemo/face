@@ -277,7 +277,6 @@ export class CallbackService {
 
   // 设备注册
   async register(body: any) {
-    console.log(body, 'body')
     const { TimeStamp } = body
     const session = `${uuid()}_${TimeStamp}`
     const { DeviceUUID } = body.Data.DeviceInfo;

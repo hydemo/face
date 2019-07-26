@@ -488,7 +488,6 @@ export class ResidentService {
     } else if (String(createUser._id) === String(userId)) {
       throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
     } else {
-      console.log(222)
       await this.userService.updateById(createUser._id, { faceUrl: family.user.faceUrl, username: family.user.username })
     }
     await this.residentExist(family.address, createUser._id)
@@ -607,7 +606,6 @@ export class ResidentService {
   // 我的待审列表
   async myReviews(pagination: Pagination, user: string): Promise<IList<IResident>> {
     const houses = await this.getMyHouses(user)
-    console.log(houses, 'house')
     const condition: any = { address: { $in: houses }, isDelete: false, checkResult: 1, type: { $ne: 'owner' } };
     const list: IResident[] = await this.residentModel
       .find(condition)
