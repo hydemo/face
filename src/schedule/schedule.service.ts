@@ -233,17 +233,20 @@ export class ScheduleService {
       if (faceExist && faceExist.checkResult === 1) {
         await this.residentService.updateByUser(faceExist.user)
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+        console.log(result, '3333')
       }
+      console.log(data.type, type, 'type')
       console.log(result, 'ss')
       if (result === 'imgError') {
         await this.faceService.updateById(data.face[0]._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face[0], client)
       } else if (result === true) {
+        console.log(result, 'upresult')
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, { checkResult: 2 })
         }))
       } else if (!result) {
-        console.log(data.face)
+        console.log(data.face, '22')
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, { checkResult: 3 })
         }))
