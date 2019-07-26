@@ -12,7 +12,7 @@ import { ResidentModule } from '../resident/resident.module';
   exports: [FaceService],
   imports: [
     DatabaseModule,
-    forwardRef(() => ResidentModule),
+    // forwardRef(() => ResidentModule),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
 })

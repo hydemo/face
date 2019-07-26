@@ -16,7 +16,7 @@ export class FaceService {
   constructor(
     @Inject('FaceModelToken') private readonly faceModel: Model<IFace>,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
-    @Inject(forwardRef(() => ResidentService)) private readonly residentService: ResidentService,
+    // @Inject(forwardRef(() => ResidentService)) private readonly residentService: ResidentService,
   ) { }
 
   // 创建数据
@@ -124,7 +124,7 @@ export class FaceService {
   }
   // 根据条件更新
   async updatePic(user: IUser, img: string) {
-    await this.residentService.updateByUser(user._id)
+    // await this.residentService.updateByUser(user._id)
     const faces: IFace[] = await this.faceModel.find({ user: user._id, isDelete: false }).populate({ path: 'device', model: 'device' })
     const deviceFaces: any = []
     for (let face of faces) {

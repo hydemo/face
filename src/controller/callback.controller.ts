@@ -40,16 +40,16 @@ export class CallbackController {
   constructor(
     private readonly callbackService: CallbackService,
     private readonly camera: CameraUtil,
-    private readonly mediaWS: MediaGateway,
-    private readonly socUtil: SOCUtil,
-    private readonly phoneUtil: PhoneUtil,
-    private readonly zocUtil: ZOCUtil,
-    private readonly preownerService: PreownerService,
-    private readonly zoneService: ZoneService,
-    private readonly config: ConfigService,
+    // private readonly mediaWS: MediaGateway,
+    // private readonly socUtil: SOCUtil,
+    // private readonly phoneUtil: PhoneUtil,
+    // private readonly zocUtil: ZOCUtil,
+    // private readonly preownerService: PreownerService,
+    // private readonly zoneService: ZoneService,
+    // private readonly config: ConfigService,
     private readonly redis: RedisService,
-    private readonly p2pErrorService: P2PErrorService,
-    private readonly residentService: ResidentService,
+    // private readonly p2pErrorService: P2PErrorService,
+    // private readonly residentService: ResidentService,
   ) {
 
   }

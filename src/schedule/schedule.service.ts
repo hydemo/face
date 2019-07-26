@@ -219,15 +219,17 @@ export class ScheduleService {
         }))
       }
     } else if (data.type === 'update-delete') {
-      const faceExist: IFace | null = await this.faceService.findById(data.face[0]._id)
-      console.log(faceExist, 'faceExist')
+      const faceExist: any = await this.faceService.findById(data.face[0]._id)
       if (faceExist && faceExist.checkResult === 1) {
+        await this.residentService.updateByUser(faceExist.user)
         type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
     } else if (data.type === 'update') {
-      const faceExist: IFace | null = await this.faceService.findById(data.face._id)
+      const faceExist: any = await this.faceService.findById(data.face._id)
+
       let result = true
       if (faceExist && faceExist.checkResult === 1) {
+        await this.residentService.updateByUser(faceExist.user)
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
       if (result) {

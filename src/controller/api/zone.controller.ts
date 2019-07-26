@@ -37,7 +37,7 @@ export class ZoneController {
     @Inject(ZoneService) private zoneService: ZoneService,
     @Inject(BlackService) private blackService: BlackService,
     @Inject(RentService) private rentService: RentService,
-    @Inject(ResidentService) private residentService: ResidentService,
+    // @Inject(ResidentService) private residentService: ResidentService,
     @Inject(RoleService) private roleService: RoleService,
 
   ) { }
