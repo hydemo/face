@@ -227,7 +227,7 @@ export class ScheduleService {
 
       }
     } else if (data.type === 'update') {
-      const faceExist: any = await this.faceService.findById(data.face._id)
+      const faceExist: any = await this.faceService.findById(data.face[0]._id)
       let result: any = true
       if (faceExist && faceExist.checkResult === 1) {
         await this.residentService.updateByUser(faceExist.user)
