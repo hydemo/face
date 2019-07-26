@@ -34,4 +34,6 @@ export interface IDevice extends Document {
 
   deviceId: number;
 
+  readonly version: string;
+
 }

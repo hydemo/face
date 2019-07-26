@@ -29,7 +29,7 @@ export class CameraUtil {
    * @param uuid 设备uuid
    * @param timeStamp 时间戳
    */
-  sign(username: string, password: string, uuid: string, timeStamp: string): string {
+  sign(username: string, password: string, uuid: string, timeStamp: number): string {
     return md5(`${uuid}:${username}:${password}:${timeStamp}`)
   }
 
@@ -41,7 +41,7 @@ export class CameraUtil {
    */
   async getList(ip): Promise<any> {
     const { username = 'admin', password = 'oyxj19891024', deviceUUID = 'umettw42g7iu' } = {}
-    const timeStamp: string = Date.now().toString()
+    const timeStamp: number = Date.now()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const result = await axios({
       method: 'post',
@@ -67,7 +67,7 @@ export class CameraUtil {
   async getOnePic(face: IFace, Mode: number): Promise<boolean> {
     const { device } = face
     const { username, password, deviceUUID } = device
-    const timeStamp: string = Date.now().toString()
+    const timeStamp: number = Date.now()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const result = await axios({
       method: 'post',
@@ -92,6 +92,34 @@ export class CameraUtil {
     return false
   }
 
+  async getPersionInfo(PersonId: string, device: any, PersonType: number) {
+    // const { username, password, deviceUUID } = device
+    const deviceUUID = 'umet9bgg8bqu'
+    const username = 'admin'
+    const password = 'oyxj19891024'
+    const timeStamp: number = Date.now()
+    const Sign = this.sign(username, password, deviceUUID, timeStamp)
+    const data = {
+      Name: 'personListRequest',
+      UUID: deviceUUID,
+      TimeStamp: timeStamp,
+      Sign,
+      Data:
+      {
+        Action: 'getPerson',
+        PersonType,
+        PersonId,
+        GetPhoto: 0
+      }
+    }
+    const result = await axios({
+      method: 'post',
+      url: this.config.p2pUrl2,
+      data
+    });
+    console.log(result, 'persionresult')
+  }
+
   /**
    * 删除单张图片
    * 
@@ -99,23 +127,41 @@ export class CameraUtil {
    */
   async deleteOnePic(face: IFace) {
     const { device } = face
-    const { username, password, deviceUUID, _id } = device
+    const { username, password, deviceUUID, _id, version } = device
     const id = String(_id)
-    const timeStamp: string = Date.now().toString()
+    const timeStamp: number = Date.now()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
-    const data = {
-      Name: 'WBListInfoREQ',
-      TimeStamp: timeStamp,
-      Sign: sign,
-      Mode: face.mode,
-      Action: 'DeleteOnePic',
-      UUID: deviceUUID,
-      DeleteOnePic: {
-        LibIndex: face.libIndex,
-        FlieIndex: face.flieIndex,
-        Pic: face.pic,
+    let data: any;
+    if (version === '1.0.0') {
+      data = {
+        Name: 'WBListInfoREQ',
+        TimeStamp: timeStamp,
+        Sign: sign,
+        Mode: face.mode,
+        Action: 'DeleteOnePic',
+        UUID: deviceUUID,
+        DeleteOnePic: {
+          LibIndex: face.libIndex,
+          FlieIndex: face.flieIndex,
+          Pic: face.pic,
+        }
+      }
+    } else if (version === '1.1.0') {
+      data = {
+        Name: 'WBListInfoREQ',
+        TimeStamp: timeStamp,
+        Sign: sign,
+        Mode: face.mode,
+        Action: 'DeleteOnePic',
+        UUID: deviceUUID,
+        DeleteOnePic: {
+          LibIndex: face.libIndex,
+          FlieIndex: face.flieIndex,
+          Pic: face.pic,
+        }
       }
     }
+
     const upData = { data, face, type: 'delete', device: id }
     const client = this.redis.getClient()
     const poolExist = await client.hget('p2p_pool', id)
@@ -143,7 +189,7 @@ export class CameraUtil {
     const Img = await this.getImg(img)
     const ImgName = user.username;
     const ImgNum = user._id;
-    const timeStamp: string = Date.now().toString()
+    const timeStamp: number = Date.now()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const deleteData = {
       Name: 'WBListInfoREQ',
@@ -189,7 +235,7 @@ export class CameraUtil {
    */
   async getDeviceInfo(device: IDevice): Promise<any> {
     const { username, password, deviceUUID } = device
-    const timeStamp: string = Date.now().toString()
+    const timeStamp: number = Date.now()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const result = await axios({
       method: 'post',
@@ -213,28 +259,48 @@ export class CameraUtil {
   */
   async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: any) {
     console.log(22)
-    const { username, password, deviceUUID, _id } = device
+    const { username, password, deviceUUID, _id, version } = device
     const id = String(_id)
+    const timeStamp: number = Date.now()
+    const sign = await this.sign(username, password, deviceUUID, timeStamp)
+    let data: any
     // console.log(user.faceUrl, 'facedd')
     // const Img = await this.getImg(`${user.faceUrl}`);
-    const ImgName = user.username;
-    const ImgNum = user._id;
-    const timeStamp: string = Date.now().toString()
-    const sign = await this.sign(username, password, deviceUUID, timeStamp)
-    const data = {
-      Name: 'WBListInfoREQ',
-      TimeStamp: timeStamp,
-      Sign: sign,
-      Mode,
-      Action: 'AddOnePic',
-      UUID: deviceUUID,
-      AddOnePic: {
-        Img,
-        ImgName,
-        ImgNum,
+    if (version === '1.0.0') {
+      const ImgName = user.username;
+      const ImgNum = user._id;
+      data = {
+        Name: 'WBListInfoREQ',
+        TimeStamp: timeStamp,
+        Sign: sign,
+        Mode,
+        Action: 'AddOnePic',
+        UUID: deviceUUID,
+        AddOnePic: {
+          Img,
+          ImgName,
+          ImgNum,
+        }
+      }
+    } else if (version === '1.1.0') {
+      data = {
+        Name: "personListResponse",
+        TimeStamp: timeStamp,
+        Sign: sign,
+        UUID: deviceUUID,
+        Data: {
+          Action: 'addPerson',
+          PersonType: Mode,
+          PersonInfo: {
+            PersonId: user._id,
+            PersonName: user.username,
+            PersonPhoto: Img
+          }
+        }
       }
     }
-    const upData = { data, face, type: 'add', device: id, username: user.username }
+
+    const upData = { data, face, type: 'add', device: id, username: user.username, version }
     const client = this.redis.getClient()
     const poolExist = await client.hget('p2p_pool', id)
     if (!poolExist) {
@@ -351,7 +417,7 @@ export class CameraUtil {
    * @param url 图片地址
    */
   async getImg(url: string): Promise<string> {
-    const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/800x/gravity/Center/crop/780x780/blur/1x0/quality/100|imageslim`, { responseType: 'arraybuffer' })
+    const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/800x/gravity/Center/crop/800x960/blur/1x0/quality/100|imageslim`, { responseType: 'arraybuffer' })
     const img = new Buffer(result.data, 'binary').toString('base64')
     return img
   }

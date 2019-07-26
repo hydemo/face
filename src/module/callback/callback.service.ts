@@ -22,6 +22,7 @@ import { WeixinUtil } from 'src/utils/weixin.util';
 import { ZoneService } from '../zone/zone.service';
 import { IZone } from '../zone/interfaces/zone.interfaces';
 import { ZOCUtil } from 'src/utils/zoc.util';
+import { Timestamp } from 'rxjs/internal/operators/timestamp';
 
 interface IReceiver {
   id: string;
@@ -45,6 +46,16 @@ export class CallbackService {
 
     private readonly mediaWs: MediaGateway,
   ) { }
+
+  /**
+   * 获取10位时间戳
+   */
+  getTemp(): string {
+    let tmp = Date.now().toString();
+    tmp = tmp.substr(0, 10);
+    return tmp;
+  }
+
   async callback(body: any) {
     const device: IDevice | null = await this.deviceService.findByUUID(body.DeviceUUID)
     if (!device) {
@@ -236,18 +247,68 @@ export class CallbackService {
   }
   // 心跳包处理
   async keepalive(body: any) {
-    const { DeviceUUID } = body;
+    console.log(body, 'bodh')
+    const { Name } = body
+    console.log(Name, 'jnaa')
+    let uuid: string = ''
+    if (Name === 'keepalive') {
+      const { DeviceUUID } = body;
+      uuid = DeviceUUID
+    } else if (Name === 'heartbeatRequest') {
+      const { DeviceUUID } = body.Data.DeviceInfo
+      console.log(DeviceUUID, 'ss')
+      uuid = DeviceUUID
+    }
+    console.log(uuid, 'uuid')
     const client = this.redis.getClient()
-    const exist = await client.hget('device', DeviceUUID)
+    const exist = await client.hget('device', uuid)
     if (!exist || Number(exist) > 4) {
-      const device: IDevice | null = await this.deviceService.findByUUID(DeviceUUID)
+      const device: IDevice | null = await this.deviceService.findByUUID(uuid)
       if (!device) {
         return
       }
-      await client.hset('p2p_pool', String(device._id), 1)
-      await client.hset('p2pError_pool', String(device._id), 1)
+      if (client.llen(`p2p_${device._id}`)) {
+        await client.hset('p2p_pool', String(device._id), 1)
+      }
+      if (client.llen(`p2pError_${device._id}`)) {
+        await client.hset('p2pError_pool', String(device._id), 1)
+      }
     }
-    await client.hset('device', DeviceUUID, 1)
+    await client.hset('device', uuid, 1)
+
+  }
+
+  // 设备注册
+  async register(body: any) {
+    console.log(body, 'body')
+    const { TimeStamp } = body
+    console.log(TimeStamp)
+    const { DeviceUUID } = body.Data.DeviceInfo;
+    console.log(DeviceUUID)
+    const data = {
+      code: 1,
+      data:
+      {
+        session: `${DeviceUUID}_${TimeStamp}`,
+      },
+      message: "success",
+      name: "registerResponse",
+      timeStamp: String(TimeStamp)
+    }
+    console.log(data, 'data')
+    return JSON.parse(JSON.stringify(data))
+
+    // const client = this.redis.getClient()
+    // const exist = await client.hget('device', DeviceUUID)
+    // if (!exist || Number(exist) > 4) {
+    //   const device: IDevice | null = await this.deviceService.findByUUID(DeviceUUID)
+    //   if (!device) {
+    //     return
+    //   }
+    //   await client.hset('p2p_pool', String(device._id), 1)
+    //   await client.hset('p2pError_pool', String(device._id), 1)
+    // }
+    // await client.hset('device', DeviceUUID, 1)
 
   }
 

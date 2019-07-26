@@ -53,6 +53,8 @@ export class ConfigService {
 
       P2P_URL: Joi.string().required(),
 
+      P2P_URL_V2: Joi.string().required(),
+
       QINIU_UPLOAD_URL: Joi.string().required(),
 
       QINIU_LINK: Joi.string().required(),
@@ -188,6 +190,10 @@ export class ConfigService {
 
   get p2pUrl(): string {
     return this.envConfig.P2P_URL
+  }
+
+  get p2pUrl2(): string {
+    return this.envConfig.P2P_URL_V2
   }
 
   get qiniuAccessKey(): string {

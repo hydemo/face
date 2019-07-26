@@ -59,6 +59,11 @@ export class CreateDeviceDTO {
   @Type(() => String)
   @ApiModelProperty({ description: '安装具体区域' })
   readonly position: string
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: 'http协议版本' })
+  readonly version: string;
 }
 
 export class BindSimDTO {

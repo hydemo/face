@@ -1055,13 +1055,13 @@ export class ResidentService {
   // 根据id修改
   async fix() {
     const array: any = []
-    const residents = await this.residentModel.find({ isDelete: false }).populate({ path: 'user', model: 'user' });
+    const residents = await this.residentModel.find({ isDelete: false, checkResult: 2 }).populate({ path: 'user', model: 'user' });
     await Promise.all(residents.map(async resident => {
       const count = await this.faceService.count({ bondToObjectId: resident._id })
       if (count < 6) {
         array.push(resident)
       }
     }))
-
+    console.log(array, array.length, 'array')
   }
 }

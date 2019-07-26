@@ -82,7 +82,7 @@ export class ZOCUtil {
    * 获取10位时间戳
    */
   getTemp(): string {
-    var tmp = Date.now().toString();
+    let tmp = Date.now().toString();
     tmp = tmp.substr(0, 10);
     return tmp;
   }

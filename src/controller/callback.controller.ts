@@ -95,6 +95,18 @@ export class CallbackController {
   }
 
   @ApiOkResponse({
+    description: '设备注册',
+  })
+  @Post('/register')
+
+  @ApiOperation({ title: '设备注册', description: '设备注册' })
+  async register(@Request() req) {
+    const result = await this.callbackService.register(req.body)
+    console.log(result, 'result')
+    return result
+  }
+
+  @ApiOkResponse({
     description: '心跳数据',
   })
   @Post('/send')
@@ -151,7 +163,8 @@ export class CallbackController {
   ) {
     // await this.callbackService.upDeviceToZOC(code)
     // await this.callbackService.upResidentToZOC(code)
-    const residents = await this.residentService.fix()
+    await this.camera.getPersionInfo('22', 1, 2)
+    // const residents = await this.residentService.fix()
     return
 
   }
