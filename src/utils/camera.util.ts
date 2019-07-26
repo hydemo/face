@@ -305,6 +305,7 @@ export class CameraUtil {
     const timeStamp: number = Date.now()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     let data: any
+    console.log(version, 'version')
     // console.log(user.faceUrl, 'facedd')
     // const Img = await this.getImg(`${user.faceUrl}`);
     if (version === '1.0.0') {
