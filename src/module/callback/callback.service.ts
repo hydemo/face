@@ -264,10 +264,10 @@ export class CallbackService {
       if (!device) {
         return
       }
-      if (client.llen(`p2p_${device._id}`)) {
+      if (await client.llen(`p2p_${device._id}`)) {
         await client.hset('p2p_pool', String(device._id), 1)
       }
-      if (client.llen(`p2pError_${device._id}`)) {
+      if (await client.llen(`p2pError_${device._id}`)) {
         await client.hset('p2pError_pool', String(device._id), 1)
       }
     }
