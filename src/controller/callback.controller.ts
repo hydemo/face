@@ -105,7 +105,7 @@ export class CallbackController {
     @Request() req,
     @Response() res
   ) {
-    const result = this.callbackService.register(req.body)
+    const result = await this.callbackService.register(req.body)
     res.setHeader("Content-Type", "text/json;charset=UTF-8")
     res.end(JSON.stringify(result))
   }
