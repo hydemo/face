@@ -173,11 +173,10 @@ export class ScheduleService {
       } else {
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       }
-      console.log(result, 'p2presult')
       if (result === 'imgError') {
         await this.faceService.updateById(data.face._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face, client)
-      } else if (result && data.version === '1.1.0') {
+      } else if (result === 'success' && data.version === '1.1.0') {
         await this.faceService.updateById(data.face._id, { checkResult: 2 })
       } else if (result && result.Pic && data.version === '1.0.0') {
         const face = {
@@ -187,15 +186,14 @@ export class ScheduleService {
           checkResult: 2
         }
         await this.faceService.updateById(data.face._id, face)
+      } else if (result === 'final') {
+        await this.faceService.updateById(data.face._id, { checkResult: 3 })
       }
     } else if (data.type === 'delete') {
       const faceExist: IFace | null = await this.faceService.findById(data.face._id)
       console.log(faceExist, 'faceExist')
-      let result = true
-      if (faceExist && faceExist.checkResult === 1) {
-        result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
-      }
-      if (result) {
+      const result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+      if (result === 'success') {
         await this.faceService.updateById(data.face._id, { checkResult: 2 })
       }
     } else if (data.type === 'update-add') {
@@ -213,7 +211,7 @@ export class ScheduleService {
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, update)
         }))
-      } else if (!result) {
+      } else if (result === 'final') {
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, { checkResult: 3 })
         }))
@@ -227,26 +225,20 @@ export class ScheduleService {
 
       }
     } else if (data.type === 'update') {
-      console.log(data.face)
       const faceExist: any = await this.faceService.findById(data.face[0]._id)
       let result: any = true
-      if (faceExist && faceExist.checkResult === 1) {
+      if (faceExist) {
         await this.residentService.updateByUser(faceExist.user)
         result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
-        console.log(result, '3333')
       }
-      console.log(data.type, type, 'type')
-      console.log(result, 'ss')
       if (result === 'imgError') {
         await this.faceService.updateById(data.face[0]._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face[0], client)
-      } else if (result === true) {
-        console.log(result, 'upresult')
+      } else if (result === 'success') {
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, { checkResult: 2 })
         }))
-      } else if (!result) {
-        console.log(data.face, '22')
+      } else if (result === 'final') {
         await Promise.all(data.face.map(async face => {
           await this.faceService.updateById(face._id, { checkResult: 3 })
         }))
@@ -291,7 +283,7 @@ export class ScheduleService {
 
         const alive = await client.hget('device', device.deviceUUID)
         console.log(alive, 'alive')
-        if (!alive || Number(alive) > 5) {
+        if (!alive || Number(alive) > 4) {
           await client.hdel('p2p_pool', pool)
           return
         }
@@ -317,7 +309,7 @@ export class ScheduleService {
           return
         }
         const alive = await client.hget('device', device.deviceUUID)
-        if (!alive || Number(alive) > 5) {
+        if (!alive || Number(alive) > 4) {
           await client.hdel('p2pError_pool', pool)
           return
         }

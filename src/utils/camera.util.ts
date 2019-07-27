@@ -370,34 +370,74 @@ export class CameraUtil {
       })
       console.log(result.data, 'result')
       console.log(upData.version, 'upData.version')
+      let code;
+      let msg;
       if (upData.version === '1.0.0') {
         if (result.data.Result === 'ok') {
-          return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;
+          return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : 'success';
         }
-        if (result.data.ErrorCode === -3 || result.data.Code === -6) {
-          return true
+        switch (result.data.ErrorCode) {
+          case -3: code = 'success'
+            break;
+          case -6: code = 'success'
+            break;
+          case -15: code = 'imgError'
+            break;
+          case -13: code = 'imgError'
+            break;
+          case -19: code = 'error'
+            break;
+          case -20: code = 'error'
+            break;
+          default: { code = 'final', msg = JSON.stringify(result.data) }
+            break;
         }
-        if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
-          return 'imgError'
-        }
-      } else if (upData.version === '1.1.0') {
 
+      } else if (upData.version === '1.1.0') {
         if (result.data.Code === 1) {
-          return true;
+          return 'success';
         }
-        if (result.data.Data.Result === -3 || result.data.Data.Result === -21) {
-          return true
-        }
-        if (result.data.Data.Result === -15 || result.data.Data.Result === -13) {
-          return 'imgError'
+        switch (result.data.Data.Result) {
+          case -3: code = 'success'
+            break;
+          case -21: code = 'success'
+            break;
+          case -15: code = 'imgError'
+            break;
+          case -13: code = 'imgError'
+            break;
+          case -19: code = 'error'
+            break;
+          case -20: code = 'error'
+            break;
+          default: { code = 'final', msg = JSON.stringify(result.data) }
+            break;
         }
       }
-      const errorData = { count: 1, upData }
-      const poolExist = await client.hget('p2pError_pool', upData.device)
-      if (!poolExist) {
-        await client.hset('p2pError_pool', upData.device, 1)
+      if (code === 'final') {
+        let face;
+        if (upData.type === 'add' || upData.type === 'delet') {
+          face = upData.face._id
+        } else {
+          face = upData.face[0]._id
+        }
+        const error: P2PErrorDTO = {
+          face,
+          msg,
+        }
+        await this.p2pErrorService.create(error)
+        await this.phoneUtil.sendP2PError()
+        return false
       }
-      await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
+      if (code === 'error') {
+        const errorData = { count: 1, upData }
+        const poolExist = await client.hget('p2pError_pool', upData.device)
+        if (!poolExist) {
+          await client.hset('p2pError_pool', upData.device, 1)
+        }
+        await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
+      }
+      return code
     } catch (error) {
       // console.log(error)
       const errorData = { count: 1, upData }
@@ -406,7 +446,7 @@ export class CameraUtil {
         await client.hset('p2pError_pool', upData.device, 1)
       }
       await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
-      return false
+      return 'error'
     }
   }
   /**
@@ -419,17 +459,6 @@ export class CameraUtil {
   async handleP2PEroor(errorData: any) {
     const client = this.redis.getClient()
     const { upData, count } = errorData
-    if (count > 10) {
-      await client.lpush('p2pErrorFinal', JSON.stringify(errorData))
-      const imgUrl = upData.type === 'add' ? upData.face.imgUrl : upData.face[0].imgUrl
-      const error: P2PErrorDTO = {
-        face: upData.face,
-        imgUrl,
-      }
-      await this.p2pErrorService.create(error)
-      await this.phoneUtil.sendP2PError()
-      return false
-    }
     try {
       const result: any = await axios({
         method: 'post',
@@ -437,34 +466,75 @@ export class CameraUtil {
         data: upData.data,
       })
       console.log(result.data, 'result')
-
+      let code;
+      let msg
       if (upData.version === '1.0.0') {
         if (result.data.Result === 'ok') {
-          return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : true;
+          return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : 'success';
         }
-        if (result.data.ErrorCode === -3 || result.data.Code === -6 || result.data.ErrorCode === -6) {
-          return true
+        switch (result.data.ErrorCode) {
+          case -3: code = 'success'
+            break;
+          case -6: code = 'success'
+            break;
+          case -15: code = 'imgError'
+            break;
+          case -13: code = 'imgError'
+            break;
+          case -19: code = 'error'
+            break;
+          case -20: code = 'error'
+            break;
+          default: code = 'final'
+            break;
         }
-        if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13) {
-          return 'imgError'
-        }
+
       } else if (upData.version === '1.1.0') {
         if (result.data.Code === 1) {
-          return true;
+          return 'success';
         }
-        if (result.data.Data.Result === -3 || result.data.Data.Result === -21) {
-          return true
-        }
-        if (result.data.Data.Result === -15 || result.data.Data.Result === -13) {
-          return 'imgError'
+        switch (result.data.Data.Result) {
+          case -3: code = 'success'
+            break;
+          case -21: code = 'success'
+            break;
+          case -15: code = 'imgError'
+            break;
+          case -13: code = 'imgError'
+            break;
+          case -19: code = 'error'
+            break;
+          case -20: code = 'error'
+            break;
+          default: code = 'final'
+            break;
         }
       }
-      const newErrorData = { count: count + 1, upData }
-      const poolExist = await client.hget('p2pError_pool', upData.device)
-      if (!poolExist) {
-        await client.hset('p2pError_pool', upData.device, 1)
+
+      if (code === 'final' || (code === 'error' && count > 8)) {
+        let face;
+        if (upData.type === 'add' || upData.type === 'delet') {
+          face = upData.face._id
+        } else {
+          face = upData.face[0]._id
+        }
+        const error: P2PErrorDTO = {
+          face,
+          msg,
+        }
+        await this.p2pErrorService.create(error)
+        await this.phoneUtil.sendP2PError()
+        return false
       }
-      await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
+      if (code === 'error') {
+        const newErrorData = { count: count + 1, upData }
+        const poolExist = await client.hget('p2pError_pool', upData.device)
+        if (!poolExist) {
+          await client.hset('p2pError_pool', upData.device, 1)
+        }
+        await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
+      }
+      return code;
     } catch (error) {
       // console.log(error, 'error')
 
@@ -474,9 +544,8 @@ export class CameraUtil {
         await client.hset('p2pError_pool', upData.device, 1)
       }
       await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
-      await this.phoneUtil.sendP2PError()
+      return 'error'
     }
-    return
   }
 
   /**

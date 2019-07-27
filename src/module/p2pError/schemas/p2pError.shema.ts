@@ -5,7 +5,7 @@ const ObjectId = mongoose.Types.ObjectId;
 export const P2PErrorSchema = new mongoose.Schema(
   {
     face: ObjectId,
-    imgUrl: String,
+    msg: String,
   },
   { collection: 'p2pError', versionKey: false, timestamps: true },
 );
