@@ -96,7 +96,7 @@ export class RoleService {
           bondToObjectId,
           bondType: 'role',
           zone: zone,
-          faceUrl: user.faceUrl
+          // faceUrl: user.faceUrl
         }
         return await this.faceService.addOnePic(face, device, user, this.config.whiteMode, img)
       }
@@ -152,6 +152,7 @@ export class RoleService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .populate({ path: 'user', model: 'user', select: 'username faceUrl phone' })
+      .populate({ path: 'reviewer', model: 'user', select: 'username' })
       .lean()
       .exec()
     const total = await this.roleModel.countDocuments(condition);
@@ -287,5 +288,26 @@ export class RoleService {
   // 根据id修改
   async updateById(id: string, update: any): Promise<IRole | null> {
     return await this.roleModel.findByIdAndUpdate(id, update)
+  }
+
+  async fix() {
+
+    // const roles: IRole[] = await this.roleModel.find({ role: { $in: [4, 5] } })
+    const rols: IRole[] = await this.roleModel.find({ role: { $in: [1, 2, 3] }, isDelete: false })
+    // console.log(rols.length, 'ss')å
+    // await Promise.all(roles.map(async role => {
+    //   await this.faceService.remove(role._id)
+    //   await this.roleModel.findByIdAndRemove(role._id)
+    // }))
+
+    await Promise.all(rols.map(async rol => {
+      // const count = await this.faceService.count({ bondToObjectId: rol._id, isDelete: false })
+      // if (count < 6) {
+      //   console.log(rol.user, count)
+      // }
+      await this.faceService.fixBount(rol, 'role')
+
+
+    }))
   }
 }

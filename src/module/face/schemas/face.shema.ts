@@ -29,7 +29,7 @@ export const FaceSchema = new mongoose.Schema(
     // 是否删除
     isDelete: { type: Boolean, default: false },
     // 人脸链接
-    faceUrl: String,
+    // faceUrl: String,
   },
   { collection: 'face', versionKey: false, timestamps: true },
 );

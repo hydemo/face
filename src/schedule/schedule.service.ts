@@ -176,7 +176,7 @@ export class ScheduleService {
       if (result === 'imgError') {
         await this.faceService.updateById(data.face._id, { checkResult: 3 })
         await this.sendP2PError(data.username, data.face, client)
-      } else if (result === 'success' && data.version === '1.1.0') {
+      } else if (result === 'success') {
         await this.faceService.updateById(data.face._id, { checkResult: 2 })
       } else if (result && result.Pic && data.version === '1.0.0') {
         const face = {
@@ -248,99 +248,99 @@ export class ScheduleService {
   }
 
   async enableSchedule() {
-    const rule = new Schedule.RecurrenceRule();
-    rule.second = 0;
-    rule.minute = 0;
-    rule.hour = 3;
+    // const rule = new Schedule.RecurrenceRule();
+    // rule.second = 0;
+    // rule.minute = 0;
+    // rule.hour = 3;
 
-    Schedule.scheduleJob(rule, async () => {
-      await this.residentService.removeVisitor()
-    });
+    // Schedule.scheduleJob(rule, async () => {
+    //   await this.residentService.removeVisitor()
+    // });
 
-    Schedule.scheduleJob('*/2 * * * *', async () => {
-      const client = this.redis.getClient()
-      const keys = await client.hkeys('device')
-      await Promise.all(keys.map(async key => {
-        await client.hincrby('device', key, 1)
-      }))
-    });
+    // Schedule.scheduleJob('*/2 * * * *', async () => {
+    //   const client = this.redis.getClient()
+    //   const keys = await client.hkeys('device')
+    //   await Promise.all(keys.map(async key => {
+    //     await client.hincrby('device', key, 1)
+    //   }))
+    // });
 
-    Schedule.scheduleJob('*/16 * * * * *', async () => {
-      const client = this.redis.getClient()
-      const pools = await client.hkeys('p2p_pool')
-      console.log(pools, 'pools')
-      await Promise.all(pools.map(async  pool => {
-        const length = await client.llen(`p2p_${pool}`)
-        if (!length) {
-          await client.hdel('p2p_pool', pool)
-          return
-        }
-        const device: IDevice = await this.deviceService.findById(pool)
-        if (!device) {
-          await client.hdel('p2p_pool', pool)
-          return
-        }
+    // Schedule.scheduleJob('*/16 * * * * *', async () => {
+    //   const client = this.redis.getClient()
+    //   const pools = await client.hkeys('p2p_pool')
+    //   console.log(pools, 'pools')
+    //   await Promise.all(pools.map(async  pool => {
+    //     const length = await client.llen(`p2p_${pool}`)
+    //     if (!length) {
+    //       await client.hdel('p2p_pool', pool)
+    //       return
+    //     }
+    //     const device: IDevice = await this.deviceService.findById(pool)
+    //     if (!device) {
+    //       await client.hdel('p2p_pool', pool)
+    //       return
+    //     }
 
-        const alive = await client.hget('device', device.deviceUUID)
-        console.log(alive, 'alive')
-        if (!alive || Number(alive) > 4) {
-          await client.hdel('p2p_pool', pool)
-          return
-        }
-        const dataString: any = await client.rpop(`p2p_${pool}`)
-        const data = JSON.parse(dataString)
-        // console.log(data, 'data')
-        await this.handelP2P(data, data, dataString, client, 'p2p')
-      }))
-    });
+    //     const alive = await client.hget('device', device.deviceUUID)
+    //     console.log(alive, 'alive')
+    //     if (!alive || Number(alive) > 4) {
+    //       await client.hdel('p2p_pool', pool)
+    //       return
+    //     }
+    //     const dataString: any = await client.rpop(`p2p_${pool}`)
+    //     const data = JSON.parse(dataString)
+    //     // console.log(data, 'data')
+    //     await this.handelP2P(data, data, dataString, client, 'p2p')
+    //   }))
+    // });
 
-    Schedule.scheduleJob('*/30 * * * * *', async () => {
-      const client = this.redis.getClient()
-      const pools = await client.hkeys('p2pError_pool')
-      await Promise.all(pools.map(async  pool => {
-        const length = await client.llen(`p2pError_${pool}`)
-        if (!length) {
-          await client.hdel('p2pError_pool', pool)
-          return
-        }
-        const device: IDevice = await this.deviceService.findById(pool)
-        if (!device) {
-          await client.hdel('p2pError_pool', pool)
-          return
-        }
-        const alive = await client.hget('device', device.deviceUUID)
-        if (!alive || Number(alive) > 4) {
-          await client.hdel('p2pError_pool', pool)
-          return
-        }
-        const dataString: any = await client.rpop(`p2pError_${pool}`)
-        const errorData = JSON.parse(dataString)
-        const { upData } = errorData
-        await this.handelP2P(upData, errorData, dataString, client, 'p2pError')
-      }))
+    // Schedule.scheduleJob('*/30 * * * * *', async () => {
+    //   const client = this.redis.getClient()
+    //   const pools = await client.hkeys('p2pError_pool')
+    //   await Promise.all(pools.map(async  pool => {
+    //     const length = await client.llen(`p2pError_${pool}`)
+    //     if (!length) {
+    //       await client.hdel('p2pError_pool', pool)
+    //       return
+    //     }
+    //     const device: IDevice = await this.deviceService.findById(pool)
+    //     if (!device) {
+    //       await client.hdel('p2pError_pool', pool)
+    //       return
+    //     }
+    //     const alive = await client.hget('device', device.deviceUUID)
+    //     if (!alive || Number(alive) > 4) {
+    //       await client.hdel('p2pError_pool', pool)
+    //       return
+    //     }
+    //     const dataString: any = await client.rpop(`p2pError_${pool}`)
+    //     const errorData = JSON.parse(dataString)
+    //     const { upData } = errorData
+    //     await this.handelP2P(upData, errorData, dataString, client, 'p2pError')
+    //   }))
 
 
-    });
+    // });
 
-    Schedule.scheduleJob('*/5 * * * * *', async () => {
-      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: { $in: [4, 5] } })
-      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
-      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
-      await Promise.all(residents.map(async resident => {
-        const checkResult = await this.faceService.checkResult(resident._id)
-        return await this.residentService.updateById(resident._id, { checkResult });
+    // Schedule.scheduleJob('*/5 * * * * *', async () => {
+    //   const residents: IResident[] = await this.residentService.findByCondition({ checkResult: { $in: [4, 5] } })
+    //   const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
+    //   const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
+    //   await Promise.all(residents.map(async resident => {
+    //     const checkResult = await this.faceService.checkResult(resident._id)
+    //     return await this.residentService.updateById(resident._id, { checkResult });
 
-      }))
-      await Promise.all(roles.map(async role => {
-        const checkResult = await this.faceService.checkResult(role._id)
-        return await this.roleService.updateById(role._id, { checkResult });
-      }))
-      await Promise.all(blacks.map(async black => {
-        const checkResult = await this.faceService.checkResult(black._id)
-        return await this.blackService.updateById(black._id, { checkResult });
+    //   }))
+    //   await Promise.all(roles.map(async role => {
+    //     const checkResult = await this.faceService.checkResult(role._id)
+    //     return await this.roleService.updateById(role._id, { checkResult });
+    //   }))
+    //   await Promise.all(blacks.map(async black => {
+    //     const checkResult = await this.faceService.checkResult(black._id)
+    //     return await this.blackService.updateById(black._id, { checkResult });
 
-      }))
-    });
+    //   }))
+    // });
 
     // Schedule.scheduleJob('*/1 * * * *', async () => {
     //   const client = this.redis.getClient()
@@ -352,19 +352,55 @@ export class ScheduleService {
 
 
 
-    Schedule.scheduleJob('*/30 * * * *', async () => {
+    // Schedule.scheduleJob('*/30 * * * *', async () => {
+    //   const client = this.redis.getClient()
+    //   const keys = await client.hkeys('device')
+    //   await Promise.all(keys.map(async key => {
+    //     const value = await client.hget('device', key)
+    //     if (Number(value) > 10) {
+    //       await client.hdel('device', key)
+    //       const device: IDevice | null = await this.deviceService.findByUUID(key)
+    //       if (!device) return
+    //       const zoneName = device.position.houseNumber.split('-')
+    //       // await this.phone.sendDeviceError(zoneName[0], key)
+    //     }
+    //   }))
+    // });
+
+    Schedule.scheduleJob('*/10 * * * * * ', async () => {
+      // const ids = [
+      //   '5d2949ef86020e6ef275e870', 
+      //   '5d294ac086020e6ef275e87c', 
+      //   '5d294ba286020e6ef275e8bb', 
+      //   '5d2ada8217785a2bca9ad1bd', 
+      //   '5d2adad017785a2bca9ad1c1', 
+      //   '5d2d5a6faec31302477e0ef9',
+      // ]
       const client = this.redis.getClient()
-      const keys = await client.hkeys('device')
-      await Promise.all(keys.map(async key => {
-        const value = await client.hget('device', key)
-        if (Number(value) > 10) {
-          await client.hdel('device', key)
-          const device: IDevice | null = await this.deviceService.findByUUID(key)
-          if (!device) return
-          const zoneName = device.position.houseNumber.split('-')
-          // await this.phone.sendDeviceError(zoneName[0], key)
+      const id = '5d2949ef86020e6ef275e870'
+      const keys = await client.hkeys(`sync_${id}`)
+      if (keys.length) {
+        const userId = keys[0]
+        const user = await this.userService.findById(userId)
+        if (!user) {
+          return
         }
-      }))
+        const img = await this.camera.getImg(`${user.faceUrl}`);
+        const result = await this.camera.addToDevice(user, img)
+        if (result === 'imgError') {
+          // console.log(user, 'user')
+          await client.hset('imgError', user._id, user.faceUrl)
+          await client.hdel(`sync_${id}`, userId)
+
+        }
+        if (result && result.Pic) {
+          await client.hdel(`sync_${id}`, userId)
+        }
+        if (result === 'exist') {
+          await client.hdel(`sync_${id}`, userId)
+        }
+      }
+
     });
   }
 }

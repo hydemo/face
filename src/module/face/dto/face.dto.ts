@@ -54,5 +54,5 @@ export class CreateFaceDTO {
   readonly checkResult: number;
 
   // 人脸链接
-  readonly faceUrl: string;
+  // readonly faceUrl: string;
 }

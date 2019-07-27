@@ -30,6 +30,8 @@ import { IPropertyCo } from 'src/module/zone/interfaces/propertyCo.interface';
 import { ResidentService } from 'src/module/resident/resident.service';
 import { P2PErrorService } from 'src/module/p2pError/p2pError.service';
 import { IDevice } from 'src/module/device/interfaces/device.interfaces';
+import { RoleService } from 'src/module/role/role.service';
+import { FaceService } from 'src/module/face/face.service';
 
 
 @ApiUseTags('callback')
@@ -49,7 +51,9 @@ export class CallbackController {
     // private readonly config: ConfigService,
     private readonly redis: RedisService,
     // private readonly p2pErrorService: P2PErrorService,
-    // private readonly residentService: ResidentService,
+    private readonly residentService: ResidentService,
+    private readonly roleService: RoleService,
+    private readonly faceService: FaceService,
   ) {
 
   }
@@ -167,8 +171,13 @@ export class CallbackController {
   ) {
     // await this.callbackService.upDeviceToZOC(code)
     // await this.callbackService.upResidentToZOC(code)
-    await this.camera.getPersionInfo('22', 1, 2)
-    // const residents = await this.residentService.fix()
+    // await this.camera.getPersionInfo('22', 1, 2)
+    // await this.faceService.fix()
+    // await this.roleService.fix()
+    // await this.residentService.fix()
+    const user = { _id: 1, username: '11' }
+    const img = await this.camera.getImg('user/e604b4db-54ce-4971-8db9-ca8a56554a61.jpg')
+    await this.camera.addToDevice(user, img)
     return
 
   }

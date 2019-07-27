@@ -244,7 +244,7 @@ export class ResidentService {
           bondType: 'resident',
           zone: zone.zoneId,
           checkResult: 1,
-          faceUrl: user.faceUrl,
+          // faceUrl: user.faceUrl,
         }
         if (expire) {
           face.expire = expire;
@@ -262,7 +262,7 @@ export class ResidentService {
         bondType: 'resident',
         zone: zone.zoneId,
         checkResult: 2,
-        faceUrl: user.faceUrl,
+        // faceUrl: user.faceUrl,
       }
       if (expire) {
         face.expire = expire;
@@ -489,10 +489,8 @@ export class ResidentService {
         isPhoneVerify: false,
       }
       createUser = await this.userService.create(createUserDto)
-    } else if (String(createUser._id) === String(userId)) {
-      throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
     } else {
-      await this.userService.updateById(createUser._id, { faceUrl: family.user.faceUrl, username: family.user.username })
+      throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
     }
     await this.residentExist(family.address, createUser._id)
     return await this.addFamily(family.isMonitor, false, createUser, zone, owner.user, userId)
@@ -531,6 +529,7 @@ export class ResidentService {
 
   // 链接访问
   async addVisitorByLink(key: string, user: IUser) {
+    const client = await this.redis.getClient()
     const link: any = await this.weixinUtil.scan(key);
     const { address, type, reviewer } = link
     const owner: IResident | null = await this.hasOwner(address)
@@ -542,6 +541,7 @@ export class ResidentService {
     if (type !== 'visitor') {
       throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
     }
+    await client.del(key)
     return await this.addVisitor(zone, user, owner.user, reviewer, expireTime)
   }
 
@@ -582,8 +582,8 @@ export class ResidentService {
       if (!user) {
         throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
       }
-      if (resident.user.faceUrl) {
-        await this.faceService.updatePic(user, resident.user.faceUrl)
+      if (update.user.faceUrl) {
+        await this.faceService.updatePic(user, update.user.faceUrl)
       }
     }
     return await this.residentModel.findByIdAndUpdate(id, { isMonitor: update.isMonitor, isPush: update.isPush })
@@ -945,6 +945,7 @@ export class ResidentService {
         .find(condition)
         .sort({ type: -1 })
         .populate({ path: 'user', model: 'user', select: '-openId' })
+        .populate({ path: 'reviewer', model: 'user', select: 'username' })
         .lean()
         .exec()
       return { address: house.address, users, isRent: house.isDisable, isOwner: String(house.owner) === String(house.address.owner) }
@@ -969,6 +970,7 @@ export class ResidentService {
       const users: IResident[] = await this.residentModel
         .find(condition)
         .populate({ path: 'user', model: 'user', select: '-openId' })
+        .populate({ path: 'reviewer', model: 'user', select: 'username' })
         .lean()
         .exec()
       return { address: house.address, users, isRent: house.isDisable, isOwner: String(house.owner) === String(house.address.owner) }
@@ -1055,14 +1057,9 @@ export class ResidentService {
 
   // 根据id修改
   async fix() {
-    const array: any = []
-    const residents = await this.residentModel.find({ isDelete: false, checkResult: 2 }).populate({ path: 'user', model: 'user' });
+    const residents = await this.residentModel.find({ isDelete: false, checkResult: 2 });
     await Promise.all(residents.map(async resident => {
-      const count = await this.faceService.count({ bondToObjectId: resident._id })
-      if (count < 6) {
-        array.push(resident)
-      }
+      await this.faceService.fixBount(resident, 'resident')
     }))
-    console.log(array, array.length, 'array')
   }
 }

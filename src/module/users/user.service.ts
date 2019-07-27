@@ -367,6 +367,7 @@ export class UserService {
       cardNumber: cardNumber,
       isPhoneVerify: user.isPhoneVerify,
       type: 'user',
+      age: user.age,
     }
     client.set(key, JSON.stringify(value), 'EX', 60 * 5);
     return key

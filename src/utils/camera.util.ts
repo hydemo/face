@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
 import * as md5 from 'md5';
 import axios from 'axios';
+import * as fs from 'fs';
 import * as uuid from 'uuid/v4';
 import { RedisService } from 'nestjs-redis';
 import { ConfigService } from 'src/config/config.service';
@@ -554,8 +555,60 @@ export class CameraUtil {
    * @param url 图片地址
    */
   async getImg(url: string): Promise<string> {
-    const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/800x/gravity/Center/crop/800x960/blur/1x0/quality/100|imageslim`, { responseType: 'arraybuffer' })
+    const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/750x/gravity/Center/crop/750x950/format/jpg/blur/1x0/quality/90|imageslim`, { responseType: 'arraybuffer' })
     const img = new Buffer(result.data, 'binary').toString('base64')
     return img
+  }
+
+  async addToDevice(user: any, Img: string) {
+    // const { username, password, deviceUUID, _id, version, session } = device
+    const deviceUUID = 'umety9isv6as'
+    const username = 'admin'
+    const password = 'oyxj19891024'
+    // const id = String(_id)
+    const timeStamp: number = this.getTemp()
+    const sign = await this.sign(username, password, deviceUUID, timeStamp)
+    // console.log(version, 'version')
+    // console.log(user.faceUrl, 'facedd')
+    // const Img = await this.getImg(`${user.faceUrl}`);
+    // if (version === '1.0.0') {
+    const ImgName = user.username;
+    const ImgNum = user._id;
+    const data = {
+      Name: 'WBListInfoREQ',
+      TimeStamp: timeStamp,
+      Sign: sign,
+      Mode: 2,
+      Action: 'AddOnePic',
+      UUID: deviceUUID,
+      AddOnePic: {
+        Img,
+        ImgName,
+        ImgNum,
+      }
+    }
+    const result: any = await axios({
+      method: 'post',
+      url: this.config.p2pUrl,
+      data,
+    })
+    console.log(result.data, 'result')
+    if (result.data.Result === 'ok') {
+      return result.data.AddOnePic;
+    }
+    if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13 || result.data.ErrorCode === -11) {
+      return 'imgError'
+    }
+    if (result.data.ErrorCode === -3) {
+      console.log(user, 'user')
+      return 'exist'
+    }
+    // if (result.data.ErrorCode === -11) {
+    //   fs.writeFileSync('1.txt', img)
+    //   console.log(user, 'user')
+    // }
+
+
+    console.log(result.data, 'error')
   }
 }

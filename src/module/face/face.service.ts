@@ -10,13 +10,14 @@ import { CameraUtil } from 'src/utils/camera.util';
 import { IUser } from '../users/interfaces/user.interfaces';
 import { IDevice } from '../device/interfaces/device.interfaces';
 import { ResidentService } from '../resident/resident.service';
+import { RedisService } from 'nestjs-redis';
 
 @Injectable()
 export class FaceService {
   constructor(
     @Inject('FaceModelToken') private readonly faceModel: Model<IFace>,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
-    // @Inject(forwardRef(() => ResidentService)) private readonly residentService: ResidentService,
+    private readonly redis: RedisService,
   ) { }
 
   // 创建数据
@@ -180,5 +181,53 @@ export class FaceService {
   }
   async updateById(id: string, update: any) {
     return await this.faceModel.findByIdAndUpdate(id, update)
+  }
+
+  async remove(bondToObjectId) {
+    await this.faceModel.remove({ bondToObjectId })
+  }
+  async fix() {
+    await this.faceModel.updateMany({}, { checkResult: 2 })
+  }
+
+  async fixBount(bound, type) {
+    const client = this.redis.getClient()
+    const ids = ['5d2949ef86020e6ef275e870', '5d294ac086020e6ef275e87c', '5d294ba286020e6ef275e8bb', '5d2ada8217785a2bca9ad1bd', '5d2adad017785a2bca9ad1c1', '5d2d5a6faec31302477e0ef9']
+    await Promise.all(ids.map(async id => {
+      const exist = await this.faceModel.findOne({ bondToObjectId: bound._id, device: id })
+      if (!exist) {
+        const faceExist = await this.faceModel.findOne({ user: bound.user, device: id, isDelete: false, checkResult: 2 })
+        if (faceExist) {
+          console.log(faceExist, 'faceExist')
+          const face: CreateFaceDTO = {
+            device: id,
+            user: bound.user,
+            mode: 2,
+            bondToObjectId: bound._id,
+            bondType: type,
+            zone: bound.zone,
+            checkResult: 2,
+            libIndex: faceExist.libIndex,
+            flieIndex: faceExist.flieIndex,
+            pic: faceExist.pic,
+            // faceUrl: user.faceUrl,
+          }
+          // await this.faceModel.create(face)
+        } else {
+          const face: CreateFaceDTO = {
+            device: id,
+            user: bound.user,
+            mode: 2,
+            bondToObjectId: bound._id,
+            bondType: type,
+            zone: bound.zone,
+            checkResult: 1,
+            // faceUrl: user.faceUrl,
+          }
+          // await this.faceModel.create(face)
+          await client.hincrby(`sync_${id}`, bound.user, 1)
+        }
+      }
+    }))
   }
 }
