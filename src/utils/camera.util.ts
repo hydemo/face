@@ -370,7 +370,9 @@ export class CameraUtil {
         data: upData.data,
       })
       console.log(result.data, 'result')
-      console.log(upData.version, 'upData.version')
+      if (upData.type === 'delete' && upData.version === '1.0.0') {
+        console.log(upData.data, 'upData.version')
+      }
       let code;
       let msg;
       if (upData.version === '1.0.0') {

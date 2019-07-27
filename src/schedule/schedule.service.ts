@@ -203,6 +203,7 @@ export class ScheduleService {
           }
           p2pData = { ...sourceData, data: { ...deleteData, DeleteOnePic } }
         }
+        // console.log(p2pData)
       }
       // console.log()
       const result = type === 'p2p' ? await this.camera.handleP2P(p2pData) : await this.camera.handleP2PEroor(sourceData)
