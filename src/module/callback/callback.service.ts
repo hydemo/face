@@ -113,12 +113,12 @@ export class CallbackService {
     if (!imgBase) {
       return
     }
-    img = await this.qiniuUtil.uploadB64(body.img)
+    img = await this.qiniuUtil.uploadB64(imgBase)
     if (device.media && Number(mode) !== 1) {
       await this.mediaWs.sendMessage(String(device.media), { type: String(body.WBMode), imgUrl: img })
     }
     if (imgexBase) {
-      imgex = await this.qiniuUtil.uploadB64(body.imgex)
+      imgex = await this.qiniuUtil.uploadB64(imgexBase)
     }
 
     // const { Attribute } = body
