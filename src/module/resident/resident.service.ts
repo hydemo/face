@@ -334,7 +334,7 @@ export class ResidentService {
       user: user._id,
       checkResult: 4,
       applicationTime: new Date(),
-      isMonitor,
+      isMonitor: isMonitor ? false : true,
       isPush,
       addTime: new Date(),
       type: 'family',
