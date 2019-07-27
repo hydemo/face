@@ -908,7 +908,7 @@ export class ResidentService {
   // 根据id删除
   async deleteById(resident: string, user: string, isRent?: boolean): Promise<IResident | null> {
     const data: IResident | null = await this.residentModel.findById(resident).lean()
-    if (!data) {
+    if (!data || data.isDelete) {
       return null
     }
     if (data.type === 'owner' && !isRent) {
