@@ -190,12 +190,26 @@ export class ScheduleService {
         await this.faceService.updateById(data.face._id, { checkResult: 3 })
       }
     } else if (data.type === 'delete') {
+      let p2pData = sourceData
       const faceExist: IFace | null = await this.faceService.findById(data.face._id)
       console.log(faceExist, 'faceExist')
-      const result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
+      if (faceExist && data.version === '1.0.0') {
+        const deleteData = sourceData.data
+        if (!deleteData.DeleteOnePic.Pic || !deleteData.DeleteOnePic.LibIndex || !deleteData.DeleteOnePic.FlieIndex) {
+          const DeleteOnePic = {
+            Pic: faceExist.pic,
+            LibIndex: faceExist.libIndex,
+            FlieIndex: faceExist.flieIndex,
+          }
+          p2pData = { ...sourceData, data: { ...deleteData, DeleteOnePic } }
+        }
+      }
+      // console.log()
+      const result = type === 'p2p' ? await this.camera.handleP2P(p2pData) : await this.camera.handleP2PEroor(sourceData)
       if (result === 'success') {
         await this.faceService.updateById(data.face._id, { checkResult: 2 })
       }
+
     } else if (data.type === 'update-add') {
       result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
       if (result === 'imgError') {
