@@ -151,15 +151,19 @@ export class FaceService {
 
   // 根据id删除
   async delete(face: IFace) {
+    console.log(face, 'face')
+    let checkResult = 2
     const faceCount: number = await this.count({ isDelete: false, device: face.device, user: face.user })
     const faceToDelete: any = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
     if (faceCount === 1 && faceToDelete) {
       // const exist = await this.cameraUtil.getPersionInfo(faceToDelete.user, faceToDelete.device, faceToDelete.mode)
       // if (exist) {
+      console.log(faceToDelete, 'faceToDelete')
       await this.cameraUtil.deleteOnePic(faceToDelete)
+      checkResult = 1
       // }
     }
-    await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true, checkResult: 1 })
+    await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true, checkResult })
     return true
   }
 

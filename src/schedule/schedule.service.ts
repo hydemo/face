@@ -190,7 +190,7 @@ export class ScheduleService {
         await this.faceService.updateById(data.face._id, { checkResult: 3 })
       }
     } else if (data.type === 'delete') {
-      let p2pData = sourceData.data
+      let p2pData = data
       const faceExist: IFace | null = await this.faceService.findById(data.face._id)
       console.log(faceExist, 'faceExist')
       if (faceExist && data.version === '1.0.0') {
