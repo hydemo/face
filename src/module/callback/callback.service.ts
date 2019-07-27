@@ -131,8 +131,8 @@ export class CallbackService {
       beard: Attribute.Beard,
     }
     const stranger: CreateStrangerDTO = {
-      device: 'device._id',
-      zone: 'device.position._id,',
+      device: device._id,
+      zone: device.position._id,
       imgUrl: img,
       imgexUrl: imgex,
       attribute,
