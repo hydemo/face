@@ -93,7 +93,7 @@ UserSchema.post('findOne', function (result: any) {
   }
 })
 
-UserSchema.post('update', function (result: any) {
+UserSchema.post('updateOne', function (result: any) {
   if (result && result.cardNumber) {
     const number = result.cardNumber;
     const thisYear = moment().format('YYYY')
