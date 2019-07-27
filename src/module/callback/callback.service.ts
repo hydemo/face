@@ -276,7 +276,7 @@ export class CallbackService {
       const birthYear = `19${number.slice(6, 8)}`
       age = Number(thisYear) - Number(birthYear)
     }
-    if (age < 14 || age > 75) {
+    if (age < 18 || age > 75) {
       const residents: IResident[] = await this.residentService.findByCondition({
         isDelete: false,
         isPush: true,
