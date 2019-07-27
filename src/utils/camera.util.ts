@@ -174,7 +174,7 @@ export class CameraUtil {
         Action: 'DeleteOnePic',
         UUID: deviceUUID,
         Data: {
-          Action: 'deletePersonList',
+          Action: 'deletePerson',
           PersonType: face.mode,
           PersonId: face.user,
         }
