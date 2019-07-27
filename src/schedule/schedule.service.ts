@@ -233,12 +233,8 @@ export class ScheduleService {
       }
     } else if (data.type === 'update-delete') {
       const faceExist: any = await this.faceService.findById(data.face[0]._id)
-      if (faceExist && faceExist.checkResult === 1) {
-        await this.residentService.updateByUser(faceExist.user)
-        const result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
-        console.log(result, 'result')
-
-      }
+      await this.residentService.updateByUser(faceExist.user)
+      type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
     } else if (data.type === 'update') {
       const faceExist: any = await this.faceService.findById(data.face[0]._id)
       let result: any = true
