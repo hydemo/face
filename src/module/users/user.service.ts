@@ -1,6 +1,7 @@
 import { Model } from 'mongoose';
 import { Inject, Injectable, Res } from '@nestjs/common';
 import * as OAuth from 'co-wechat-oauth';
+import * as moment from 'moment'
 import { IUser } from './interfaces/user.interfaces';
 import { CreateUserDTO, RegisterUserDTO, LoginUserDTO, VerifyUserDTO, ForgetPasswordDTO, ResetPasswordDTO, BindPhoneDTO } from './dto/users.dto';
 import { Pagination } from '@common/dto/pagination.dto';
@@ -359,6 +360,15 @@ export class UserService {
     const replaceStr = number.substring(4, 13);
     const str = '*'.repeat(replaceStr.length)
     const cardNumber = number.replace(replaceStr, str)
+    const thisYear = moment().format('YYYY')
+    let age
+    if (number.length > 15) {
+      const birthYear = number.slice(6, 10)
+      age = Number(thisYear) - Number(birthYear)
+    } else {
+      const birthYear = `19${number.slice(6, 8)}`
+      age = Number(thisYear) - Number(birthYear)
+    }
     const value = {
       _id: user._id,
       username: user.username,
@@ -367,7 +377,7 @@ export class UserService {
       cardNumber: cardNumber,
       isPhoneVerify: user.isPhoneVerify,
       type: 'user',
-      age: user.age,
+      age,
     }
     client.set(key, JSON.stringify(value), 'EX', 60 * 5);
     return key

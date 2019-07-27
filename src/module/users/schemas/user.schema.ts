@@ -93,20 +93,20 @@ UserSchema.post('findOne', function (result: any) {
   }
 })
 
-UserSchema.post('updateOne', function (result: any) {
-  if (result && result.cardNumber) {
-    const number = result.cardNumber;
-    const thisYear = moment().format('YYYY')
-    if (number.length > 15) {
-      const birthYear = number.slice(6, 10)
-      result.age = Number(thisYear) - Number(birthYear)
-    } else {
-      const birthYear = `19${number.slice(6, 8)}`
-      result.age = Number(thisYear) - Number(birthYear)
-    }
-    // const replaceStr = number.substring(4, 13);
-    // const str = '*'.repeat(replaceStr.length)
-    // result.cardNumber = number.replace(replaceStr, str);
-  }
-})
+// UserSchema.post('updateOne', function (result: any) {
+//   if (result && result.cardNumber) {
+//     const number = result.cardNumber;
+//     const thisYear = moment().format('YYYY')
+//     if (number.length > 15) {
+//       const birthYear = number.slice(6, 10)
+//       result.age = Number(thisYear) - Number(birthYear)
+//     } else {
+//       const birthYear = `19${number.slice(6, 8)}`
+//       result.age = Number(thisYear) - Number(birthYear)
+//     }
+//     // const replaceStr = number.substring(4, 13);
+//     // const str = '*'.repeat(replaceStr.length)
+//     // result.cardNumber = number.replace(replaceStr, str);
+//   }
+// })
 
