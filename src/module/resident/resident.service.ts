@@ -490,7 +490,7 @@ export class ResidentService {
       }
       createUser = await this.userService.create(createUserDto)
     } else {
-      throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
+      throw new ApiException('身份证已被注册,请通过扫一扫添加', ApiErrorCode.PHONE_EXIST, 406);
     }
     await this.residentExist(family.address, createUser._id)
     return await this.addFamily(family.isMonitor, false, createUser, zone, owner.user, userId)
