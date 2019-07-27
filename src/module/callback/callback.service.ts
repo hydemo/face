@@ -71,7 +71,6 @@ export class CallbackService {
     let Attribute: any = null;
     let profile: any = {}
     if (Name === 'CompareInfo') {
-      console.log(body)
       deviceUUID = body.DeviceUUID
       imgBase = body.img
       imgexBase = body.imgex
@@ -107,17 +106,17 @@ export class CallbackService {
         userId = CompareInfo.PersonInfo.PersonId
       }
     }
-    // const device: IDevice | null = await this.deviceService.findByUUID(deviceUUID)
-    // if (!device) {
-    //   return;
-    // }
+    const device: IDevice | null = await this.deviceService.findByUUID(deviceUUID)
+    if (!device) {
+      return;
+    }
     if (!imgBase) {
       return
     }
     img = await this.qiniuUtil.uploadB64(body.img)
-    // if (device.media && Number(mode) !== 1) {
-    //   await this.mediaWs.sendMessage(String(device.media), { type: String(body.WBMode), imgUrl: img })
-    // }
+    if (device.media && Number(mode) !== 1) {
+      await this.mediaWs.sendMessage(String(device.media), { type: String(body.WBMode), imgUrl: img })
+    }
     if (imgexBase) {
       imgex = await this.qiniuUtil.uploadB64(body.imgex)
     }
@@ -139,40 +138,39 @@ export class CallbackService {
       attribute,
       ...profile
     }
-    console.log(userId, mode, 'userId')
-    console.log(stranger, 'stranger')
-    // if (Number(mode) === 0) {
-    //   await this.strangerService.create(stranger);
-    // } else {
-    //   const user: IUser | null = await this.userService.updateById(userId, {})
-    //   if (!user) {
-    //     return
-    //   }
-    //   let isZOCPush = false
-    //   let zipname = ''
-    //   let phone = user.phone
 
-    //   // if (!phone) {
-    //   //   const resident = await this.residentService.findByCondition({ user: userId, isDelete: false })
+    if (Number(mode) === 0) {
+      await this.strangerService.create(stranger);
+    } else {
+      const user: IUser | null = await this.userService.updateById(userId, {})
+      if (!user) {
+        return
+      }
+      let isZOCPush = false
+      let zipname = ''
+      let phone = user.phone
 
-    //   //   const owner = await this.userService.findById(resident[0].reviewer)
-    //   //   if (owner) {
-    //   //     phone = owner.phone
-    //   //   }
-    //   //   const zone: IZone = await this.zoneService.findById(device.zone)
-    //   //   const time = moment().format('YYYYMMDDHHmmss');
-    //   //   const zip = await this.zocUtil.genZip()
-    //   //   await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, phone)
-    //   //   await this.zocUtil.genImage(zip, time, zone.detail, img)
-    //   //   const data = await this.zocUtil.upload(zip, time)
-    //   //   isZOCPush = data.success ? true : false
-    //   //   zipname = data.success ? data.zipname : ''
-    //   // }
-    //   const orbit: CreateOrbitDTO = { user: user._id, mode, isZOCPush, ZOCZip: zipname, ...stranger, upTime: Date.now() }
-    //   const createOrbit: IOrbit = await this.orbitService.create(orbit);
-    //   await this.sendMessage(createOrbit, user, device)
-    // }
-    // return
+      // if (!phone) {
+      //   const resident = await this.residentService.findByCondition({ user: userId, isDelete: false })
+
+      //   const owner = await this.userService.findById(resident[0].reviewer)
+      //   if (owner) {
+      //     phone = owner.phone
+      //   }
+      //   const zone: IZone = await this.zoneService.findById(device.zone)
+      //   const time = moment().format('YYYYMMDDHHmmss');
+      //   const zip = await this.zocUtil.genZip()
+      //   await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, phone)
+      //   await this.zocUtil.genImage(zip, time, zone.detail, img)
+      //   const data = await this.zocUtil.upload(zip, time)
+      //   isZOCPush = data.success ? true : false
+      //   zipname = data.success ? data.zipname : ''
+      // }
+      const orbit: CreateOrbitDTO = { user: user._id, mode, isZOCPush, ZOCZip: zipname, ...stranger, upTime: Date.now() }
+      const createOrbit: IOrbit = await this.orbitService.create(orbit);
+      await this.sendMessage(createOrbit, user, device)
+    }
+    return
   }
 
   // 发送消息
