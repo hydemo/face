@@ -328,7 +328,6 @@ export class ScheduleService {
 
     Schedule.scheduleJob('*/5 * * * * *', async () => {
       const residents: IResident[] = await this.residentService.findByCondition({ checkResult: { $in: [4, 5] } })
-      console.log(residents, 'residents')
       const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
       const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
       await Promise.all(residents.map(async resident => {

@@ -57,7 +57,7 @@ export class ResidentService {
   ) { }
 
   async updateByUser(user: string) {
-    await this.residentModel.updateMany({ user, isDelete: false }, { checkResult: 4 })
+    await this.residentModel.updateMany({ user, isDelete: false, checkResult: { $in: [2, 4, 5] } }, { checkResult: 4 })
   }
 
   async sendVerifyMessage(house: string, reviewer: string, type, openId: string) {
