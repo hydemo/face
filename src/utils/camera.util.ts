@@ -367,6 +367,7 @@ export class CameraUtil {
         url: upData.version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
         data: upData.data,
       })
+      console.log(result.data, 'result.data')
       if (upData.type === 'delete' && upData.version === '1.0.0') {
       }
       let code;
