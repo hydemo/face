@@ -151,7 +151,7 @@ export class CallbackController {
     const client = this.redis.getClient()
     await client.del('p2p_listen')
     // await client.lpush('p2pErrorFinal', '2')
-    await client.del('p2pError_5d32f812c03242510ce4030b')
+    await client.del('p2pErrorFinal')
     // await client.lpush('p2p', '22')
     // await client.lpush('p2p', '33')
     // await client.rpush('p2p', '44')
