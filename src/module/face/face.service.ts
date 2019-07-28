@@ -151,14 +151,12 @@ export class FaceService {
 
   // 根据id删除
   async delete(face: IFace) {
-    console.log(face, 'face')
     let checkResult = 2
     const faceCount: number = await this.count({ isDelete: false, device: face.device, user: face.user })
     const faceToDelete: any = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
     if (faceCount === 1 && faceToDelete) {
       // const exist = await this.cameraUtil.getPersionInfo(faceToDelete.user, faceToDelete.device, faceToDelete.mode)
       // if (exist) {
-      console.log(faceToDelete, 'faceToDelete')
       await this.cameraUtil.deleteOnePic(faceToDelete)
       checkResult = 1
       // }
@@ -198,24 +196,24 @@ export class FaceService {
     const client = this.redis.getClient()
     const ids = ['5d2949ef86020e6ef275e870', '5d294ac086020e6ef275e87c', '5d294ba286020e6ef275e8bb', '5d2ada8217785a2bca9ad1bd', '5d2adad017785a2bca9ad1c1', '5d2d5a6faec31302477e0ef9']
     await Promise.all(ids.map(async id => {
-      const exist = await this.faceModel.findOne({ bondToObjectId: bound._id, device: id })
+      const exist = await this.faceModel.findOne({ bondToObjectId: bound._id, device: id, isDelete: false })
       if (!exist) {
-        const faceExist = await this.faceModel.findOne({ user: bound.user, device: id, isDelete: false, checkResult: 2 })
+        const faceExist = await this.faceModel.findOne({ user: bound.user, device: id, isDelete: false })
         if (faceExist) {
-          console.log(faceExist, 'faceExist')
-          const face: CreateFaceDTO = {
-            device: id,
-            user: bound.user,
-            mode: 2,
-            bondToObjectId: bound._id,
-            bondType: type,
-            zone: bound.zone,
-            checkResult: 2,
-            libIndex: faceExist.libIndex,
-            flieIndex: faceExist.flieIndex,
-            pic: faceExist.pic,
-            // faceUrl: user.faceUrl,
-          }
+          return
+          // const face: CreateFaceDTO = {
+          //   device: id,
+          //   user: bound.user,
+          //   mode: 2,
+          //   bondToObjectId: bound._id,
+          //   bondType: type,
+          //   zone: bound.zone,
+          //   checkResult: 2,
+          //   libIndex: faceExist.libIndex,
+          //   flieIndex: faceExist.flieIndex,
+          //   pic: faceExist.pic,
+          //   // faceUrl: user.faceUrl,
+          // }
           // await this.faceModel.create(face)
         } else {
           const face: CreateFaceDTO = {
@@ -228,10 +226,19 @@ export class FaceService {
             checkResult: 1,
             // faceUrl: user.faceUrl,
           }
-          // await this.faceModel.create(face)
-          await client.hincrby(`sync_${id}`, bound.user, 1)
+          await this.faceModel.create(face)
+          await client.hset(`sync_${id}`, bound.user, 1)
         }
       }
     }))
+  }
+
+  async success(user, device, result) {
+    await this.faceModel.updateMany({ user, device, checkResult: 1, isDelete: false }, {
+      libIndex: result.LibIndex,
+      flieIndex: result.FlieIndex,
+      pic: result.Pic,
+      checkResult: 2
+    })
   }
 }

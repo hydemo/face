@@ -292,13 +292,12 @@ export class RoleService {
 
   async fix() {
 
-    // const roles: IRole[] = await this.roleModel.find({ role: { $in: [4, 5] } })
+    const roles: IRole[] = await this.roleModel.find({ role: { $in: [4, 5] } })
     const rols: IRole[] = await this.roleModel.find({ role: { $in: [1, 2, 3] }, isDelete: false })
-    // console.log(rols.length, 'ss')å
-    // await Promise.all(roles.map(async role => {
-    //   await this.faceService.remove(role._id)
-    //   await this.roleModel.findByIdAndRemove(role._id)
-    // }))
+    await Promise.all(roles.map(async role => {
+      await this.faceService.remove(role._id)
+      await this.roleModel.findByIdAndRemove(role._id)
+    }))
 
     await Promise.all(rols.map(async rol => {
       // const count = await this.faceService.count({ bondToObjectId: rol._id, isDelete: false })

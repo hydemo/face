@@ -219,6 +219,7 @@ export class ZOCUtil {
       },
     });
     console.log(result.data, 'result')
+
   }
   /**
    * 生成zip对象

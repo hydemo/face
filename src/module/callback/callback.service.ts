@@ -88,7 +88,6 @@ export class CallbackService {
       }
     } else if (Name === 'captureInfoRequest') {
       const { DeviceInfo, CaptureInfo, FaceInfo, CompareInfo } = body.Data
-      console.log(CompareInfo, 'ss')
       deviceUUID = DeviceInfo.DeviceUUID
       imgBase = CaptureInfo.FacePicture
       imgexBase = CaptureInfo.BackgroundPicture

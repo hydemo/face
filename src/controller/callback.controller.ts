@@ -159,27 +159,27 @@ export class CallbackController {
     return
   }
 
-  @ApiOkResponse({
-    description: '心跳数据',
-  })
-  @Post('/tests')
+  // @ApiOkResponse({
+  //   description: '心跳数据',
+  // })
+  // @Post('/tests')
 
-  @ApiOperation({ title: '心跳数据', description: '心跳数据' })
-  async test(
-    @Request() req,
-    @Query('code') code: string,
-  ) {
-    // await this.callbackService.upDeviceToZOC(code)
-    // await this.callbackService.upResidentToZOC(code)
-    // await this.camera.getPersionInfo('22', 1, 2)
-    // await this.faceService.fix()
-    // await this.roleService.fix()
-    // await this.residentService.fix()
-    const user = { _id: 1, username: '11' }
-    const img = await this.camera.getImg('user/e604b4db-54ce-4971-8db9-ca8a56554a61.jpg')
-    await this.camera.addToDevice(user, img)
-    return
+  // @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  // async test(
+  //   @Request() req,
+  //   @Query('code') code: string,
+  // ) {
+  //   // await this.callbackService.upDeviceToZOC(code)
+  //   // await this.callbackService.upResidentToZOC(code)
+  //   // await this.camera.getPersionInfo('22', 1, 2)
+  //   // await this.faceService.fix()
+  //   await this.residentService.fix()
+  //   // await this.roleService.fix()
+  //   // const user = { _id: 1, username: '11' }
+  //   // const img = await this.camera.getImg('user/e604b4db-54ce-4971-8db9-ca8a56554a61.jpg')
+  //   // await this.camera.addToDevice(user, img)
+  //   return
 
-  }
+  // }
 
 }

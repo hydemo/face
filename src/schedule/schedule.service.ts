@@ -97,12 +97,10 @@ export class ScheduleService {
 
   async sendP2PError(username, face: IFace, client) {
     const openId = await this.getOpenId(face)
-    console.log(openId, 'opwneId')
     if (!openId) {
       return
     }
     const send = await client.get(openId.openId)
-    console.log(send, 'send')
     if (send) {
       return
     }
@@ -134,7 +132,6 @@ export class ScheduleService {
         },
       }
       this.weixinUtil.sendVerifyMessage(openId.openId, message)
-      console.log(openId)
       await client.set(openId.openId, 1, 'EX', 60 * 2)
     }
   }
@@ -142,7 +139,6 @@ export class ScheduleService {
   async handelP2P(data, sourceData, dataString, client, type) {
     // console.log(data, 'data')
     const listenTime = await client.hget('p2p_listen', data.device)
-    console.log(listenTime, 'listenTime')
     if (listenTime > 5) {
       await client.hset('p2p_listen', data.device, 0)
       return
@@ -192,7 +188,6 @@ export class ScheduleService {
     } else if (data.type === 'delete') {
       let p2pData = data
       const faceExist: IFace | null = await this.faceService.findById(data.face._id)
-      console.log(faceExist, 'faceExist')
       if (faceExist && data.version === '1.0.0') {
         const deleteData = data.data
         if (!deleteData.DeleteOnePic.Pic || !deleteData.DeleteOnePic.LibIndex || !deleteData.DeleteOnePic.FlieIndex) {
@@ -279,7 +274,6 @@ export class ScheduleService {
     Schedule.scheduleJob('*/16 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
-      console.log(pools, 'pools')
       await Promise.all(pools.map(async  pool => {
         const length = await client.llen(`p2p_${pool}`)
         if (!length) {
@@ -293,7 +287,6 @@ export class ScheduleService {
         }
 
         const alive = await client.hget('device', device.deviceUUID)
-        console.log(alive, 'alive')
         if (!alive || Number(alive) > 4) {
           await client.hdel('p2p_pool', pool)
           return
@@ -378,40 +371,50 @@ export class ScheduleService {
       }))
     });
 
-    // Schedule.scheduleJob('*/10 * * * * * ', async () => {
+    // Schedule.scheduleJob('*/15 * * * * * ', async () => {
     //   // const ids = [
-    //   //   '5d2949ef86020e6ef275e870', 
-    //   //   '5d294ac086020e6ef275e87c', 
-    //   //   '5d294ba286020e6ef275e8bb', 
-    //   //   '5d2ada8217785a2bca9ad1bd', 
-    //   //   '5d2adad017785a2bca9ad1c1', 
-    //   //   '5d2d5a6faec31302477e0ef9',
+    //   //   // '5d2949ef86020e6ef275e870',
+    //   //   // '5d294ac086020e6ef275e87c', 
+    //   //   // '5d294ba286020e6ef275e8bb', 
+    //   //   // '5d2ada8217785a2bca9ad1bd', 
+    //   //   '5d2adad017785a2bca9ad1c1',
+    //   //   // '5d2d5a6faec31302477e0ef9',
     //   // ]
+    //   const devices: IDevice[] = await this.deviceService.findByCondition({})
     //   const client = this.redis.getClient()
-    //   const id = '5d2949ef86020e6ef275e870'
-    //   const keys = await client.hkeys(`sync_${id}`)
-    //   if (keys.length) {
-    //     const userId = keys[0]
-    //     const user = await this.userService.findById(userId)
-    //     if (!user) {
-    //       return
+    //   await Promise.all(devices.map(async device => {
+    //     const listenTime = await client.hget('p2p_listen', String(device._id))
+    //     if (Number(listenTime) > 0) {
+    //       return;
     //     }
-    //     const img = await this.camera.getImg(`${user.faceUrl}`);
-    //     const result = await this.camera.addToDevice(user, img)
-    //     if (result === 'imgError') {
-    //       // console.log(user, 'user')
-    //       await client.hset('imgError', user._id, user.faceUrl)
-    //       await client.hdel(`sync_${id}`, userId)
+    //     await client.hset('p2p_listen', String(device._id), 1)
+    //     const keys = await client.hkeys(`sync_${device._id}`)
+    //     if (keys.length) {
+    //       const userId = keys[0]
+    //       const user = await this.userService.findById(userId)
+    //       if (!user) {
+    //         return
+    //       }
+    //       // console.log(user.faceUrl, 'face')
+    //       const img = await this.camera.getImg(`${user.faceUrl}`);
+    //       const result = await this.camera.addToDevice(device, user, img)
+    //       if (result === 'imgError') {
+    //         // console.log(user, 'user')
+    //         await client.hset(`imgError_${device._id}`, user._id, user.faceUrl)
+    //         await client.hdel(`sync_${device._id}`, userId)
 
+    //       }
+    //       if (result && result.Pic) {
+    //         await this.faceService.success(userId, device._id, result)
+    //         await client.hdel(`sync_${device._id}`, userId)
+    //       }
+    //       if (result === 'exist') {
+    //         await client.hset(`exist_${device._id}`, user._id, user.faceUrl)
+    //         await client.hdel(`sync_${device._id}`, userId)
+    //       }
+    //       await client.hset('p2p_listen', String(device._id), 0)
     //     }
-    //     if (result && result.Pic) {
-    //       await client.hdel(`sync_${id}`, userId)
-    //     }
-    //     if (result === 'exist') {
-    //       await client.hdel(`sync_${id}`, userId)
-    //     }
-    //   }
-
+    //   }))
     // });
   }
 }

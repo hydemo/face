@@ -146,7 +146,7 @@ export class ResidentService {
   // 是否家人
   async isFamily(address: string, user: string) {
     const family: IResident | null = await this.residentModel
-      .findOne({ user, address, type: { $ne: 'visitor' }, isDelete: false, checkResult: 2 })
+      .findOne({ user, address, type: { $ne: 'visitor' }, isDelete: false, checkResult: { $in: [2, 4, 5] } })
     if (!family) {
       throw new ApiException('无权限操作该房屋', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -159,6 +159,8 @@ export class ResidentService {
     if (!owner) {
       throw new ApiException('无权限操作该房屋', ApiErrorCode.NO_PERMISSION, 403);
     }
+
+
   }
 
   // 获取审核人
@@ -228,7 +230,6 @@ export class ResidentService {
     //   const deviceIds = devices.map(device => String(device.deviceId))
     //   this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
     // }
-    console.log(devices.length, 'devices')
     const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
       const faceCheck: IFace | null = await this.faceService.findOne({ bondToObjectId: resident, device: device._id, isDelete: false })
@@ -1020,12 +1021,12 @@ export class ResidentService {
 
   // 退租
   async rentRecyle(address: IZone) {
-    const residents: IResident[] = await this.residentModel.find({ address: address._id, checkResult: 2, isDelete: false, isDisable: false })
+    const residents: IResident[] = await this.residentModel.find({ address: address._id, isDelete: false, isDisable: false })
     await Promise.all(residents.map(async resident => {
       // if (resident.type === 'owner') {
       //   await this.roleService.findOneAndDelete({ role: 5, user: resident.user, zone: resident.address })
       // }
-      await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true, checkResult: 4 })
+      // await this.residentModel.findByIdAndUpdate(resident._id, { isDelete: true, checkResult: 4 })
       await this.deleteById(resident._id, resident.owner, true)
     }))
     await this.residentModel.findOneAndUpdate({ isDisable: true, type: 'owner', address: address._id, user: address.owner }, { isDisable: false })
