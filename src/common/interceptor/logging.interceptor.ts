@@ -1,11 +1,11 @@
 import { Injectable, NestInterceptor, ExecutionContext, Logger } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { RedisService } from 'nestjs-redis';
+// import { RedisService } from 'nestjs-redis';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private readonly redis: RedisService
+  // private readonly redis: RedisService
   constructor() {
 
   }
@@ -13,7 +13,6 @@ export class LoggingInterceptor implements NestInterceptor {
     context: ExecutionContext,
     call$: Observable<any>,
   ): Observable<any> {
-    const client = this.redis.getClient()
     const request = context.switchToHttp().getRequest();
     const url = request.originalUrl
     const ip = request.headers['x-real-ip'] ? request.headers['x-real-ip'] : request.ip.replace(/::ffff:/, '');
@@ -27,7 +26,7 @@ export class LoggingInterceptor implements NestInterceptor {
       delete body.img;
       delete body.imgex;
       Logger.log(body);
-      client.hincrby('Log_IP', ip, 1)
+      // client.hincrby('Log_IP', ip, 1)
     }
     const now = Date.now();
     return call$.pipe(
