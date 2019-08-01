@@ -23,7 +23,6 @@ import { WeixinUtil } from 'src/utils/weixin.util';
 import { ZoneService } from '../zone/zone.service';
 import { IZone } from '../zone/interfaces/zone.interfaces';
 import { ZOCUtil } from 'src/utils/zoc.util';
-import { Timestamp } from 'rxjs/internal/operators/timestamp';
 
 interface IReceiver {
   id: string;

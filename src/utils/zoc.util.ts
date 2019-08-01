@@ -466,7 +466,7 @@ export class ZOCUtil {
       HZSFZ: user.cardNumber,
       MJCSDM: this.config.companyCreditCode,
       MJJLX: '04',
-      MJJBH: device.deviceId,
+      MJJBH: String(device.deviceId),
       MJJXX: '人脸开门',
       KMZT: 'Y',
       CZLX: '04',
