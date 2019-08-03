@@ -17,6 +17,7 @@ import { IFace } from 'src/module/face/interfaces/face.interfaces';
 import { IResident } from 'src/module/resident/interfaces/resident.interfaces';
 import { IRole } from 'src/module/role/interfaces/role.interfaces';
 import { IBlack } from 'src/module/black/interfaces/black.interfaces';
+import { LogRecordService } from 'src/module/logRecord/logRecord.service';
 
 @Injectable()
 export class ScheduleService {
@@ -31,6 +32,7 @@ export class ScheduleService {
     @Inject(UserService) private readonly userService: UserService,
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
+    @Inject(LogRecordService) private readonly logService: LogRecordService,
   ) { }
 
   async getOpenId(face: IFace) {
@@ -259,8 +261,19 @@ export class ScheduleService {
     rule.minute = 0;
     rule.hour = 3;
 
+    const logRule = new Schedule.RecurrenceRule();
+    logRule.second = 0;
+    logRule.minute = 0;
+    logRule.hour = 0;
+
     Schedule.scheduleJob(rule, async () => {
       await this.residentService.removeVisitor()
+    });
+
+
+
+    Schedule.scheduleJob(logRule, async () => {
+      await this.logService.genLog()
     });
 
     Schedule.scheduleJob('*/2 * * * *', async () => {

@@ -13,6 +13,7 @@ import { ConfigService } from './config/config.service';
 import { InitService } from './init/init.service';
 import { ScheduleService } from './schedule/schedule.service';
 import { UploadModule } from './upload/upload.module';
+import { RedisService } from 'nestjs-redis';
 
 const bodyParser = require('body-parser');
 // require('body-parser-xml')(bodyParser);
@@ -20,6 +21,7 @@ const bodyParser = require('body-parser');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config: ConfigService = app.get(ConfigService);
+  const redis: RedisService = app.get(RedisService)
 
   app.use(helmet())
     .use(compression())
@@ -47,7 +49,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, skipMissingProperties: true }));
   app.enableCors();
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(new LoggingInterceptor(redis));
   const uploadedPath = join(__dirname, '../', 'upload');
   app.useStaticAssets(uploadedPath);
   const ApiOptions = new DocumentBuilder()
@@ -58,7 +60,7 @@ async function bootstrap() {
     .setSchemes('http', 'https')
     .build();
 
-  // initService.init();
+  initService.init();
   scheduleService.enableSchedule()
 
   const ApiDocument = SwaggerModule.createDocument(app, ApiOptions, {

@@ -29,6 +29,11 @@ export class MediaService {
     return await this.mediaModel.findById(id)
   }
 
+  // 根据token查找
+  async findByToken(token: string): Promise<IMedia | null> {
+    return await this.mediaModel.findOne({ token })
+  }
+
   // 查询全部数据
   async findAll(pagination: Pagination): Promise<IList<IMedia>> {
     const search: any = [];
@@ -62,9 +67,10 @@ export class MediaService {
     if (!media) {
       throw new ApiException('广告机不存在', ApiErrorCode.ACCOUNT_INVALID, 406);
     }
-    // if (!this.cryptoUtil.checkPassword(password, media.password)) {
-    //   throw new ApiException('密码有误', ApiErrorCode.PASSWORD_INVALID, 406);
-    // }
-    return await this.jwtService.sign({ id: media._id, type: 'media' });
+    if (!this.cryptoUtil.checkPassword(password, media.password)) {
+      throw new ApiException('密码有误', ApiErrorCode.PASSWORD_INVALID, 406);
+    }
+    const token = await this.jwtService.sign({ id: media._id, type: 'media' })
+    return await this.mediaModel.findByIdAndUpdate(media._id, { token });
   }
 }

@@ -40,6 +40,15 @@ export class ResidentController {
     return { statusCode: 200, msg: '申请成功' };
   }
 
+  @Get('/address/:id')
+  @ApiOperation({ title: '获取审核列表', description: '获取审核列表' })
+  getResidentsByAddress(
+    @Param('id') id: string,
+    @Request() req: any
+  ) {
+    return this.residentService.getResidentByAddress(id);
+  }
+
   @Post('/applications/family')
   @ApiOkResponse({
     description: '申请常住人',

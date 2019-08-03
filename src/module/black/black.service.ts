@@ -11,11 +11,10 @@ import { RoleService } from '../role/role.service';
 import { DeviceService } from '../device/device.service';
 import { IDevice } from '../device/interfaces/device.interfaces';
 import { ConfigService } from 'src/config/config.service';
-import { CreateFaceDTO } from '../face/dto/face.dto';
 import { FaceService } from '../face/face.service';
 import { IUser } from '../users/interfaces/user.interfaces';
 import { UserService } from '../users/user.service';
-import { IFace } from '../face/interfaces/face.interfaces';
+import { RedisService } from 'nestjs-redis';
 
 @Injectable()
 export class BlackService {
@@ -27,6 +26,7 @@ export class BlackService {
     @Inject(ConfigService) private readonly config: ConfigService,
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(UserService) private readonly userService: UserService,
+    private readonly redis: RedisService,
   ) {
 
   }
@@ -159,6 +159,8 @@ export class BlackService {
       checkTime: new Date(),
       reviewer: userId,
     })
+    const client = this.redis.getClient()
+    client.hincrby(this.config.LOG, this.config.LOG_BLACK, 1)
     return true;
   }
 

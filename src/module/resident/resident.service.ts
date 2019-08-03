@@ -210,6 +210,8 @@ export class ResidentService {
     await this.zocUtil.genResident(zip, time, [data])
     const result = await this.zocUtil.upload(zip, time)
     if (result.success) {
+      const client = this.redis.getClient()
+      client.hincrby(this.config.LOG, this.config.LOG_RESIDENT, 1)
       await this.residentModel.findByIdAndUpdate(resident, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
     }
   }
@@ -324,6 +326,8 @@ export class ResidentService {
 
     // 发送审核通过消息
     this.sendVerifyMessage(resident.address.houseNumber, '物业', '业主', resident.user.openId)
+    const client = this.redis.getClient()
+    await client.hincrby(this.config.LOG, this.config.LOG_OWNER, 1)
     return true;
   }
 
@@ -491,6 +495,8 @@ export class ResidentService {
         isPhoneVerify: false,
       }
       createUser = await this.userService.create(createUserDto)
+      const client = this.redis.getClient()
+      client.hincrby(this.config.LOG, this.config.LOG_VERIFY, 1)
     } else if (createUser.isPhoneVerify) {
       throw new ApiException('身份证已被注册,请通过扫一扫添加', ApiErrorCode.PHONE_EXIST, 406);
     }
@@ -1063,5 +1069,13 @@ export class ResidentService {
     await Promise.all(residents.map(async resident => {
       await this.faceService.fixBount(resident, 'resident')
     }))
+  }
+
+  async getResidentByAddress(address: string): Promise<IResident[]> {
+    return this.residentModel
+      .find({ address })
+      .populate({ path: 'user', model: 'user' })
+      .lean()
+      .exec()
   }
 }

@@ -23,6 +23,7 @@ import { WeixinUtil } from 'src/utils/weixin.util';
 import { ZoneService } from '../zone/zone.service';
 import { IZone } from '../zone/interfaces/zone.interfaces';
 import { ZOCUtil } from 'src/utils/zoc.util';
+import { ConfigService } from 'src/config/config.service';
 
 interface IReceiver {
   id: string;
@@ -43,7 +44,7 @@ export class CallbackService {
     @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
     @Inject(ZoneService) private readonly zoneService: ZoneService,
     private readonly redis: RedisService,
-
+    private readonly config: ConfigService,
     private readonly mediaWs: MediaGateway,
   ) { }
 
@@ -139,7 +140,11 @@ export class CallbackService {
 
     if (Number(mode) === 0) {
       await this.strangerService.create(stranger);
-    } else {
+    } else if (Number(mode) === 2) {
+      const client = this.redis.getClient()
+      if (device.deviceType === 2) {
+        await client.hincrby(this.config.LOG, this.config.LOG_OPEN, 1)
+      }
       const user: IUser | null = await this.userService.updateById(userId, {})
       if (!user) {
         return
@@ -148,22 +153,25 @@ export class CallbackService {
       let zipname = ''
       let phone = user.phone
 
-      // if (!phone) {
-      //   const resident = await this.residentService.findByCondition({ user: userId, isDelete: false })
+      if (!phone) {
+        const resident = await this.residentService.findByCondition({ user: userId, isDelete: false })
 
-      //   const owner = await this.userService.findById(resident[0].reviewer)
-      //   if (owner) {
-      //     phone = owner.phone
-      //   }
-      //   const zone: IZone = await this.zoneService.findById(device.zone)
-      //   const time = moment().format('YYYYMMDDHHmmss');
-      //   const zip = await this.zocUtil.genZip()
-      //   await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, phone)
-      //   await this.zocUtil.genImage(zip, time, zone.detail, img)
-      //   const data = await this.zocUtil.upload(zip, time)
-      //   isZOCPush = data.success ? true : false
-      //   zipname = data.success ? data.zipname : ''
-      // }
+        const owner = await this.userService.findById(resident[0].reviewer)
+        if (owner) {
+          phone = owner.phone
+        }
+        const zone: IZone = await this.zoneService.findById(device.zone)
+        const time = moment().format('YYYYMMDDHHmmss');
+        const zip = await this.zocUtil.genZip()
+        await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, phone)
+        await this.zocUtil.genImage(zip, time, zone.detail, img)
+        const data = await this.zocUtil.upload(zip, time)
+        if (data.success) {
+          isZOCPush = true
+          zipname = data.zipname
+          client.hincrby(this.config.LOG, this.config.LOG_ENRECORD, 1)
+        }
+      }
       const orbit: CreateOrbitDTO = { user: user._id, mode, isZOCPush, ZOCZip: zipname, ...stranger, upTime: Date.now() }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
       await this.sendMessage(createOrbit, user, device)

@@ -9,6 +9,7 @@ import { RoleModule } from 'src/module/role/role.module';
 import { BlackModule } from 'src/module/black/black.module';
 import { UserModule } from 'src/module/users/user.module';
 import { WeixinUtil } from 'src/utils/weixin.util';
+import { LogRecordModule } from 'src/module/logRecord/LogRecord.module';
 
 @Global()
 @Module({
@@ -25,6 +26,7 @@ import { WeixinUtil } from 'src/utils/weixin.util';
     RoleModule,
     BlackModule,
     UserModule,
+    LogRecordModule,
   ],
   exports: [ScheduleService],
 })

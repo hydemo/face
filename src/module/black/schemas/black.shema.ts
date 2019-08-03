@@ -18,7 +18,7 @@ export const BlackSchema = new mongoose.Schema(
     isDelete: { type: Boolean, default: false },
     // 申请小区
     zone: ObjectId,
-    // 类型 1:监控 2:报警
+    // 类型 1:高危 2:一般
     type: { type: Number, enum: [1, 2] },
     // 姓名
     username: String,

@@ -62,8 +62,11 @@ export class OrbitService {
   }
 
   // 查询我的轨迹
-  async myOrbits(pagination: Pagination, userId: String): Promise<IList<IOrbit>> {
-    const condition: any = { user: userId, isDelete: false };
+  async myOrbits(pagination: Pagination, userId: String, type: string): Promise<IList<IOrbit>> {
+    const condition: any = { user: userId };
+    if (type === 'me') {
+      condition.isDelete = false
+    }
 
     const list = await this.orbitModel
       .find(condition)

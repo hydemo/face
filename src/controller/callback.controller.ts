@@ -149,13 +149,24 @@ export class CallbackController {
   @ApiOperation({ title: '心跳数据', description: '心跳数据' })
   async handle(@Request() req) {
     const client = this.redis.getClient()
-    await client.del('p2p_listen')
-    // await client.lpush('p2pErrorFinal', '2')
-    await client.del('p2pErrorFinal')
+    // const ips = await client.hkeys('Log_op')
+    await client.hset('Log', 'resident', 0)
+    const ss = await client.hget('Log', 'resident')
+    if (!ss) {
+      console.log(111)
+    }
+    console.log(typeof (ss), 'as')
+    // await client.del('p2p_listen')
+    // // await client.lpush('p2pErrorFinal', '2')
+    // await client.del('p2pErrorFinal')
     // await client.lpush('p2p', '22')
     // await client.lpush('p2p', '33')
     // await client.rpush('p2p', '44')
     // console.log(await client.rpop('p2p'))
+    // co
+    const preDate = moment('2019-03-31').add(-1, 'M').format('YYYY-MM-DD')
+    const now = moment('2019-03-30').format('YYYY-MM-DD')
+    console.log(preDate, now, ss)
     return
   }
 

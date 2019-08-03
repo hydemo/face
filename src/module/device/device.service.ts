@@ -11,6 +11,8 @@ import { ZoneService } from '../zone/zone.service';
 import { TaskService } from '../task/task.service';
 import { ITask } from '../task/interfaces/task.interfaces';
 import { ZOCUtil } from 'src/utils/zoc.util';
+import { RedisService } from 'nestjs-redis';
+import { ConfigService } from 'src/config/config.service';
 
 @Injectable()
 export class DeviceService {
@@ -18,6 +20,8 @@ export class DeviceService {
     @Inject('DeviceModelToken') private readonly deviceModel: Model<IDevice>,
     @Inject(ZoneService) private readonly zoneService: ZoneService,
     @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
+    private readonly redis: RedisService,
+    private readonly config: ConfigService,
   ) { }
   // 获取设备id
   async getDeviceId() {
@@ -39,6 +43,8 @@ export class DeviceService {
     const result = await this.zocUtil.upload(zip, time)
     if (result.success) {
       await this.deviceModel.findByIdAndUpdate(device._id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
+      const client = this.redis.getClient()
+      await client.hincrby(this.config.LOG, this.config.LOG_DEVICE, 1)
     }
   }
 

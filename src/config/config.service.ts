@@ -140,6 +140,27 @@ export class ConfigService {
       MANAGEMENT_CARD_NUMBER: Joi.string().required(),
 
       MANAGEMENT_PHONE: Joi.string().required(),
+      LOG: Joi.string().required(),
+
+      LOG_IP: Joi.string().required(),
+
+      LOG_USER: Joi.string().required(),
+
+      LOG_TOTAL: Joi.string().required(),
+
+      LOG_RESIDENT: Joi.string().required(),
+
+      LOG_ENRECORD: Joi.string().required(),
+
+      LOG_DEVICE: Joi.string().required(),
+
+      LOG_VERIFY: Joi.string().required(),
+
+      LOG_BLACK: Joi.string().required(),
+
+      LOG_OPEN: Joi.string().required(),
+
+      LOG_OWNER: Joi.string().required(),
     });
 
     const { error, value: validatedEnvConfig } = Joi.validate(
@@ -370,4 +391,49 @@ export class ConfigService {
   get managementPhone(): string {
     return this.envConfig.MANAGEMENT_PHONE
   }
+
+  get LOG(): string {
+    return this.envConfig.LOG
+  }
+
+  get LOG_IP(): string {
+    return this.envConfig.LOG_IP
+  }
+
+  get LOG_USER(): string {
+    return this.envConfig.LOG_USER
+  }
+
+  get LOG_TOTAL(): string {
+    return this.envConfig.LOG_TOTAL
+  }
+
+  get LOG_RESIDENT(): string {
+    return this.envConfig.LOG_RESIDENT
+  }
+
+  get LOG_ENRECORD(): string {
+    return this.envConfig.LOG_ENRECORD
+  }
+
+  get LOG_DEVICE(): string {
+    return this.envConfig.LOG_DEVICE
+  }
+
+  get LOG_VERIFY(): string {
+    return this.envConfig.LOG_VERIFY
+  }
+
+  get LOG_BLACK(): string {
+    return this.envConfig.LOG_BLACK
+  }
+
+  get LOG_OPEN(): string {
+    return this.envConfig.LOG_OPEN
+  }
+
+  get LOG_OWNER(): string {
+    return this.envConfig.LOG_OWNER
+  }
+
 }

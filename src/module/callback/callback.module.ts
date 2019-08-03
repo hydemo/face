@@ -15,6 +15,7 @@ import { SOCUtil } from 'src/utils/soc.util';
 import { ZoneModule } from '../zone/zone.module';
 import { CryptoUtil } from 'src/utils/crypto.util';
 import { PhoneUtil } from 'src/utils/phone.util';
+import { ConfigModule } from 'src/config/config.module';
 
 
 @Module({
@@ -37,6 +38,7 @@ import { PhoneUtil } from 'src/utils/phone.util';
     MessageModule,
     ResidentModule,
     MediaModule,
+    ConfigModule,
     ZoneModule,
   ],
 })

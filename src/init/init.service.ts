@@ -7,6 +7,7 @@ import { AdminService } from 'src/module/admin/admin.service';
 import { SOCUtil } from 'src/utils/soc.util';
 import { ConfigService } from 'src/config/config.service';
 import { UserService } from 'src/module/users/user.service';
+import { LogRecordService } from 'src/module/logRecord/logRecord.service';
 
 @Injectable()
 export class InitService {
@@ -15,6 +16,7 @@ export class InitService {
     private readonly userService: UserService,
     private readonly socUtil: SOCUtil,
     private readonly configService: ConfigService,
+    private readonly logService: LogRecordService,
   ) { }
 
   async init() {
@@ -82,6 +84,7 @@ export class InitService {
     // console.log(up, 'proc')
     // this.userService.cleanData()
     // const data = await this.socUtil.qrcodeAddress('')
+    await this.logService.initData()
     const adminExist = await this.adminService.countByCondition({ role: 0 })
     if (!adminExist) {
       const admin: CreateAdminDTO = {

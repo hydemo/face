@@ -12,6 +12,8 @@ export const MediaSchema = new mongoose.Schema(
     zone: ObjectId,
     // 区域名
     zoneName: String,
+    // token
+    token: String,
   },
   { collection: 'media', versionKey: false, timestamps: true },
 );

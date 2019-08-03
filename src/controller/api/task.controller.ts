@@ -19,7 +19,7 @@ import { CreateDeviceDTO } from 'src/module/device/dto/device.dto';
 @ApiUseTags('tasks')
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @UseGuards(AuthGuard())
-@Controller('tasks')
+@Controller('api/tasks')
 export class TaskController {
   constructor(
     private taskService: TaskService,

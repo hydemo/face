@@ -53,6 +53,8 @@ import { PhoneUtil } from './utils/phone.util';
 import { ZOCUtil } from './utils/zoc.util';
 import { PreownerModule } from './module/preowner/preowner.module';
 import { P2PErrorModule } from './module/p2pError/p2pError.module';
+import { LogRecordModule } from './module/logRecord/LogRecord.module';
+import { LogController } from './controller/api/log.controller';
 
 @Module({
   imports: [
@@ -77,6 +79,7 @@ import { P2PErrorModule } from './module/p2pError/p2pError.module';
     MediaModule,
     PreownerModule,
     P2PErrorModule,
+    LogRecordModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => configService.redis,
@@ -115,6 +118,7 @@ import { P2PErrorModule } from './module/p2pError/p2pError.module';
     RoleController,
     TaskController,
     MediaController,
+    LogController,
   ]
 })
 export class AppModule { }

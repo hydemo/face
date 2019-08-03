@@ -30,7 +30,7 @@ export class UserService {
     @Inject(CryptoUtil) private readonly cryptoUtil: CryptoUtil,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
     @Inject(JwtService) private readonly jwtService: JwtService,
-    @Inject(ConfigService) private readonly configService: ConfigService,
+    @Inject(ConfigService) private readonly config: ConfigService,
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(PhoneUtil) private readonly phoneUtil: PhoneUtil,
@@ -337,6 +337,13 @@ export class UserService {
     }
     if (!returnUser) {
       await this.userModel.findByIdAndUpdate(user._id, { ...verify, isVerify: true, isPhoneVerify }).lean().exec()
+    }
+    const client = this.redis.getClient()
+    if (!user.isVerify) {
+      client.hincrby(this.config.LOG, this.config.LOG_VERIFY, 1)
+    }
+    if (!user.isPhoneVerify) {
+      client.hincrby(this.config.LOG, this.config.LOG_USER, 1)
     }
     return returnUser
   }
