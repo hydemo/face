@@ -187,11 +187,11 @@ export class LogRecordService {
     return await this.logRecordModel.create(log);
   }
   // 根据固定条件获取用户数据
-  async getUserRecord(type: string): Promise<IUserRecord[]> {
+  async getUserRecord(type: string): Promise<{ list: IUserRecord[], today: IUserRecord }> {
 
     const userRecordToday: IUserRecord = await this.getUserRecordToday()
     if (type === 'day') {
-      return [userRecordToday]
+      return { list: [userRecordToday], today: userRecordToday }
     }
     const condition: any = this.getCondition(type)
     console.log(condition, 'condition')
@@ -201,21 +201,19 @@ export class LogRecordService {
       .lean()
       .exec()
     data.push(userRecordToday)
-    return data
+    return { list: data, today: userRecordToday }
   }
 
   // 根据zoneId查询
-  async getUserRecordBetween(start: string, end: string): Promise<IUserRecord[]> {
+  async getUserRecordBetween(start: string, end: string): Promise<{ list: IUserRecord[], today: IUserRecord }> {
     const now = moment().format('YYYY-MM-DD')
     let condition: any;
-    let userRecordToday;
-    console.log(now, end, 'sss')
+    const userRecordToday = await this.getUserRecordToday();
     if (end === now) {
       const preDate = moment().add(-1, 'd').format('YYYY-MM-DD')
       condition = { $and: [{ date: { $lte: preDate } }, { date: { $gte: start } }] }
-      userRecordToday = await this.getUserRecordToday()
       if (start === end) {
-        return [userRecordToday]
+        return { list: [userRecordToday], today: userRecordToday }
       }
     } else {
       condition = { $and: [{ date: { $lte: end } }, { date: { $gte: start } }] }
@@ -228,14 +226,14 @@ export class LogRecordService {
     if (end === now) {
       data.push(userRecordToday)
     }
-    return data
+    return { list: data, today: userRecordToday }
   }
 
   // 根据固定条件获取用户数据
-  async getUploadRecord(type: string): Promise<IUploadRecord[]> {
+  async getUploadRecord(type: string): Promise<{ list: IUploadRecord[], today: IUploadRecord }> {
     const uploadRecordToday: IUploadRecord = await this.getUploadRecordToday()
     if (type === 'day') {
-      return [uploadRecordToday]
+      return { list: [uploadRecordToday], today: uploadRecordToday }
     }
     const condition: any = this.getCondition(type)
     const data: IUploadRecord[] = await this.logRecordModel
@@ -244,20 +242,19 @@ export class LogRecordService {
       .lean()
       .exec()
     data.push(uploadRecordToday)
-    return data
+    return { list: data, today: uploadRecordToday }
   }
 
   // 根据zoneId查询
-  async getUploadRecordBetween(start: string, end: string): Promise<IUploadRecord[]> {
+  async getUploadRecordBetween(start: string, end: string): Promise<{ list: IUploadRecord[], today: IUploadRecord }> {
     const now = moment().format('YYYY-MM-DD')
     let condition: any;
-    let uploadRecordToday;
+    let uploadRecordToday = await this.getUploadRecordToday();
     if (end === now) {
       const preDate = moment().add(-1, 'd').format('YYYY-MM-DD')
       condition = { $and: [{ date: { $lte: preDate } }, { date: { $gte: start } }] }
-      uploadRecordToday = await this.getUploadRecordToday()
       if (start === end) {
-        return [uploadRecordToday]
+        return { list: [uploadRecordToday], today: uploadRecordToday }
       }
     } else {
       condition = { $and: [{ date: { $lte: end } }, { date: { $gte: start } }] }
@@ -270,6 +267,6 @@ export class LogRecordService {
     if (end === now) {
       data.push(uploadRecordToday)
     }
-    return data
+    return { list: data, today: uploadRecordToday }
   }
 }
