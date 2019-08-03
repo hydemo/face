@@ -46,14 +46,13 @@ import { TaskController } from './controller/api/task.controller';
 import { CMSBlackController } from './controller/cms/black.controller';
 import { SOCUtil } from './utils/soc.util';
 import { MediaModule } from './module/media/media.module';
-import { MediaGateway } from './module/media/media.gateway';
 import { CMSMediaController } from './controller/cms/media.controller';
 import { MediaController } from './controller/api/media.controller';
 import { PhoneUtil } from './utils/phone.util';
 import { ZOCUtil } from './utils/zoc.util';
 import { PreownerModule } from './module/preowner/preowner.module';
 import { P2PErrorModule } from './module/p2pError/p2pError.module';
-import { LogRecordModule } from './module/logRecord/LogRecord.module';
+import { LogRecordModule } from './module/logRecord/logRecord.module';
 import { LogController } from './controller/api/log.controller';
 
 @Module({

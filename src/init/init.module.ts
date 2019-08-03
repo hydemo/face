@@ -5,7 +5,7 @@ import { SOCUtil } from 'src/utils/soc.util';
 import { CryptoUtil } from 'src/utils/crypto.util';
 import { ConfigModule } from 'src/config/config.module';
 import { UserModule } from 'src/module/users/user.module';
-import { LogRecordModule } from 'src/module/logRecord/LogRecord.module';
+import { LogRecordModule } from 'src/module/logRecord/logRecord.module';
 
 @Global()
 @Module({
