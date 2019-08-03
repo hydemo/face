@@ -8,7 +8,7 @@ export const LogRecordSchema = new mongoose.Schema(
     userCount: { type: Number, default: 0 },
     // 总用户数
     userTotal: Number,
-    // 独立ip数
+    // 日活
     ipCount: { type: Number, default: 0 },
     // 总访问量
     totalCount: { type: Number, default: 0 },

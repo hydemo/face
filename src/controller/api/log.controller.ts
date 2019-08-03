@@ -37,7 +37,7 @@ export class LogController {
     isArray: true,
   })
   @Get('/user/between')
-  @ApiOperation({ title: '获取用户数据', description: '获取用户数据' })
+  @ApiOperation({ title: '根据区间获取用户数据', description: '根据区间获取用户数据' })
   async userRecordBetween(
     @Query('start') start: string,
     @Query('end') end: string,
@@ -47,11 +47,11 @@ export class LogController {
   }
 
   @ApiOkResponse({
-    description: '获取用户数据',
+    description: '获取上传数据',
     isArray: true,
   })
   @Get('/upload')
-  @ApiOperation({ title: '获取用户数据', description: '获取用户数据' })
+  @ApiOperation({ title: '获取上传数据', description: '获取上传数据' })
   async uploadRecord(
     @Query('type') type: string,
   ) {
@@ -60,11 +60,11 @@ export class LogController {
   }
 
   @ApiOkResponse({
-    description: '根据区间获取用户数据',
+    description: '根据区间获取上传数据',
     isArray: true,
   })
   @Get('/upload/between')
-  @ApiOperation({ title: '获取用户数据', description: '获取用户数据' })
+  @ApiOperation({ title: '根据区间获取上传数据', description: '根据区间获取上传数据' })
   async uploadRecordBetween(
     @Query('start') start: string,
     @Query('end') end: string,
