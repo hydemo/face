@@ -49,6 +49,15 @@ export class ResidentController {
     return this.residentService.getResidentByAddress(id);
   }
 
+  @Get('/cardNumber')
+  @ApiOperation({ title: '获取审核列表', description: '获取审核列表' })
+  getResidentsByCardNumber(
+    @Query('cardNumber') cardNumber: string,
+    @Request() req: any
+  ) {
+    return this.residentService.getResidentByCardNumber(cardNumber);
+  }
+
   @Post('/applications/family')
   @ApiOkResponse({
     description: '申请常住人',
