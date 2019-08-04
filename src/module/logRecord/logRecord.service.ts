@@ -119,8 +119,8 @@ export class LogRecordService {
   }
   // 生成当天数据
   async genLog() {
-    const preDate = moment().add(-1, 'd').format('YYYY-MM-DD')
-    const now = moment().format('YYYY-MM-DD')
+    const preDate = moment().add(-2, 'd').format('YYYY-MM-DD')
+    const now = moment().add(-1, 'd').format('YYYY-MM-DD')
     const preLog: ILogRecord | null = await this.logRecordModel.findOne({ date: preDate })
     const client = this.redis.getClient()
     const userCount = Number(await client.hget(this.config.LOG, this.config.LOG_USER))
@@ -146,7 +146,7 @@ export class LogRecordService {
     await client.del(this.config.LOG_IP)
     const log = {
       // 日期
-      date: now,
+      date: preDate,
       // 用户增长量
       userCount,
       // 总用户数
@@ -198,6 +198,7 @@ export class LogRecordService {
     const data: IUserRecord[] = await this.logRecordModel
       .find(condition)
       .select({ residentCount: 0, residentTotal: 0, enRecordCount: 0, enRecordTotal: 0, deviceCount: 0, deviceTotal: 0 })
+      .sort({ date: 1 })
       .lean()
       .exec()
     data.push(userRecordToday)
@@ -221,6 +222,7 @@ export class LogRecordService {
     const data: IUserRecord[] = await this.logRecordModel
       .find(condition)
       .select({ residentCount: 0, residentTotal: 0, enRecordCount: 0, enRecordTotal: 0, deviceCount: 0, deviceTotal: 0 })
+      .sort({ date: 1 })
       .lean()
       .exec()
     if (end === now) {
@@ -239,6 +241,7 @@ export class LogRecordService {
     const data: IUploadRecord[] = await this.logRecordModel
       .find(condition)
       .select({ data: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1 })
+      .sort({ date: 1 })
       .lean()
       .exec()
     data.push(uploadRecordToday)
@@ -262,6 +265,7 @@ export class LogRecordService {
     const data: IUploadRecord[] = await this.logRecordModel
       .find(condition)
       .select({ data: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1 })
+      .sort({ date: 1 })
       .lean()
       .exec()
     if (end === now) {
