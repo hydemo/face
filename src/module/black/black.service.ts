@@ -76,7 +76,7 @@ export class BlackService {
 
   // 查询全部数据
   async findAll(pagination: Pagination, checkResult: number): Promise<IList<IBlack>> {
-    const condition: any = { checkResult };
+    const condition: any = { checkResult, isDelete: false };
     const list = await this.blackModel
       .find(condition)
       .limit(pagination.limit)

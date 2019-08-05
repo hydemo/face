@@ -41,7 +41,7 @@ export class ResidentController {
   }
 
   @Get('/address/:id')
-  @ApiOperation({ title: '获取审核列表', description: '获取审核列表' })
+  @ApiOperation({ title: '根据地址获取住户信息', description: '根据地址获取住户信息' })
   getResidentsByAddress(
     @Param('id') id: string,
     @Request() req: any
@@ -50,7 +50,7 @@ export class ResidentController {
   }
 
   @Get('/cardNumber')
-  @ApiOperation({ title: '获取审核列表', description: '获取审核列表' })
+  @ApiOperation({ title: '根据身份证获取住户信息', description: '根据身份证获取住户信息' })
   getResidentsByCardNumber(
     @Query('cardNumber') cardNumber: string,
     @Request() req: any

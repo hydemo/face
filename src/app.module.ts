@@ -54,6 +54,7 @@ import { PreownerModule } from './module/preowner/preowner.module';
 import { P2PErrorModule } from './module/p2pError/p2pError.module';
 import { LogRecordModule } from './module/logRecord/logRecord.module';
 import { LogController } from './controller/api/log.controller';
+import { BlackController } from './controller/api/black.controller';
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { LogController } from './controller/api/log.controller';
     TaskController,
     MediaController,
     LogController,
+    BlackController
   ]
 })
 export class AppModule { }
