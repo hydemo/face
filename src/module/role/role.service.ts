@@ -5,7 +5,7 @@ import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
-import { CreateRoleByScanDTO, RoleDTO } from './dto/role.dto';
+import { CreateRoleByScanDTO, RoleDTO, CreateAdminRole, CreatePoliceRole } from './dto/role.dto';
 import { WeixinUtil } from 'src/utils/weixin.util';
 import { IUser } from '../users/interfaces/user.interfaces';
 import { ZoneService } from '../zone/zone.service';
@@ -17,6 +17,7 @@ import { CameraUtil } from 'src/utils/camera.util';
 import { ConfigService } from 'src/config/config.service';
 import { CreateFaceDTO } from '../face/dto/face.dto';
 import { UserService } from '../users/user.service';
+import { IZone } from '../zone/interfaces/zone.interfaces';
 
 @Injectable()
 export class RoleService {
@@ -30,12 +31,24 @@ export class RoleService {
     @Inject(UserService) private readonly userService: UserService,
     @Inject(FaceService) private readonly faceService: FaceService,
   ) { }
+  // 创建超级管理员
+  async createAdmin(role: CreateAdminRole): Promise<IRole | null> {
+    const creatRole = await this.roleModel.create(role);
+    return creatRole;
+  }
+
+  // 创建警察段
+  async createPolice(role: CreatePoliceRole): Promise<IRole | null> {
+    const creatRole = await this.roleModel.create(role);
+    return creatRole;
+  }
 
   // 创建数据
   async create(role: RoleDTO): Promise<IRole | null> {
     const user: IUser | null = await this.userService.findById(role.user)
-    if (!user) {
-      return null
+    const zone: IZone | null = await this.zoneService.findById(role.zone)
+    if (!user || !zone) {
+      throw new ApiException('用户或地区不存在', ApiErrorCode.NO_EXIST, 406);
     }
     const creatRole = await this.roleModel.create(role);
     return creatRole;

@@ -18,6 +18,8 @@ export const RoleSchema = new mongoose.Schema(
     isDelete: { type: Boolean, default: false },
     // 添加人
     reviewer: String,
+    // 片区
+    area: ObjectId,
   },
   { collection: 'role', versionKey: false, timestamps: true },
 );

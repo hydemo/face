@@ -23,7 +23,12 @@ export class BlackDTO {
   @IsMongoId()
   @Type(() => String)
   @ApiModelProperty({ description: '申请小区' })
-  readonly zone: string;
+  readonly zone?: string;
+
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '片区' })
+  readonly area: string;
 
   @IsNumber()
   @IsEnum([1, 2, 3])

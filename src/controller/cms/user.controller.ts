@@ -14,7 +14,7 @@ import { UserService } from 'src/module/users/user.service';
 import { CreateUserDTO } from 'src/module/users/dto/users.dto';
 import { IUser } from 'src/module/users/interfaces/user.interfaces';
 import { RoleService } from 'src/module/role/role.service';
-import { RoleDTO } from 'src/module/role/dto/role.dto';
+import { CreateAdminRole, CreatePoliceRole } from 'src/module/role/dto/role.dto';
 
 
 
@@ -59,14 +59,34 @@ export class CMSUserController {
   async setAdmin(
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any) {
-    const role: RoleDTO = {
+    const role: CreateAdminRole = {
       user: id,
       description: '管理员',
       role: 0,
       checkResult: 2,
-      reviewer: req.user._id
     }
-    await this.roleService.create(role);
+    await this.roleService.createAdmin(role);
+    return { statusCode: 200, msg: '设置成功' };
+  }
+
+  @Put('/:id/police')
+  @ApiOkResponse({
+    description: '设为民警',
+  })
+  @ApiCreatedResponse({ description: '设为民警' })
+  @ApiOperation({ title: '设为民警', description: '设为民警' })
+  async setPolice(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Body() area: { area: string }
+  ) {
+    const role: CreatePoliceRole = {
+      user: id,
+      description: '管理员',
+      role: 0,
+      checkResult: 2,
+      area: area.area,
+    }
+    await this.roleService.createPolice(role);
     return { statusCode: 200, msg: '设置成功' };
   }
 

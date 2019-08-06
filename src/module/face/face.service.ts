@@ -11,6 +11,7 @@ import { IUser } from '../users/interfaces/user.interfaces';
 import { IDevice } from '../device/interfaces/device.interfaces';
 import { ResidentService } from '../resident/resident.service';
 import { RedisService } from 'nestjs-redis';
+import { IPic } from 'src/common/interface/pic.interface';
 
 @Injectable()
 export class FaceService {
@@ -138,7 +139,7 @@ export class FaceService {
   }
 
   // 根据条件更新
-  async addOnePic(face: CreateFaceDTO, device: IDevice, user: IUser, mode: number, img: string, ) {
+  async addOnePic(face: CreateFaceDTO, device: IDevice, user: IPic, mode: number, img: string, ) {
     // if (device.version === '1.1.0') {
     //   // const exist = await this.cameraUtil.getPersionInfo(user._id, device, mode)
     //   // if (exist) {

@@ -19,6 +19,11 @@ export class CreateZoneDTO {
   @Type(() => Number)
   @ApiModelProperty({ description: '区域类型' })
   readonly zoneType: number;
+
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '区域名称' })
+  readonly area: string;
 }
 
 export class CreateZoneByScanDTO {
@@ -31,6 +36,11 @@ export class CreateZoneByScanDTO {
   @Type(() => String)
   @ApiModelProperty({ description: '二维码' })
   readonly code: string;
+
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '区域名称' })
+  readonly area: string;
 
   @IsNumber()
   @Type(() => Number)
@@ -89,6 +99,11 @@ export class ZoneDTO {
   @Type(() => String)
   @ApiModelProperty({ description: '区域ID' })
   readonly zoneId?: string;
+
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '区域名称' })
+  readonly area: string;
 
   @IsMongoId()
   @IsOptional()

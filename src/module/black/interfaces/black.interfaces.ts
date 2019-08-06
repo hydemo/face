@@ -25,4 +25,6 @@ export interface IBlack extends Document {
   readonly reason: string;
   // 人脸图片
   readonly faceUrl: string;
+  // 片区
+  readonly area: string;
 }

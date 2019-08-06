@@ -50,8 +50,10 @@ export class DeviceService {
 
   // 创建数据
   async create(createDeviceDTO: CreateDeviceDTO): Promise<IDevice> {
-    const creatDevice = new this.deviceModel(createDeviceDTO);
+    const zone = await this.zoneService.findById(createDeviceDTO.zone)
+    const creatDevice: IDevice = new this.deviceModel(createDeviceDTO);
     creatDevice.deviceId = await this.getDeviceId()
+    creatDevice.area = zone.area
     await creatDevice.save();
     // this.uploadToZoc(createDeviceDTO.zone, creatDevice)
     await this.zoneService.incDeviceCount(creatDevice.zone, 1);
@@ -116,6 +118,10 @@ export class DeviceService {
   // 根据uuid查找设备
   async findByZoneId(zone: string): Promise<IDevice[]> {
     return await this.deviceModel.find({ zone }).lean().exec()
+  }
+
+  async findByAreaId(area: string): Promise<IDevice[]> {
+    return await this.deviceModel.find({ area }).lean().exec()
   }
 
   // 绑定旧sim卡

@@ -164,7 +164,8 @@ export class ZoneController {
     @Body() black: CreateBlackDTO,
     @Request() req: any
   ) {
-    await this.blackService.addToZone(req.user._id, id, black);
+    const zone = await this.zoneService.findById(id)
+    await this.blackService.addToZone(req.user._id, zone, black);
     return { statusCode: 200, msg: '申请成功成功' };
   }
 

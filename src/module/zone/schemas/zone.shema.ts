@@ -16,6 +16,8 @@ export const ZoneSchema = new mongoose.Schema(
     zoneType: { type: Number },
     //门牌号
     houseNumber: String,
+    // 片区
+    area: ObjectId,
     // 是否有下级区域
     hasChildren: { type: Boolean, default: false },
     // 下级区域

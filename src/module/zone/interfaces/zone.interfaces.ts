@@ -8,6 +8,8 @@ export interface IZone extends Document {
   readonly name: string;
   // 所属地区
   readonly location: string;
+  // 片区
+  readonly area: string;
   // 区域级别
   readonly zoneLayer: number;
   // 区域类型

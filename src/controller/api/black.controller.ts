@@ -11,7 +11,7 @@ import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { BlackService } from 'src/module/black/black.service';
-import { BlackDTO } from 'src/module/black/dto/black.dto';
+import { BlackDTO, CreateBlackDTO } from 'src/module/black/dto/black.dto';
 
 
 @ApiUseTags('blacks')
@@ -23,16 +23,20 @@ export class BlackController {
     @Inject(BlackService) private blackService: BlackService,
   ) { }
 
-  // @ApiOkResponse({
-  //   description: '审核列表',
-  //   type: CreateBlackDTO,
-  //   isArray: true,
-  // })
-  // @Get('/')
-  // @ApiOperation({ title: '获取区域列表', description: '获取区域列表' })
-  // blackList(@Query() pagination: Pagination) {
-  //   return this.blackService.findAll(pagination);
-  // }
+  @Post('/')
+  @ApiOkResponse({
+    description: '添加黑名单',
+  })
+  @ApiCreatedResponse({ description: '添加黑名单' })
+  @ApiOperation({ title: '添加黑名单', description: '添加黑名单' })
+  async addBlack(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Body() black: CreateBlackDTO,
+    @Request() req: any
+  ) {
+    await this.blackService.add(req.user._id, black);
+    return { statusCode: 200, msg: '申请成功成功' };
+  }
 
   @ApiOkResponse({
     description: '黑名单申请列表',

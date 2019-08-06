@@ -48,6 +48,8 @@ export const DeviceSchema = new mongoose.Schema(
     ZOCZip: String,
     // 智能感知平台上传时间
     upTime: Date,
+    // 片区
+    area: ObjectId,
   },
   { collection: 'device', versionKey: false, timestamps: true },
 );

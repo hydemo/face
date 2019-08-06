@@ -191,6 +191,7 @@ export class ZoneService {
       ancestor: [...parent.ancestor, parent._id],
       houseNumber,
       buildingType: profile.dzsx,
+      area: parent.area,
     }
     return await this.zoneModel.create(create);
   }
@@ -248,6 +249,7 @@ export class ZoneService {
       houseNumber: createZone.name,
       profile: parentProfile,
       buildingType: parentProfile.dzsx,
+      area: createZone.area,
       // detail,
       propertyCo: {
         name: createZone.propertyCoName,

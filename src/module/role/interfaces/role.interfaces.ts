@@ -7,6 +7,8 @@ export interface IRole extends Document {
   readonly user: any;
   // 区域
   readonly zone: IZone;
+  // 区域
+  readonly area: string;
   // 角色 1:管理 2:工作人员 3:保安
   readonly role: number;
   // 轨迹

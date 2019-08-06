@@ -15,6 +15,7 @@ import { FaceService } from '../face/face.service';
 import { IUser } from '../users/interfaces/user.interfaces';
 import { UserService } from '../users/user.service';
 import { RedisService } from 'nestjs-redis';
+import { IZone } from '../zone/interfaces/zone.interfaces';
 
 @Injectable()
 export class BlackService {
@@ -30,19 +31,39 @@ export class BlackService {
   ) {
 
   }
-  async addToZone(user: string, zone: string, createBlack: CreateBlackDTO): Promise<IBlack> {
+  async addToZone(user: string, zone: IZone, createBlack: CreateBlackDTO): Promise<IBlack> {
     const canActive = await this.roleService.checkRoles({ isDelete: false, role: 1, user, zone })
     if (!canActive) {
       throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
     }
+
     const black: BlackDTO = {
       ...createBlack,
       applicant: user,
       applicationTime: new Date(),
       checkResult: 1,
-      zone,
+      zone: zone._id,
+      area: zone.area,
     }
     return await this.blackModel.create(black);
+  }
+
+  async add(user: string, createBlack: CreateBlackDTO) {
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 6, user })
+    if (!canActive) {
+      throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const role = await this.roleService.findByCondition({ isDelete: false, role: 6, user })
+    const black: BlackDTO = {
+      ...createBlack,
+      applicant: user,
+      applicationTime: new Date(),
+      checkResult: 1,
+      area: role.area
+      // zone,
+    }
+    const newBlack = await this.blackModel.create(black);
+    await this.agree(newBlack._id, user)
   }
 
 
@@ -128,11 +149,11 @@ export class BlackService {
 
   // 接受黑名单申请
   async agree(id: string, userId: string) {
-    const black: any = await this.blackModel
+    const black: IBlack = await this.blackModel
       .findById(id)
       .lean()
       .exec()
-    const devices: IDevice[] = await this.deviceService.findByZoneId(black.zone)
+    const devices: IDevice[] = await this.deviceService.findByAreaId(black.area)
     const user: IUser | null = await this.userService.findById(userId);
     if (!user) {
       return

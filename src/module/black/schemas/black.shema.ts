@@ -28,6 +28,8 @@ export const BlackSchema = new mongoose.Schema(
     reason: String,
     // 人脸图片
     faceUrl: String,
+    // 片区
+    area: ObjectId,
   },
   { collection: 'black', versionKey: false, timestamps: true },
 );
