@@ -48,7 +48,7 @@ export class BlackController {
     @Query() pagination: Pagination,
     @Query('checkResult') checkResult: number,
   ) {
-    return this.blackService.findAll(pagination, checkResult);
+    return this.blackService.findAll(pagination, Number(checkResult));
   }
 
   @Put('/:id/agree')
