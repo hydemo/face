@@ -35,19 +35,19 @@ export class CMSBlackController {
   //   return this.blackService.findAll(pagination);
   // }
 
-  @ApiOkResponse({
-    description: '黑名单申请列表',
-    type: BlackDTO,
-    isArray: true,
-  })
-  @Get('/')
-  @ApiOperation({ title: '黑名单申请列表', description: '黑名单申请列表' })
-  async getOwnerApplication(
-    @Query() pagination: Pagination,
-    @Query('checkResult') checkResult: number,
-  ) {
-    return this.blackService.findAll(pagination, checkResult);
-  }
+  // @ApiOkResponse({
+  //   description: '黑名单申请列表',
+  //   type: BlackDTO,
+  //   isArray: true,
+  // })
+  // @Get('/')
+  // @ApiOperation({ title: '黑名单申请列表', description: '黑名单申请列表' })
+  // async getOwnerApplication(
+  //   @Query() pagination: Pagination,
+  //   @Query('checkResult') checkResult: number,
+  // ) {
+  //   return this.blackService.findAll(pagination, checkResult);
+  // }
 
   @Put('/:id/agree')
   @ApiOkResponse({
