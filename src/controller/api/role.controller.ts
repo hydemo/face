@@ -46,7 +46,7 @@ export class RoleController {
     isArray: true,
   })
   @Get('/police')
-  @UserRoles(1)
+  @UserRoles(4)
   @ApiOperation({ title: '民警列表', description: '民警列表' })
   async polices(
     @Query() pagination: Pagination,
