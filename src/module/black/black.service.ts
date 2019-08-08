@@ -16,6 +16,7 @@ import { IUser } from '../users/interfaces/user.interfaces';
 import { UserService } from '../users/user.service';
 import { RedisService } from 'nestjs-redis';
 import { IZone } from '../zone/interfaces/zone.interfaces';
+import { IRole } from '../role/interfaces/role.interfaces';
 
 @Injectable()
 export class BlackService {
@@ -96,12 +97,16 @@ export class BlackService {
   }
 
   // 查询全部数据
-  async findAll(pagination: Pagination, type: number): Promise<IList<IBlack>> {
+  async findAll(pagination: Pagination, type: number, user: string): Promise<IList<IBlack>> {
+    const role: IRole | null = await this.roleService.findOneByCondition({ user, isDelete: false, role: 4 })
+    if (!role) {
+      throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
+    }
     let checkResult: any = type
     if (checkResult === 2) {
       checkResult = { $in: [2, 4, 5] }
     }
-    const condition: any = { checkResult, isDelete: false };
+    const condition: any = { checkResult, isDelete: false, area: role.area };
     const list = await this.blackModel
       .find(condition)
       .limit(pagination.limit)
@@ -179,8 +184,9 @@ export class BlackService {
       }
       return await this.faceService.addOnePic(face, device, black, this.config.blackMode, img)
     })
+    const checkResult = await this.faceService.checkResult(id)
     await this.blackModel.findByIdAndUpdate(id, {
-      checkResult: 4,
+      checkResult,
       checkTime: new Date(),
       reviewer: userId,
     })

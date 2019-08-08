@@ -18,6 +18,7 @@ import { ConfigService } from 'src/config/config.service';
 import { CreateFaceDTO } from '../face/dto/face.dto';
 import { UserService } from '../users/user.service';
 import { IZone } from '../zone/interfaces/zone.interfaces';
+import { IArea } from '../area/interfaces/area.interfaces';
 
 interface IReceiver {
   id: string;
@@ -266,6 +267,13 @@ export class RoleService {
     const total = await this.roleModel.countDocuments(condition);
     return { list, total };
   }
+
+  // 查询全部数据
+  async getPoliceArea(user: string): Promise<IRole | null> {
+    return await this.roleModel
+      .findOne({ user, isDelete: false, role: 4 })
+      .populate({ path: 'area', model: 'area' })
+  }
   // 查询全部数据
   async myRoles(userId: string) {
     const cond = { user: userId, isDelete: false }
@@ -347,6 +355,10 @@ export class RoleService {
 
   async findByCondition(condition: any) {
     return await this.roleModel.find(condition).populate({ path: 'zone', model: 'zone' }).lean().exec()
+  }
+
+  async findOneByCondition(condition: any) {
+    return await this.roleModel.findOne(condition).lean().exec()
   }
 
   async findOneAndDelete(condition: any) {

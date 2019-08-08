@@ -47,8 +47,9 @@ export class BlackController {
   async getOwnerApplication(
     @Query() pagination: Pagination,
     @Query('checkResult') checkResult: number,
+    @Request() req: any,
   ) {
-    return this.blackService.findAll(pagination, Number(checkResult));
+    return this.blackService.findAll(pagination, Number(checkResult), req.user._id);
   }
 
   @Put('/:id/agree')
