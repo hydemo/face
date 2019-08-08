@@ -150,4 +150,11 @@ export class BindPhoneDTO {
   readonly phone: string;
 }
 
+export class AreaDTO {
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelPropertyOptional({ description: '片区id' })
+  readonly area: string;
+}
+
 

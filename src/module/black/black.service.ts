@@ -49,11 +49,11 @@ export class BlackService {
   }
 
   async add(user: string, createBlack: CreateBlackDTO) {
-    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 6, user })
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 4, user })
     if (!canActive) {
       throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
     }
-    const role = await this.roleService.findByCondition({ isDelete: false, role: 6, user })
+    const role = await this.roleService.findByCondition({ isDelete: false, role: 4, user })
     const black: BlackDTO = {
       ...createBlack,
       applicant: user,

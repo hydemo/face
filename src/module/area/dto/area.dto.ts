@@ -11,7 +11,7 @@ export class CreateAreaDTO {
   @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '省份' })
-  readonly provianc: string;
+  readonly proviance: string;
 
   @IsString()
   @Type(() => String)

@@ -7,7 +7,7 @@ export const AreaSchema = new mongoose.Schema(
     // 片区名称
     name: String,
     // 省份
-    provianc: String,
+    proviance: String,
     // 城市
     city: String,
   },

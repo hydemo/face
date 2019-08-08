@@ -55,6 +55,8 @@ import { P2PErrorModule } from './module/p2pError/p2pError.module';
 import { LogRecordModule } from './module/logRecord/logRecord.module';
 import { LogController } from './controller/api/log.controller';
 import { BlackController } from './controller/api/black.controller';
+import { CMSAreaController } from './controller/cms/area.controller';
+import { AreaModule } from './module/area/area.module';
 
 @Module({
   imports: [
@@ -80,6 +82,7 @@ import { BlackController } from './controller/api/black.controller';
     PreownerModule,
     P2PErrorModule,
     LogRecordModule,
+    AreaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => configService.redis,
@@ -109,6 +112,7 @@ import { BlackController } from './controller/api/black.controller';
     CMSResidentController,
     CMSBlackController,
     CMSMediaController,
+    CMSAreaController,
     ZoneController,
     UserController,
     ResidentController,
