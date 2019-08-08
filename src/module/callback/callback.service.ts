@@ -26,6 +26,8 @@ import { ZOCUtil } from 'src/utils/zoc.util';
 import { ConfigService } from 'src/config/config.service';
 import { IBlack } from '../black/interfaces/black.interfaces';
 import { BlackService } from '../black/black.service';
+import { IRole } from '../role/interfaces/role.interfaces';
+import { RoleService } from '../role/role.service';
 
 interface IReceiver {
   id: string;
@@ -46,6 +48,7 @@ export class CallbackService {
     @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
     @Inject(ZoneService) private readonly zoneService: ZoneService,
     @Inject(BlackService) private readonly blackService: BlackService,
+    @Inject(RoleService) private readonly roleService: RoleService,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
     private readonly mediaWs: MediaGateway,
@@ -185,7 +188,7 @@ export class CallbackService {
       }
       const orbit: CreateOrbitDTO = { user: black._id, mode, ...stranger }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
-      // await this.sendBlackMessage(createOrbit, user, device)
+      await this.sendBlackMessage(createOrbit, black, device)
     }
     return
   }
@@ -226,6 +229,57 @@ export class CallbackService {
         },
         keyword3: {
           value: user.username,
+          color: "#173177"
+        },
+        keyword4: {
+          value: moment().format('YYYY:MM:DD HH:mm:ss'),
+          color: "#173177"
+        },
+        remark: {
+          value: '详情可查看进出图像',
+          color: "#173177"
+        },
+      }
+      this.weixinUtil.sendPassMessage(receiverUser.openId, application)
+    }))
+  }
+
+  // 发送消息
+  async sendBlackMessage(orbit: IOrbit, black: IBlack, device: IDevice) {
+    const receivers: IReceiver[] = await this.roleService.blackReceivers(device)
+    return await Promise.all(receivers.map(async receiver => {
+      const receiverUser: IUser | null = await this.userService.findById(receiver.id)
+      if (!receiverUser) {
+        return
+      }
+      const message: CreateOrbitMessageDTO = {
+        sender: black._id,
+        receiver: receiver.id,
+        type: receiver.type,
+        orbit: orbit._id,
+        passType: device.passType,
+        zone: device.zone,
+        imgUrl: orbit.imgUrl,
+        imgexUrl: orbit.imgexUrl,
+        compareResult: orbit.compareResult,
+        position: `${device.position.houseNumber}-${device.description}`
+      }
+      await this.messageService.createOrbitMessage(message)
+      const application: ApplicationDTO = {
+        first: {
+          value: `${device.position.houseNumber}-${device.description}有异常人员通过`,
+          color: "#173177"
+        },
+        keyword1: {
+          value: '异常人员',
+          color: "#173177"
+        },
+        keyword2: {
+          value: device.passType === 1 ? '进入' : '离开',
+          color: "#173177"
+        },
+        keyword3: {
+          value: black.username,
           color: "#173177"
         },
         keyword4: {

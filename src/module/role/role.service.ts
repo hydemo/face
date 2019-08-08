@@ -19,6 +19,11 @@ import { CreateFaceDTO } from '../face/dto/face.dto';
 import { UserService } from '../users/user.service';
 import { IZone } from '../zone/interfaces/zone.interfaces';
 
+interface IReceiver {
+  id: string;
+  type: string;
+}
+
 @Injectable()
 export class RoleService {
   constructor(
@@ -351,6 +356,20 @@ export class RoleService {
   // 根据id修改
   async updateById(id: string, update: any): Promise<IRole | null> {
     return await this.roleModel.findByIdAndUpdate(id, update)
+  }
+
+  // 根据id修改
+  async blackReceivers(device: IDevice): Promise<IReceiver[]> {
+    const managements: IRole[] = await this.roleModel.find({ zone: device.zone, isDelete: false, role: 1 })
+    const polices: IRole[] = await this.roleModel.find({ role: 4, isDelete: false, area: device.area })
+    const receivers: IReceiver[] = []
+    managements.map(management => {
+      receivers.push({ id: management.user, type: 'black' })
+    })
+    polices.map(police => {
+      receivers.push({ id: police.user, type: 'black' })
+    })
+    return receivers
   }
 
   async fix() {

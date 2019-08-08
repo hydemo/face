@@ -16,6 +16,7 @@ import { ZoneModule } from '../zone/zone.module';
 import { CryptoUtil } from 'src/utils/crypto.util';
 import { PhoneUtil } from 'src/utils/phone.util';
 import { ConfigModule } from 'src/config/config.module';
+import { RoleModule } from '../role/role.module';
 
 
 @Module({
@@ -40,6 +41,7 @@ import { ConfigModule } from 'src/config/config.module';
     MediaModule,
     ConfigModule,
     ZoneModule,
+    RoleModule,
   ],
 })
 

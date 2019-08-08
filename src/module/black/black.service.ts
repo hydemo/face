@@ -96,7 +96,11 @@ export class BlackService {
   }
 
   // 查询全部数据
-  async findAll(pagination: Pagination, checkResult: number): Promise<IList<IBlack>> {
+  async findAll(pagination: Pagination, type: number): Promise<IList<IBlack>> {
+    let checkResult: any = type
+    if (checkResult === 2) {
+      checkResult = { $in: [2, 4, 5] }
+    }
     const condition: any = { checkResult, isDelete: false };
     const list = await this.blackModel
       .find(condition)
