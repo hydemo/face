@@ -34,7 +34,7 @@ export class RoleController {
   @Get('/')
   @UserRoles(1)
   @ApiOperation({ title: '管理人员列表', description: '管理人员列表' })
-  async polices(
+  async managements(
     @Query() pagination: Pagination,
     @Request() req: any,
   ) {
@@ -42,17 +42,17 @@ export class RoleController {
   }
 
   @ApiOkResponse({
-    description: '管理人员列表',
+    description: '民警列表',
     isArray: true,
   })
-  @Get('/')
+  @Get('/police')
   @UserRoles(1)
-  @ApiOperation({ title: '管理人员列表', description: '管理人员列表' })
-  async managements(
+  @ApiOperation({ title: '民警列表', description: '民警列表' })
+  async polices(
     @Query() pagination: Pagination,
     @Request() req: any,
   ) {
-    return await this.roleService.findByManagement(pagination, req.user._id);
+    return await this.roleService.polices(pagination, req.user._id);
   }
 
   @Get('/tail')
