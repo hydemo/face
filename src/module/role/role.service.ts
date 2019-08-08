@@ -131,7 +131,7 @@ export class RoleService {
   }
 
   // 删除数据
-  async delete(id: string, userId: string, skip: number): Promise<IRole | null> {
+  async delete(id: string, userId: string): Promise<IRole | null> {
     const role: IRole | null = await this.roleModel.findById(id)
     if (!role) {
       return null
@@ -141,6 +141,27 @@ export class RoleService {
     // }
     const exist = await this.roleModel.findOne({ zone: role.zone, user: userId, isDelete: false, role: 1 })
     if (!exist) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: id, isDelete: false })
+    await Promise.all(faces.map(async face => {
+      return await this.faceService.delete(face)
+    }))
+    const checkResult: number = await this.faceService.checkResult(id)
+    return await this.roleModel.findByIdAndUpdate(id, { isDelete: true, checkResult });
+  }
+
+  // 删除数据
+  async deletePolice(id: string, userId: string): Promise<IRole | null> {
+    const role: IRole | null = await this.roleModel.findById(id)
+    if (!role) {
+      return null
+    }
+    // if (role.role === 1) {
+    //   throw new ApiException('物业无法删除', ApiErrorCode.NO_PERMISSION, 403);
+    // }
+    const exist = await this.roleModel.findOne({ user: userId, isDelete: false, role: 4 })
+    if (!exist || String(role.area) !== String(exist.area)) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: id, isDelete: false })

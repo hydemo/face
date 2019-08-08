@@ -78,8 +78,22 @@ export class RoleController {
     @Request() req: any,
     @Body() body: { skip: number },
   ) {
-    await this.roleService.delete(id, req.user._id, body.skip);
+    await this.roleService.delete(id, req.user._id);
     return { statusCode: 200, msg: '删除工作人员成功' };
+
+  }
+
+  @ApiOkResponse({
+    description: '删除民警',
+  })
+  @Delete('/:id/police')
+  @ApiOperation({ title: '删除民警', description: '删除民警' })
+  async deletePolice(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
+  ) {
+    await this.roleService.deletePolice(id, req.user._id);
+    return { statusCode: 200, msg: '删除民警' };
 
   }
 
