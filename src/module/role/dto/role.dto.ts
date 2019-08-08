@@ -136,6 +136,13 @@ export class CreateRoleByScanDTO {
   reviewer: string;
 }
 
+export class CreatePoliceByScanDTO {
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: 'key' })
+  readonly key: string;
+}
+
 
 
 

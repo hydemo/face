@@ -97,6 +97,19 @@ export class RoleController {
   }
 
   @ApiOkResponse({
+    description: '扫码添加民警',
+  })
+  @Post('/scan/police')
+  @ApiOperation({ title: '扫码添加民警', description: '扫码添加民警' })
+  async addPolice(
+    @Body() key: CreateRoleByScanDTO,
+    @Request() req: any,
+  ) {
+    await this.roleService.createPoliceByScan(key.key, req.user._id);
+    return { statusCode: 200, msg: '添加成功' };
+  }
+
+  @ApiOkResponse({
     description: '获取我的角色',
   })
   @Get('/me')
