@@ -400,6 +400,28 @@ export class CameraUtil {
         if (result.data.Code === 1) {
           return 'success';
         }
+        if (result.data.Code === 1106) {
+          const data = upData.data
+          const result = await axios({
+            method: 'post',
+            url: this.config.p2pUrl2,
+            data: {
+              Name: "personListRequest",
+              TimeStamp: data.TimeStamp,
+              Sign: data.Sign,
+              UUID: data.UUID,
+              Session: data.UUID,
+              Data: {
+                Action: 'addPerson',
+                PersonType: data.Data.PersonType,
+                PersonInfo: data.Data.PersonInfo
+              }
+            }
+          });
+          if (result.data.Result === 'ok') {
+            return 'success'
+          }
+        }
         switch (result.data.Data.Result) {
           case -3: code = 'success'
             break;
@@ -430,7 +452,7 @@ export class CameraUtil {
         }
         await this.p2pErrorService.create(error)
         await this.phoneUtil.sendP2PError()
-        return false
+        return 'error'
       }
       if (code === 'error') {
         const errorData = { count: 1, upData }
@@ -499,6 +521,28 @@ export class CameraUtil {
         if (result.data.Code === 1) {
           return 'success';
         }
+        if (result.data.Code === 1106) {
+          const data = upData.data
+          const result = await axios({
+            method: 'post',
+            url: this.config.p2pUrl2,
+            data: {
+              Name: "personListRequest",
+              TimeStamp: data.TimeStamp,
+              Sign: data.Sign,
+              UUID: data.UUID,
+              Session: data.UUID,
+              Data: {
+                Action: 'addPerson',
+                PersonType: data.Data.PersonType,
+                PersonInfo: data.Data.PersonInfo
+              }
+            }
+          });
+          if (result.data.Result === 'ok') {
+            return 'success'
+          }
+        }
         switch (result.data.Data.Result) {
           case -3: code = 'success'
             break;
@@ -519,7 +563,7 @@ export class CameraUtil {
 
       if (code === 'final' || (code === 'error' && count > 8)) {
         let face;
-        if (upData.type === 'add' || upData.type === 'delet') {
+        if (upData.type === 'add' || upData.type === 'delete') {
           face = upData.face._id
         } else {
           face = upData.face[0]._id
@@ -530,7 +574,7 @@ export class CameraUtil {
         }
         await this.p2pErrorService.create(error)
         await this.phoneUtil.sendP2PError()
-        return false
+        return 'error'
       }
       if (code === 'error') {
         const newErrorData = { count: count + 1, upData }
@@ -609,13 +653,5 @@ export class CameraUtil {
       // console.log(user, 'user')
       return 'exist'
     }
-
-    // if (result.data.ErrorCode === -11) {
-    //   fs.writeFileSync('1.txt', img)
-    //   console.log(user, 'user')
-    // }
-
-
-    // console.log(result.data, 'error')
   }
 }

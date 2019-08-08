@@ -82,13 +82,13 @@ export class CreatePoliceRole {
   @ApiModelProperty({ description: '用户' })
   readonly user: string;
 
-  @IsString()
+  @IsMongoId()
   @Type(() => String)
-  @ApiModelProperty({ description: '描述' })
-  readonly description: string;
+  @ApiModelProperty({ description: '添加人' })
+  readonly reviewer?: string;
 
   @IsNumber()
-  @IsEnum([1, 2, 3, 4, 5])
+  @IsEnum([4])
   @Type(() => Number)
   @ApiModelProperty({ description: '角色' })
   readonly role: number;

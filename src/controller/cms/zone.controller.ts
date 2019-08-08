@@ -53,10 +53,10 @@ export class CMSZoneController {
 
   @Get('/:id/roles')
   @ApiOkResponse({
-    description: '获取区域成功',
+    description: '获取管理员',
   })
-  @ApiCreatedResponse({ description: '获取区域' })
-  @ApiOperation({ title: '根据id获取区域信息', description: '根据id获取区域信息' })
+  @ApiCreatedResponse({ description: '获取管理员' })
+  @ApiOperation({ title: '获取管理员', description: '获取管理员' })
   async getRoleByZone(
     @Query() pagination: Pagination,
     @Param('id', new MongodIdPipe()) id: string,
@@ -66,10 +66,10 @@ export class CMSZoneController {
 
   @Post('/:id/roles')
   @ApiOkResponse({
-    description: '获取区域成功',
+    description: '添加管理员',
   })
-  @ApiCreatedResponse({ description: '获取区域' })
-  @ApiOperation({ title: '根据id获取区域信息', description: '根据id获取区域信息' })
+  @ApiCreatedResponse({ description: '添加管理员' })
+  @ApiOperation({ title: '添加管理员', description: '添加管理员' })
   async addManagement(
     @Body() role: CreateRoleDTO,
     @Param('id', new MongodIdPipe()) id: string,

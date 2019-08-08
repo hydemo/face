@@ -270,8 +270,6 @@ export class ScheduleService {
       await this.residentService.removeVisitor()
     });
 
-
-
     Schedule.scheduleJob(logRule, async () => {
       await this.logService.genLog()
     });

@@ -30,7 +30,6 @@ export class BlackController {
   @ApiCreatedResponse({ description: '添加黑名单' })
   @ApiOperation({ title: '添加黑名单', description: '添加黑名单' })
   async addBlack(
-    @Param('id', new MongodIdPipe()) id: string,
     @Body() black: CreateBlackDTO,
     @Request() req: any
   ) {

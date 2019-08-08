@@ -24,6 +24,8 @@ import { ZoneService } from '../zone/zone.service';
 import { IZone } from '../zone/interfaces/zone.interfaces';
 import { ZOCUtil } from 'src/utils/zoc.util';
 import { ConfigService } from 'src/config/config.service';
+import { IBlack } from '../black/interfaces/black.interfaces';
+import { BlackService } from '../black/black.service';
 
 interface IReceiver {
   id: string;
@@ -43,6 +45,7 @@ export class CallbackService {
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
     @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
     @Inject(ZoneService) private readonly zoneService: ZoneService,
+    @Inject(BlackService) private readonly blackService: BlackService,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
     private readonly mediaWs: MediaGateway,
@@ -175,6 +178,14 @@ export class CallbackService {
       const orbit: CreateOrbitDTO = { user: user._id, mode, isZOCPush, ZOCZip: zipname, ...stranger, upTime: Date.now() }
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
       await this.sendMessage(createOrbit, user, device)
+    } else if (Number(mode) === 1) {
+      const black: IBlack | null = await this.blackService.findById(userId)
+      if (!black) {
+        return
+      }
+      const orbit: CreateOrbitDTO = { user: black._id, mode, ...stranger }
+      const createOrbit: IOrbit = await this.orbitService.create(orbit);
+      // await this.sendBlackMessage(createOrbit, user, device)
     }
     return
   }

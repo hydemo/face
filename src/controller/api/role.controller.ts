@@ -34,6 +34,20 @@ export class RoleController {
   @Get('/')
   @UserRoles(1)
   @ApiOperation({ title: '管理人员列表', description: '管理人员列表' })
+  async polices(
+    @Query() pagination: Pagination,
+    @Request() req: any,
+  ) {
+    return await this.roleService.findByManagement(pagination, req.user._id);
+  }
+
+  @ApiOkResponse({
+    description: '管理人员列表',
+    isArray: true,
+  })
+  @Get('/')
+  @UserRoles(1)
+  @ApiOperation({ title: '管理人员列表', description: '管理人员列表' })
   async managements(
     @Query() pagination: Pagination,
     @Request() req: any,

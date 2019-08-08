@@ -40,6 +40,12 @@ export class RoleService {
   // 创建警察段
   async createPolice(role: CreatePoliceRole): Promise<IRole | null> {
     const creatRole = await this.roleModel.create(role);
+    const devices = await this.deviceService.findByCondition({ area: role.area })
+    const user: IUser | null = await this.userService.findById(role.user)
+    if (!user) {
+      throw new ApiException('用户不存在', ApiErrorCode.NO_EXIST, 406);
+    }
+    await this.addToDevice(devices, user, creatRole._id)
     return creatRole;
   }
 
@@ -75,13 +81,13 @@ export class RoleService {
       reviewer
     }
     const result = await this.roleModel.create(createRole);
-    await this.addToDevice(role.zone, user, result._id)
+    const devices: IDevice[] = await this.deviceService.findByCondition({ zone: role.zone })
+    await this.addToDevice(devices, user, result._id)
     return result
   }
 
   // 添加人员到设备
-  async addToDevice(zone: string, user: IUser, bondToObjectId: string) {
-    const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
+  async addToDevice(devices: IDevice[], user: IUser, bondToObjectId: string) {
     const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: 2 })
@@ -95,7 +101,7 @@ export class RoleService {
           pic: faceExist.pic,
           bondToObjectId,
           bondType: 'role',
-          zone: zone,
+          zone: device.zone,
           checkResult: 2,
           faceUrl: user.faceUrl,
         }
@@ -108,7 +114,7 @@ export class RoleService {
           checkResult: 1,
           bondToObjectId,
           bondType: 'role',
-          zone: zone,
+          zone: device.zone,
           // faceUrl: user.faceUrl
         }
         return await this.faceService.addOnePic(face, device, user, this.config.whiteMode, img)
@@ -158,7 +164,7 @@ export class RoleService {
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    const condition = { isDelete: false, zone, role: { $lt: 4 } }
+    const condition = { isDelete: false, zone, role: { $in: [1, 2, 3] } }
     const list: IRole[] = await this.roleModel
       .find(condition)
       .sort({ role: 1 })
@@ -170,7 +176,51 @@ export class RoleService {
       .exec()
     const total = await this.roleModel.countDocuments(condition);
     return { list, total };
+  }
 
+  // 创建数据
+  async createPoliceByScan(key: string, reviewer: string): Promise<IRole> {
+    const user: IUser = await this.weixinUtil.scan(key)
+    const userRole: IRole | null = await this.roleModel.findOne({ isDelete: false, role: 4, user: reviewer })
+    if (!userRole) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const exist: number = await this.roleModel.countDocuments({ user: user._id, role: 4, area: userRole.area, isDelete: false })
+    if (exist) {
+      throw new ApiException('已在该片区', ApiErrorCode.APPLICATION_EXIST, 406);
+    }
+    const createRole: CreatePoliceRole = {
+      user: user._id,
+      role: 4,
+      checkResult: 4,
+      reviewer,
+      area: userRole.area
+    }
+    const result = await this.roleModel.create(createRole);
+    const devices = await this.deviceService.findByCondition({ area: userRole.area })
+    await this.addToDevice(devices, user, result._id)
+    return result
+  }
+
+
+  // 查询全部数据
+  async polices(pagination: Pagination, user: string) {
+    const userRole: IRole | null = await this.roleModel.findOne({ isDelete: false, role: 4, user })
+    if (!userRole) {
+      return { list: [], total: 0 }
+    }
+    const condition = { isDelete: false, area: userRole.area, role: 4 }
+    const list: IRole[] = await this.roleModel
+      .find(condition)
+      .sort({ role: 1 })
+      .limit(pagination.limit)
+      .skip((pagination.offset - 1) * pagination.limit)
+      .populate({ path: 'user', model: 'user', select: 'username faceUrl phone' })
+      .populate({ path: 'reviewer', model: 'user', select: 'username' })
+      .lean()
+      .exec()
+    const total = await this.roleModel.countDocuments(condition);
+    return { list, total };
   }
 
   // 查询全部数据

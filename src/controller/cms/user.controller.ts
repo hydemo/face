@@ -81,8 +81,7 @@ export class CMSUserController {
   ) {
     const role: CreatePoliceRole = {
       user: id,
-      description: '管理员',
-      role: 0,
+      role: 4,
       checkResult: 2,
       area: area.area,
     }
