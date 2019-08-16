@@ -196,7 +196,7 @@ export class ZoneService {
     return await this.zoneModel.create(create);
   }
   // 获取子集
-  async getChildren(children: IChildren, parent: IZone, pno: number, code: string): Promise<IChildren> {
+  async getChildren(children: IChildren, parent: IZone, pno: number, code: string, layer: number): Promise<IChildren> {
     const result: any = await this.socUtil.qrcodeAddress(code, String(pno))
     const list: IZoneProfile[] = result.list
     const page = result.page
@@ -211,8 +211,8 @@ export class ZoneService {
       const subZone: IZone = await this.createSubZone(child, parent)
       children.children.push(String(subZone._id))
       let subChildren: IChildren = { children: [], hasPartition: false }
-      if (parent.zoneLayer < 1) {
-        subChildren = await this.getChildren(subChildren, subZone, 1, child.dzbm)
+      if (parent.zoneLayer < layer - 1) {
+        subChildren = await this.getChildren(subChildren, subZone, 1, child.dzbm, layer)
       }
       if (subChildren.hasPartition) {
         await this.partition(subZone._id)
@@ -223,7 +223,7 @@ export class ZoneService {
       await subZone.save()
     }))
     if (Number(totalPage) > pno) {
-      return this.getChildren(children, parent, pno + 1, code)
+      return this.getChildren(children, parent, pno + 1, code, layer)
     }
     return children
   }
@@ -231,7 +231,7 @@ export class ZoneService {
   // 二维码添加小区
   async addByQrcode(createZone: CreateZoneByScanDTO) {
     const result: any = await this.socUtil.qrcodeAddress(createZone.code, '1')
-    // const detail: IDetail = await this.socUtil.address(createZone.code)
+    const detail: IDetail = await this.socUtil.address(createZone.code)
     // console.log(detail, 'detail')
     const list: IZoneProfile[] = result.list
     const page = result.page
@@ -250,7 +250,7 @@ export class ZoneService {
       profile: parentProfile,
       buildingType: parentProfile.dzsx,
       area: createZone.area,
-      // detail,
+      detail,
       propertyCo: {
         name: createZone.propertyCoName,
         contact: createZone.contact,
@@ -262,7 +262,7 @@ export class ZoneService {
     const createParent: IZone = await new this.zoneModel(parent);
     createParent.zoneId = createParent._id;
     await createParent.save()
-    const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, 1, createZone.code)
+    const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, 1, createZone.code, createZone.layer)
     createParent.children = children.children
     createParent.hasPartition = children.hasPartition
     await this.zoneModel.findByIdAndUpdate(createParent._id, { children: children.children, hasPartition: children.hasPartition })

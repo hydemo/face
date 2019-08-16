@@ -26,7 +26,7 @@ export class LoggingInterceptor implements NestInterceptor {
       delete body.img;
       delete body.imgex;
       Logger.log(body);
-      if (url.indexOf('/cms') === -1) {
+      if (url.indexOf('/cms') === -1 && request.user) {
         client.hincrby('Log', 'total', 1)
         client.hincrby('Log_IP', String(request.user._id), 1)
       }
