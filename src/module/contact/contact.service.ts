@@ -74,7 +74,7 @@ export class ContactService {
       .find(condition)
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
-      .populate({ path: 'contact', model: 'user', select: 'username faceUrl cardNumber' })
+      .populate({ path: 'contact', model: 'user', select: 'username faceUrl cardNumber phone' })
       .lean()
       .exec();
     console.log(condition, list, pagination)
