@@ -39,6 +39,10 @@ export class ContactService {
     } else if (createUser.isPhoneVerify) {
       throw new ApiException('身份证已被注册,请通过扫一扫添加', ApiErrorCode.PHONE_EXIST, 406);
     }
+    const exist = await this.contactModel.findOne({ user, contact: createUser._id })
+    if (exist) {
+      throw new ApiException('联系人已存在', ApiErrorCode.QRCODE_ERROR, 406);
+    }
     return await this.contactModel.create({ user, contact: createUser._id })
   }
 
@@ -47,6 +51,10 @@ export class ContactService {
     const contact = await this.weixinUtil.scan(key)
     if (contact.type !== 'user') {
       throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
+    }
+    const exist = await this.contactModel.findOne({ user, contact: contact._id })
+    if (exist) {
+      throw new ApiException('用户已存在', ApiErrorCode.QRCODE_ERROR, 406);
     }
     return await this.contactModel.create({
       contact: contact._id,
