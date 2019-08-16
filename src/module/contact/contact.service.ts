@@ -66,10 +66,10 @@ export class ContactService {
       .find(condition)
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
-      .sort({ isDone: -1 })
-      .populate({ path: 'contact', model: 'user', select: 'username faceUrl' })
+      .populate({ path: 'contact', model: 'user', select: 'username faceUrl cardNumber' })
       .lean()
       .exec();
+    console.log(condition, list, pagination)
     const total = await this.contactModel.countDocuments(condition);
     return { list, total };
   }
