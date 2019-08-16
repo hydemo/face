@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { ResidentService } from './resident.service';
-import { residentsProviders } from './resident.providers';
+import { SchoolService } from './school.service';
+import { schoolsProviders } from './school.providers';
 import { DatabaseModule } from 'src/database/database.module';
 import { ZoneModule } from '../zone/zone.module';
 import { UserModule } from '../users/user.module';
@@ -18,16 +18,16 @@ import { CryptoUtil } from 'src/utils/crypto.util';
 
 @Module({
   providers: [
-    ResidentService,
+    SchoolService,
     CameraUtil,
     WeixinUtil,
     PhoneUtil,
     ZOCUtil,
     SOCUtil,
     CryptoUtil,
-    ...residentsProviders
+    ...schoolsProviders
   ],
-  exports: [ResidentService],
+  exports: [SchoolService],
   imports: [
     DatabaseModule,
     ZoneModule,
@@ -40,4 +40,4 @@ import { CryptoUtil } from 'src/utils/crypto.util';
   ],
 })
 
-export class ResidentModule { }
+export class SchoolModule { }

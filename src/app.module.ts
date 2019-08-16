@@ -57,6 +57,10 @@ import { LogController } from './controller/api/log.controller';
 import { BlackController } from './controller/api/black.controller';
 import { CMSAreaController } from './controller/cms/area.controller';
 import { AreaModule } from './module/area/area.module';
+import { ContactModule } from './module/contact/contact.module';
+import { ContactController } from './controller/api/contact.controller';
+import { SchoolModule } from './module/school/school.module';
+import { SchoolController } from './controller/api/school.controller';
 
 @Module({
   imports: [
@@ -83,6 +87,8 @@ import { AreaModule } from './module/area/area.module';
     P2PErrorModule,
     LogRecordModule,
     AreaModule,
+    ContactModule,
+    SchoolModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => configService.redis,
@@ -123,7 +129,9 @@ import { AreaModule } from './module/area/area.module';
     TaskController,
     MediaController,
     LogController,
-    BlackController
+    BlackController,
+    ContactController,
+    SchoolController,
   ]
 })
 export class AppModule { }

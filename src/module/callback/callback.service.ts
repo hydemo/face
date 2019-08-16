@@ -119,7 +119,7 @@ export class CallbackService {
       return
     }
     img = await this.qiniuUtil.uploadB64(imgBase)
-    if (device.media && Number(mode) !== 1) {
+    if (device.media && Number(mode) !== 2) {
       await this.mediaWs.sendMessage(String(device.media), { type: String(body.WBMode), imgUrl: img })
     }
     if (imgexBase) {
@@ -142,6 +142,9 @@ export class CallbackService {
       imgexUrl: imgex,
       attribute,
       ...profile
+    }
+    if (profile.compareResult < 0.8) {
+      mode = 0
     }
 
     if (Number(mode) === 0) {

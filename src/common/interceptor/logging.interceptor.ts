@@ -28,7 +28,7 @@ export class LoggingInterceptor implements NestInterceptor {
       Logger.log(body);
       if (url.indexOf('/cms') === -1) {
         client.hincrby('Log', 'total', 1)
-        client.hincrby('Log_IP', ip, 1)
+        client.hincrby('Log_IP', String(request.user._id), 1)
       }
     }
     const now = Date.now();

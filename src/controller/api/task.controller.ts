@@ -39,29 +39,6 @@ export class TaskController {
     return this.taskService.findByUser(pagination, req.user._id);
   }
 
-  // @Get('/zones/:zoneId')
-  // @ApiOkResponse({
-  //   description: '根据区域查询任务列表',
-  // })
-  // @ApiCreatedResponse({ description: '获取任务' })
-  // @ApiOperation({ title: '根据区域查询任务列表', description: '根据区域查询任务列表' })
-  // async findByZoneId(@Param('id', new MongodIdPipe()) zoneId: string) {
-  //   const data: ITask[] = await this.taskService.findByZoneId(zoneId);
-  //   return { statusCode: 200, msg: '获取任务成功', data };
-  // }
-
-  // @Get('/:id')
-  // @ApiOkResponse({
-  //   description: '获取任务成功',
-  // })
-  // @ApiCreatedResponse({ description: '获取任务' })
-  // @ApiOperation({ title: '根据id获取任务信息', description: '根据id获取任务信息' })
-  // async findById(@Param('id', new MongodIdPipe()) id: string) {
-  //   const data: ITask = await this.taskService.findById(id);
-  //   return { statusCode: 200, msg: '获取任务成功', data };
-  // }
-
-
   @Put('/:id/done')
   @ApiOkResponse({
     description: '完成任务',

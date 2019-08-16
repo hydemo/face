@@ -7,7 +7,6 @@ import {
   ResidentDTO,
   CreateFamilyDTO,
   CreateFamilyByScanDTO,
-  CreateVisitorByScanDTO,
   AgreeFamilyDTO,
   UpdateFamilyDTO,
   AgreeVisitorDTO,
@@ -47,7 +46,7 @@ export class ResidentService {
     @Inject(UserService) private readonly userService: UserService,
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
-    @Inject(forwardRef(() => FaceService)) private readonly faceService: FaceService,
+    @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
     @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
     @Inject(RoleService) private readonly roleService: RoleService,
@@ -92,10 +91,10 @@ export class ResidentService {
   }
 
   // 发送待审核通知
-  async sendApplicationMessage(applicant: IUser, house: string, openId: string) {
+  async sendApplicationMessage(applicant: IUser, house: string, openId: string, type: string) {
     const message: ApplicationDTO = {
       first: {
-        value: `您收到一条${house}的家人申请`,
+        value: `您收到一条${house}的${type}申请`,
         color: "#173177"
       },
       keyword1: {
@@ -315,7 +314,7 @@ export class ResidentService {
       isDelete: false,
       isDisable: false,
       type: 'owner',
-      address: resident.address,
+      address: resident.address._id,
     })
 
     // 同步人脸到设备
@@ -332,7 +331,7 @@ export class ResidentService {
   }
 
   // 添加家人
-  async addFamily(isMonitor: boolean, isPush: boolean, user: IUser, zone: IZone, owner: string, reviewer?: string, ): Promise<IResident> {
+  async addFamily(isMonitor: boolean, isPush: boolean, user: IUser, zone: IZone, owner: string, reviewer?: string): Promise<IResident> {
     const resident: ResidentDTO = {
       zone: zone.zoneId,
       address: zone._id,
@@ -442,7 +441,7 @@ export class ResidentService {
     await this.residentModel.create(resident);
 
     const reviewers = await this.getReviewers(family.address)
-    return reviewers.map(reviewer => this.sendApplicationMessage(user, zone.houseNumber, reviewer.openId))
+    return reviewers.map(reviewer => this.sendApplicationMessage(user, zone.houseNumber, reviewer.openId, '家人'))
   }
 
   // 访客申请
@@ -469,7 +468,7 @@ export class ResidentService {
     await this.residentModel.create(resident);
 
     const reviewers = await this.getReviewers(visitor.address)
-    return reviewers.map(reviewer => this.sendApplicationMessage(user, zone.houseNumber, reviewer.openId))
+    return reviewers.map(reviewer => this.sendApplicationMessage(user, zone.houseNumber, reviewer.openId, '访客'))
   }
 
 
@@ -728,7 +727,7 @@ export class ResidentService {
     })
     const message: ApplicationDTO = {
       first: {
-        value: `您提交的${resident.address.houseNumber} ${resident.tpye === 'family' ? '家人' : '访客'} 申请已审核`,
+        value: `您提交的${resident.address.houseNumber} ${resident.type === 'family' ? '家人' : '访客'} 申请已审核`,
         color: "#173177"
       },
       keyword1: {

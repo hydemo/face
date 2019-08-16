@@ -119,8 +119,7 @@ export class LogRecordService {
   }
   // 生成当天数据
   async genLog() {
-    const preDate = moment().add(-2, 'd').format('YYYY-MM-DD')
-    const now = moment().add(-1, 'd').format('YYYY-MM-DD')
+    const preDate = moment().add(-1, 'd').format('YYYY-MM-DD')
     const preLog: ILogRecord | null = await this.logRecordModel.findOne({ date: preDate })
     const client = this.redis.getClient()
     const userCount = Number(await client.hget(this.config.LOG, this.config.LOG_USER))
@@ -240,7 +239,7 @@ export class LogRecordService {
     const condition: any = this.getCondition(type)
     const data: IUploadRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ data: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1 })
+      .select({ date: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1 })
       .sort({ date: 1 })
       .lean()
       .exec()
@@ -264,7 +263,7 @@ export class LogRecordService {
     }
     const data: IUploadRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ data: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1 })
+      .select({ date: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1 })
       .sort({ date: 1 })
       .lean()
       .exec()

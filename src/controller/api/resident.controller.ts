@@ -12,10 +12,11 @@ import { Pagination } from 'src/common/dto/pagination.dto';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { ResidentService } from 'src/module/resident/resident.service';
 import { CreateResidentDTO, CreateFamilyDTO, AgreeVisitorDTO, AgreeFamilyDTO, CreateFamilyByScanDTO, CreateVisitorByScanDTO, UpdateFamilyDTO, CreateVisitorByOwnerDTO } from 'src/module/resident/dto/resident.dto';
+import { Roles } from 'src/common/decorator/roles.decorator';
 
 
 @ApiUseTags('residents')
-@UseGuards(AuthGuard())
+@UseGuards(AuthGuard(), RolesGuard)
 @ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/residents')
@@ -40,6 +41,7 @@ export class ResidentController {
     return { statusCode: 200, msg: '申请成功' };
   }
 
+  @Roles('4')
   @Get('/address/:id')
   @ApiOperation({ title: '根据地址获取住户信息', description: '根据地址获取住户信息' })
   getResidentsByAddress(
@@ -49,6 +51,8 @@ export class ResidentController {
     return this.residentService.getResidentByAddress(id);
   }
 
+
+  @Roles('4')
   @Get('/cardNumber')
   @ApiOperation({ title: '根据身份证获取住户信息', description: '根据身份证获取住户信息' })
   getResidentsByCardNumber(
@@ -111,6 +115,8 @@ export class ResidentController {
     return this.residentService.getApplications(pagination, req.user._id, 'visitor');
   }
 
+
+  @Roles('1')
   @ApiOkResponse({
     description: '业主审核列表',
     isArray: true,
@@ -271,6 +277,8 @@ export class ResidentController {
     return { statusCode: 200, msg: '接受常住人申请成功' };
   }
 
+
+  @Roles('1')
   @Put('/applications/:id/agree-owner')
   @ApiOkResponse({
     description: '接受业主申请',
@@ -284,6 +292,8 @@ export class ResidentController {
     return { statusCode: 200, msg: '审核成功' };
   }
 
+
+  @Roles('1')
   @Put('/applications/:id/reject-owner')
   @ApiOkResponse({
     description: '拒绝业主申请',

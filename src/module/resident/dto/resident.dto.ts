@@ -68,7 +68,7 @@ export class ResidentDTO {
 
   @IsDate()
   @Type(() => Date)
-  @ApiModelProperty({ description: '申请时间' })
+  @ApiModelProperty({ description: '过期时间' })
   readonly expireTime?: Date;
 
   @IsBoolean()
@@ -144,7 +144,7 @@ export class CreateVisitorByOwnerDTO {
   @IsNumber()
   @Type(() => Number)
   @Max(7)
-  @ApiModelProperty({ description: '申请时间' })
+  @ApiModelProperty({ description: '申请天数' })
   readonly expireTime: number;
 }
 

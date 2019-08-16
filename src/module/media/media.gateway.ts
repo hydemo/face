@@ -37,11 +37,11 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!media) {
       return
     }
-    const index = this.connectedMedias.findIndex(v => v.id === String(media.id))
+    const index = this.connectedMedias.findIndex(v => v.id === String(media._id))
     if (index < 0) {
-      this.connectedMedias = [...this.connectedMedias, { id: String(media.id), client }];
+      this.connectedMedias = [...this.connectedMedias, { id: String(media._id), client }];
     } else {
-      this.connectedMedias[index] = { id: String(media.id), client }
+      this.connectedMedias[index] = { id: String(media._id), client }
     }
     client.emit('connect', '连接成功')
   }

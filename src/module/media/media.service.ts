@@ -71,6 +71,6 @@ export class MediaService {
       throw new ApiException('密码有误', ApiErrorCode.PASSWORD_INVALID, 406);
     }
     const token = await this.jwtService.sign({ id: media._id, type: 'media' })
-    return await this.mediaModel.findByIdAndUpdate(media._id, { token });
+    await this.mediaModel.findByIdAndUpdate(media._id, { token });
   }
 }
