@@ -236,7 +236,12 @@ export class ZoneService {
     const list: IZoneProfile[] = result.list
     const page = result.page
     const count = Number(page.tcount)
-    const parentProfile: IZoneProfile = list[0];
+    let parentProfile;
+    list.map(profile => {
+      if (profile.dzbm === createZone.code) {
+        parentProfile = profile
+      }
+    })
     const parent: ZoneDTO = {
       name: createZone.name,
       nameLength: createZone.name.length,
