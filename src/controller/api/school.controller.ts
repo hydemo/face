@@ -129,7 +129,7 @@ export class SchoolController {
   // }
 
 
-  @Roles('1')
+  @Roles('5')
   @ApiOkResponse({
     description: '班主任审核列表',
     isArray: true,
@@ -253,7 +253,7 @@ export class SchoolController {
   }
 
 
-  @Roles('1')
+  @Roles('5')
   @Put('/applications/:id/agree-owner')
   @ApiOkResponse({
     description: '接受班主任申请',
@@ -268,7 +268,7 @@ export class SchoolController {
   }
 
 
-  @Roles('1')
+  @Roles('5')
   @Put('/applications/:id/reject-owner')
   @ApiOkResponse({
     description: '拒绝班主任申请',
