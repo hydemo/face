@@ -312,8 +312,9 @@ export class SchoolController {
   @ApiOperation({ title: '获取审核列表', description: '获取审核列表' })
   applications(
     @Query() pagination: Pagination,
+    @Query('checkResult') checkResult: number,
     @Request() req: any
   ) {
-    return this.schoolService.myReviews(pagination, req.user._id);
+    return this.schoolService.myReviews(pagination, req.user._id, Number(checkResult));
   }
 }

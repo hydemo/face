@@ -520,9 +520,13 @@ export class SchoolService {
   }
 
   // 我的待审列表
-  async myReviews(pagination: Pagination, user: string): Promise<IList<ISchool>> {
+  async myReviews(pagination: Pagination, user: string, type: number): Promise<IList<ISchool>> {
     const schools = await this.getMySchools(user)
-    const condition: any = { address: { $in: schools }, isDelete: false, checkResult: 1, type: { $ne: 'owner' } };
+    let checkResult: any = type
+    if (type === 2) {
+      checkResult = { $in: [2, 4, 5] }
+    }
+    const condition: any = { address: { $in: schools }, isDelete: false, checkResult, type: { $ne: 'owner' } };
     const list: ISchool[] = await this.schoolModel
       .find(condition)
       .limit(pagination.limit)
@@ -679,7 +683,7 @@ export class SchoolService {
    */
 
   // 班主任管理列表
-  async ownerApplications(pagination: Pagination, user: string, checkResult: number) {
+  async ownerApplications(pagination: Pagination, user: string, type: number) {
     if (!pagination.zone) {
       return { list: [], total: 0 }
     }
@@ -688,11 +692,11 @@ export class SchoolService {
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    let check: any = checkResult
-    if (checkResult === 2) {
-      check = { $in: [2, 4, 5] }
+    let checkResult: any = type
+    if (type === 2) {
+      checkResult = { $in: [2, 4, 5] }
     }
-    const condition = { isDelete: false, type: 'owner', zone, checkResult: check, isRent: { $exists: false } }
+    const condition = { isDelete: false, type: 'owner', zone, checkResult, isRent: { $exists: false } }
     const list: ISchool[] = await this.schoolModel
       .find(condition)
       .limit(pagination.limit)
