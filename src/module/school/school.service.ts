@@ -125,7 +125,7 @@ export class SchoolService {
   // 班主任存在确认
   async hasOwner(address: string) {
     return await this.schoolModel
-      .findOne({ address, isDelete: false, isDisable: false, checkResult: { $in: [2, 4, 5] }, type: 'owner' })
+      .findOne({ address, isDelete: false, checkResult: { $in: [2, 4, 5] }, type: 'owner' })
       .populate({ path: 'user', model: 'user' })
       .exec()
   }
@@ -134,7 +134,7 @@ export class SchoolService {
   // 是否是班主任本人
   async isOwner(address: string, user: string) {
     const owner: ISchool | null = await this.schoolModel
-      .findOne({ user, address, isDelete: false, isDisable: false, type: 'owner', checkResult: { $in: [2, 4, 5] } })
+      .findOne({ user, address, isDelete: false, type: 'owner', checkResult: { $in: [2, 4, 5] } })
     if (!owner) {
       throw new ApiException('无权限操作该教室', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -281,7 +281,6 @@ export class SchoolService {
     const otherApplications: ISchool[] = await this.schoolModel.find({
       checkResult: 1,
       isDelete: false,
-      isDisable: false,
       type: 'owner',
       address: headTeacher.address._id,
     })
