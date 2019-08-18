@@ -685,7 +685,7 @@ export class SchoolService {
       return { list: [], total: 0 }
     }
     const zone = pagination.zone;
-    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 1, user, zone })
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 5, user, zone })
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -713,7 +713,7 @@ export class SchoolService {
     if (headTeacher.type !== 'owner') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    const canActive = await this.roleService.checkRoles({ user, isDelete: false, role: 1, zone: headTeacher.zone })
+    const canActive = await this.roleService.checkRoles({ user, isDelete: false, role: 5, zone: headTeacher.zone })
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -726,7 +726,7 @@ export class SchoolService {
     if (headTeacher.type !== 'owner') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    const canActive = await this.roleService.checkRoles({ user, isDelete: false, role: 1, zone: headTeacher.zone })
+    const canActive = await this.roleService.checkRoles({ user, isDelete: false, role: 5, zone: headTeacher.zone })
     if (!canActive) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
