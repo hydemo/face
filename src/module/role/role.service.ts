@@ -304,6 +304,7 @@ export class RoleService {
     let worker = [];
     let rent = [];
     let isAdmin = false;
+    let affairOffice = []
     const roles: any = await this.roleModel.aggregate([
       { $match: cond },
       { $group: { _id: '$role', zones: { $push: '$zone' } } },
@@ -340,20 +341,31 @@ export class RoleService {
           break;
         case 3: guard = role.zones || [];
           break;
-        // case 4: {
-        //   owner = await Promise.all(role.zones.map(async zone => {
-        //     const rentCount = await this.roleModel.countDocuments({ zone: zone._id, role: 5, isDelete: false })
-        //     return { ...zone, isRent: rentCount > 0 }
-        //   }))
-        // };
-        //   break;
-        // case 5: rent = role.zones || [];
-        //   break;
+        case 5: {
+          affairOffice = await Promise.all(role.zones.map(async zone => {
+            const total = await this.zoneService.countByCondition({
+              zoneId: zone._id,
+              zoneLayer: 2
+            })
+            const ownerCount = await this.zoneService.countByCondition({
+              zoneId: zone._id,
+              zoneLayer: 2,
+              owner: { $exists: 1 }
+            })
+            const workerCount = await this.roleModel.countDocuments({
+              zone: zone._id,
+              isDelete: false,
+              role: { $in: [2, 3, 5] }
+            })
+            return { ...zone, total, ownerCount, workerCount }
+          }))
+        };
+          break;
         default:
           break;
       }
     }));
-    return { guard, management, worker, isAdmin }
+    return { guard, management, worker, isAdmin, affairOffice }
   }
 
   async checkRoles(condition: any) {

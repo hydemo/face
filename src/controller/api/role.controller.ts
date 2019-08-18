@@ -15,6 +15,7 @@ import { CreateRoleByScanDTO } from 'src/module/role/dto/role.dto';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
 import { UserRoles } from 'src/common/decorator/roles.decorator';
 import { ResidentService } from 'src/module/resident/resident.service';
+import { SchoolService } from 'src/module/school/school.service';
 
 @ApiUseTags('roles')
 @ApiBearerAuth()
@@ -25,6 +26,7 @@ export class RoleController {
   constructor(
     @Inject(RoleService) private roleService: RoleService,
     @Inject(ResidentService) private residentService: ResidentService,
+    @Inject(SchoolService) private schoolService: SchoolService,
   ) { }
 
   @ApiOkResponse({
@@ -136,6 +138,18 @@ export class RoleController {
     const owner = await this.residentService.getMyOwnerHouses(req.user._id)
     const data = await this.roleService.myRoles(req.user._id);
     const police = await this.roleService.getPoliceArea(req.user._id)
-    return { statusCode: 200, data: { ...data, police, hasApplication: applications.length > 0, isFamily: myHouses.length > 0, owner } };
+    const teacher = await this.schoolService.isTeacher(req.user._id)
+    const parent = await this.schoolService.isParent(req.user._id)
+    return {
+      statusCode: 200, data: {
+        ...data,
+        police,
+        hasApplication: applications.length > 0,
+        isFamily: myHouses.length > 0,
+        owner,
+        teacher,
+        parent,
+      }
+    };
   }
 }

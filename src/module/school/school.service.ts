@@ -140,6 +140,18 @@ export class SchoolService {
     }
   }
 
+  // 是否是班主任
+  async isTeacher(user: string) {
+    const teacherCount = await this.schoolModel.countDocuments({ user, isDelete: false, type: 'owner' })
+    return teacherCount > 0
+  }
+
+  // 是否是家长
+  async isParent(user: string) {
+    const teacherCount = await this.schoolModel.countDocuments({ type: 'student', isDelete: false, 'parent.user': user })
+    return teacherCount > 0
+  }
+
   // 是否家长或者班主任
   isParentOrHeadTeacher(student: ISchool, user: string) {
     let isParent = false
