@@ -772,7 +772,10 @@ export class SchoolService {
 
   // 获取已申请教室列表
   async getApplications(pagination: Pagination, userId: string, type: string): Promise<IList<ISchool>> {
-    const condition: any = { type, isDelete: false, user: userId };
+    let condition: any = { type, isDelete: false, user: userId };
+    if (type === 'student') {
+      condition = { type, isDelete: false, 'parent.user': userId }
+    }
     const list: ISchool[] = await this.schoolModel
       .find(condition)
       .limit(pagination.limit)
