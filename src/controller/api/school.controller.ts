@@ -231,8 +231,8 @@ export class SchoolController {
   @ApiOperation({ title: '生成链接', description: '生成链接' })
   async getVisitorLink(
     @Query('address', new MongodIdPipe()) address: string,
-    @Query('type', new MongodIdPipe()) type: string,
-    @Query('name', new MongodIdPipe()) name: string,
+    @Query('type') type: string,
+    @Query('name') name: string,
     @Request() req: any
   ) {
     const data = await this.schoolService.getLink(address, req.user, name, type);
