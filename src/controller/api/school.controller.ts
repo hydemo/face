@@ -96,10 +96,10 @@ export class SchoolController {
   @ApiOperation({ title: '我的申请列表', description: '我的申请列表' })
   headTeacherApplications(
     @Query() pagination: Pagination,
-    @Query() type: string,
+    @Query() applicationType: string,
     @Request() req: any
   ) {
-    return this.schoolService.getApplications(pagination, req.user._id, type);
+    return this.schoolService.getApplications(pagination, req.user._id, applicationType);
   }
 
   // @ApiOkResponse({
