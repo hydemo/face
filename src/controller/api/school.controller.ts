@@ -88,32 +88,45 @@ export class SchoolController {
     return { statusCode: 200, msg: '申请成功' };
   }
 
-
   @ApiOkResponse({
-    description: '我的学生申请列表',
+    description: '我的申请列表',
     isArray: true,
   })
-  @Get('/applications/student')
-  @ApiOperation({ title: '我的学生申请列表', description: '我的学生申请列表' })
-  studentApplications(
+  @Get('/applications')
+  @ApiOperation({ title: '我的申请列表', description: '我的申请列表' })
+  headTeacherApplications(
     @Query() pagination: Pagination,
+    @Query() type: string,
     @Request() req: any
   ) {
-    return this.schoolService.getApplications(pagination, req.user._id, 'student');
+    return this.schoolService.getApplications(pagination, req.user._id, type);
   }
 
-  @ApiOkResponse({
-    description: '我的访客申请列表',
-    isArray: true,
-  })
-  @Get('/applications/visitor')
-  @ApiOperation({ title: '我的访客申请列表', description: '我的访客申请列表' })
-  visitorApplications(
-    @Query() pagination: Pagination,
-    @Request() req: any
-  ) {
-    return this.schoolService.getApplications(pagination, req.user._id, 'visitor');
-  }
+  // @ApiOkResponse({
+  //   description: '我的学生申请列表',
+  //   isArray: true,
+  // })
+  // @Get('/applications/student')
+  // @ApiOperation({ title: '我的学生申请列表', description: '我的学生申请列表' })
+  // studentApplications(
+  //   @Query() pagination: Pagination,
+  //   @Request() req: any
+  // ) {
+  //   return this.schoolService.getApplications(pagination, req.user._id, 'student');
+  // }
+
+  // @ApiOkResponse({
+  //   description: '我的访客申请列表',
+  //   isArray: true,
+  // })
+  // @Get('/applications/visitor')
+  // @ApiOperation({ title: '我的访客申请列表', description: '我的访客申请列表' })
+  // visitorApplications(
+  //   @Query() pagination: Pagination,
+  //   @Request() req: any
+  // ) {
+  //   return this.schoolService.getApplications(pagination, req.user._id, 'visitor');
+  // }
 
 
   @Roles('1')
