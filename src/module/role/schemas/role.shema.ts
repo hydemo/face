@@ -8,7 +8,7 @@ export const RoleSchema = new mongoose.Schema(
     user: ObjectId,
     // 区域
     zone: ObjectId,
-    // 角色 1:管理 2:工作人员 3:保安 4:民警 5:教务
+    // 角色 1:管理 2:工作人员 3:保安 4:民警 
     role: { type: Number, enum: [1, 2, 3, 4, 5] },
     // 轨迹
     description: String,

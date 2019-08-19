@@ -205,6 +205,30 @@ export class RoleService {
     return { list, total };
   }
 
+  // 查询全部数据
+  async findAffairOffice(pagination: Pagination, user: string) {
+    if (!pagination.zone) {
+      return { list: [], total: 0 }
+    }
+    const zone = pagination.zone;
+    const canActive = await this.checkRoles({ isDelete: false, role: 5, user, zone })
+    if (!canActive) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const condition = { isDelete: false, zone, role: { $in: [2, 3, 5] } }
+    const list: IRole[] = await this.roleModel
+      .find(condition)
+      .sort({ role: -1 })
+      .limit(pagination.limit)
+      .skip((pagination.offset - 1) * pagination.limit)
+      .populate({ path: 'user', model: 'user', select: 'username faceUrl phone' })
+      .populate({ path: 'reviewer', model: 'user', select: 'username' })
+      .lean()
+      .exec()
+    const total = await this.roleModel.countDocuments(condition);
+    return { list, total };
+  }
+
   // 创建数据
   async createPoliceByScan(key: string, reviewer: string): Promise<IRole> {
     const user: IUser = await this.weixinUtil.scan(key)

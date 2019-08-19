@@ -43,6 +43,21 @@ export class RoleController {
     return await this.roleService.findByManagement(pagination, req.user._id);
   }
 
+
+  @ApiOkResponse({
+    description: '学校人员管理',
+    isArray: true,
+  })
+  @Get('/affairOffice')
+  @UserRoles(1)
+  @ApiOperation({ title: '学校人员管理', description: '学校人员管理' })
+  async affairOffice(
+    @Query() pagination: Pagination,
+    @Request() req: any,
+  ) {
+    return await this.roleService.findAffairOffice(pagination, req.user._id);
+  }
+
   @ApiOkResponse({
     description: '民警列表',
     isArray: true,
