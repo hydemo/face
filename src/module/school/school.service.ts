@@ -514,7 +514,7 @@ export class SchoolService {
       }
     })
     if (!isParent) {
-      await this.schoolModel.findByIdAndUpdate(id, { $push: { parentType, user: String(parent._id) } })
+      await this.schoolModel.findByIdAndUpdate(id, { $push: { parent: { parentType, user: String(parent._id) } } })
     }
     return
   }
