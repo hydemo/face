@@ -199,7 +199,7 @@ export class SchoolController {
   }
 
 
-  @Get('/students')
+  @Get('/children')
   @ApiOkResponse({
     description: '小孩列表',
   })
