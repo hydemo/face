@@ -508,8 +508,8 @@ export class SchoolService {
     await this.isParentOrHeadTeacher(student, String(user))
 
     let isParent = false
-    student.parent.map(parent => {
-      if (parent.user === String(user)) {
+    student.parent.map(par => {
+      if (par.user === String(parent._id)) {
         isParent = true
       }
     })
