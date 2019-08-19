@@ -889,12 +889,12 @@ export class SchoolService {
       let isContain = false
       result.map(re => {
         if (String(re.address._id) === String(child.address._id)) {
-          re.users.push(child.user)
+          re.users.push(child)
           isContain = true
         }
       })
       if (!isContain) {
-        result.push({ address: child.address, users: [child.user] })
+        result.push({ address: child.address, users: [child] })
       }
     }))
     return result
