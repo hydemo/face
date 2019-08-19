@@ -884,9 +884,20 @@ export class SchoolService {
       .populate({ path: 'parent.user', model: 'user', select: 'username' })
       .lean()
       .exec()
-    return await Promise.all(children.map(async child => {
-      return { address: child.address, user: child.user }
+    const result: any = []
+    await Promise.all(children.map(async child => {
+      let isContain = false
+      result.map(re => {
+        if (String(re.address._id) === String(child.address._id)) {
+          re.users.push(child.user)
+          isContain = true
+        }
+      })
+      if (!isContain) {
+        result.push({ address: child.address, users: [child.user] })
+      }
     }))
+    return result
   }
 
   // 访客列表
