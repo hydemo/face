@@ -864,7 +864,7 @@ export class SchoolService {
       const users: ISchool[] = await this.schoolModel
         .find(condition)
         .sort({ type: -1 })
-        .populate({ path: 'user', model: 'user', select: '_id username' })
+        .populate({ path: 'user', model: 'user', select: '_id username faceUrl cardNumber' })
         .populate({ path: 'reviewer', model: 'user', select: 'username' })
         .populate({ path: 'parent.user', model: 'user', select: 'username' })
         .lean()
@@ -879,7 +879,7 @@ export class SchoolService {
     const children: ISchool[] = await this.schoolModel
       .find({ 'parent.user': user, isDelete: false, type: 'student', checkResult: { $in: [2, 4, 5] } })
       .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
-      .populate({ path: 'user', model: 'user', select: '_id username' })
+      .populate({ path: 'user', model: 'user', select: '_id username faceUrl cardNumber' })
       .populate({ path: 'reviewer', model: 'user', select: 'username' })
       .populate({ path: 'parent.user', model: 'user', select: 'username' })
       .lean()
@@ -905,7 +905,7 @@ export class SchoolService {
       };
       const users: ISchool[] = await this.schoolModel
         .find(condition)
-        .populate({ path: 'user', model: 'user', select: '_id username' })
+        .populate({ path: 'user', model: 'user', select: '_id username faceUrl cardNumber' })
         .populate({ path: 'reviewer', model: 'user', select: 'username' })
         .lean()
         .exec()
