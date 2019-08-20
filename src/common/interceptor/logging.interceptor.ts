@@ -21,7 +21,7 @@ export class LoggingInterceptor implements NestInterceptor {
       Logger.log(request.method);
       Logger.log(ip);
       Logger.log(request.params);
-      Logger.log(request.headers)
+      // Logger.log(request.headers)
       Logger.log(request.query)
       const body = { ...request.body }
       delete body.img;
