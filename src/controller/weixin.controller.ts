@@ -30,7 +30,7 @@ export class WeixinController {
     description: '微信签名',
   })
   @Get('/sign')
-  @UseGuards(AuthGuard())
+  // @UseGuards(AuthGuard())
   @ApiOperation({ title: '微信签名', description: '微信签名' })
   async sign(
     @Query('url') url: string,

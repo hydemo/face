@@ -20,7 +20,7 @@ import { SchoolService } from 'src/module/school/school.service';
 @ApiUseTags('roles')
 @ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-@UseGuards(AuthGuard(), UserRolesGuard)
+// @UseGuards(AuthGuard(), UserRolesGuard)
 @Controller('api/roles')
 export class RoleController {
   constructor(
