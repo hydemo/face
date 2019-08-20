@@ -33,7 +33,7 @@ export class BlackService {
 
   }
   async addToZone(user: string, zone: IZone, createBlack: CreateBlackDTO): Promise<IBlack> {
-    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 1, user, zone })
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: { $in: [1, 5] }, user, zone })
     if (!canActive) {
       throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -123,7 +123,7 @@ export class BlackService {
 
   // 黑名单列表
   async findByZone(pagination: Pagination, zone: string, user: string): Promise<IList<IBlack>> {
-    const canActive = await this.roleService.checkRoles({ isDelete: false, role: 1, user, zone })
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: { $in: [1, 5] }, user, zone })
     if (!canActive) {
       throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
     }
