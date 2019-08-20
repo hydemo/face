@@ -323,12 +323,14 @@ export class RoleService {
   async myRoles(userId: string) {
     const cond = { user: userId, isDelete: false }
     let owner = [];
-    let guard = [];
+    let guard: IZone[] = [];
     let management = [];
     let worker = [];
     let rent = [];
     let isAdmin = false;
-    let affairOffice = []
+    let affairOffice = [];
+    let houseGuard: IZone[] = [];
+    let schoolGuard: IZone[] = [];
     const roles: any = await this.roleModel.aggregate([
       { $match: cond },
       { $group: { _id: '$role', zones: { $push: '$zone' } } },
@@ -389,7 +391,15 @@ export class RoleService {
           break;
       }
     }));
-    return { guard, management, worker, isAdmin, affairOffice }
+    guard.map(zone => {
+      if (zone.zoneType === 1) {
+        houseGuard.push(zone)
+      } else if (zone.zoneType === 2) (
+        schoolGuard.push(zone)
+      )
+
+    })
+    return { houseGuard, schoolGuard, management, worker, isAdmin, affairOffice }
   }
 
   async checkRoles(condition: any) {
