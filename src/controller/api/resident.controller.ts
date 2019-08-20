@@ -10,7 +10,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { ResidentService } from 'src/module/resident/resident.service';
-import { CreateResidentDTO, CreateFamilyDTO, AgreeVisitorDTO, AgreeFamilyDTO, CreateFamilyByScanDTO, CreateVisitorByScanDTO, UpdateFamilyDTO, CreateVisitorByOwnerDTO } from 'src/module/resident/dto/resident.dto';
+import { CreateResidentDTO, CreateFamilyDTO, AgreeVisitorDTO, AgreeFamilyDTO, CreateFamilyByScanDTO, CreateVisitorByScanDTO, UpdateFamilyDTO, CreateVisitorByOwnerDTO, CreateVisitorByGuardDTO } from 'src/module/resident/dto/resident.dto';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
 
@@ -234,6 +234,20 @@ export class ResidentController {
     @Request() req: any
   ) {
     await this.residentService.addVisitorByScan(visitor, req.user._id);
+    return { statusCode: 200, msg: '添加访客成功' };
+  }
+
+  @Roles('3')
+  @Post('/visitor/guard')
+  @ApiOkResponse({
+    description: '保安添加访客',
+  })
+  @ApiOperation({ title: '扫码添加访客', description: '扫码添加访客' })
+  async addVisitorByGuard(
+    @Body() visitor: CreateVisitorByGuardDTO,
+    @Request() req: any
+  ) {
+    await this.residentService.addVisitorByGuard(visitor, req.user._id);
     return { statusCode: 200, msg: '添加访客成功' };
   }
 

@@ -10,7 +10,9 @@ import {
   AgreeFamilyDTO,
   UpdateFamilyDTO,
   AgreeVisitorDTO,
-  CreateVisitorByOwnerDTO
+  CreateVisitorByOwnerDTO,
+  CreateVisitorByScanDTO,
+  CreateVisitorByGuardDTO
 } from './dto/resident.dto';
 import * as uuid from 'uuid/v4';
 import { RedisService } from 'nestjs-redis';
@@ -532,6 +534,21 @@ export class ResidentService {
       throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
     }
     return await this.addVisitor(zone, user, owner.user, userId, expireTime)
+  }
+
+  //保安添加访客
+  async addVisitorByGuard(visitor: CreateVisitorByGuardDTO, userId: string) {
+    const user: any = await this.weixinUtil.scan(visitor.key);
+    const guard = await this.roleService.findOneByCondition({ role: 3, isDelete: false, zone: visitor.zone })
+    if (!guard) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const expireTime = moment().startOf('d').add(1, 'd').toDate()
+    if (user.type !== 'user') {
+      throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
+    }
+    const zone = await this.zoneService.findById(visitor.zone)
+    return await this.addVisitor(zone, user, userId, userId, expireTime)
   }
 
   // 链接访问

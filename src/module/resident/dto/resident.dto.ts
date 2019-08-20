@@ -130,6 +130,18 @@ export class CreateVisitorByScanDTO {
   readonly key: string;
 }
 
+export class CreateVisitorByGuardDTO {
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: 'key' })
+  readonly key: string;
+
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '地址ID' })
+  readonly zone: string;
+}
+
 export class CreateVisitorByOwnerDTO {
   @IsMongoId()
   @Type(() => String)
