@@ -9,6 +9,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse();
     const request = ctx.getRequest();
     Logger.error(exception);
+    const ip = request.headers['x-real-ip'] ? request.headers['x-real-ip'] : request.ip.replace(/::ffff:/, '');
+    Logger.log(ip, 'ip')
     if (exception instanceof ApiException) {
 
       response
