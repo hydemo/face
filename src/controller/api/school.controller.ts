@@ -11,7 +11,7 @@ import { Pagination } from 'src/common/dto/pagination.dto';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { SchoolService } from 'src/module/school/school.service';
 import { Roles } from 'src/common/decorator/roles.decorator';
-import { HeadTeacherApplicationDTO, StudentApplicationDTO, VisitorApplicationDTO, UpdateStudentDTO, BindParent } from 'src/module/school/dto/school.dto';
+import { HeadTeacherApplicationDTO, StudentApplicationDTO, VisitorApplicationDTO, UpdateStudentDTO, BindParent, CreateVisitorDTO } from 'src/module/school/dto/school.dto';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
 
 
@@ -144,6 +144,33 @@ export class SchoolController {
     return this.schoolService.ownerApplications(pagination, req.user._id, Number(checkResult));
   }
 
+
+  @Post('/visitor/scan')
+  @ApiOkResponse({
+    description: '扫码添加访客',
+  })
+  @ApiOperation({ title: '扫码添加访客', description: '扫码添加访客' })
+  async addVisitorByScan(
+    @Body() visitor: CreateVisitorDTO,
+    @Request() req: any
+  ) {
+    await this.schoolService.addVisitorByScan(visitor, req.user._id);
+    return { statusCode: 200, msg: '添加访客成功' };
+  }
+
+  @Roles('3')
+  @Post('/visitor/guard')
+  @ApiOkResponse({
+    description: '保安添加访客',
+  })
+  @ApiOperation({ title: '扫码添加访客', description: '扫码添加访客' })
+  async addVisitorByGuard(
+    @Body() visitor: CreateVisitorDTO,
+    @Request() req: any
+  ) {
+    await this.schoolService.addVisitorByGuard(visitor, req.user._id);
+    return { statusCode: 200, msg: '添加访客成功' };
+  }
 
   @Delete('/:id')
   @ApiOkResponse({

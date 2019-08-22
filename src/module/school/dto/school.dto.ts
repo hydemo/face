@@ -130,7 +130,20 @@ export class VisitorDTO {
   @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '申请理由' })
-  readonly visitorReason: string;
+  readonly visitorReason?: string;
+
+  readonly reviewer?: string;
+
+  @IsDate()
+  @Type(() => Date)
+  @ApiModelProperty({ description: '过期时间' })
+  readonly addTime?: Date;
+
+  @IsDate()
+  @Type(() => Date)
+  @ApiModelProperty({ description: '过期时间' })
+  readonly checkTime?: Date;
+
 }
 
 export class StudentApplicationDTO {
@@ -210,6 +223,18 @@ export class BindParent {
   @ApiModelProperty({ description: '家长类型' })
   readonly parentType: string;
 
+}
+
+export class CreateVisitorDTO {
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: 'key' })
+  readonly key: string;
+
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '地址ID' })
+  readonly zone: string;
 }
 
 

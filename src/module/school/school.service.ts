@@ -24,7 +24,7 @@ import { ConfigService } from 'src/config/config.service';
 import { ApplicationDTO } from 'src/common/dto/Message.dto';
 import { PreownerService } from '../preowner/preowner.service';
 import { ZOCUtil } from 'src/utils/zoc.util';
-import { StudentDTO, HeadTeacherApplicationDTO, HeadTeacherDTO, StudentApplicationDTO, VisitorDTO, VisitorApplicationDTO, UpdateStudentDTO } from './dto/school.dto';
+import { StudentDTO, HeadTeacherApplicationDTO, HeadTeacherDTO, StudentApplicationDTO, VisitorDTO, VisitorApplicationDTO, UpdateStudentDTO, CreateVisitorDTO } from './dto/school.dto';
 
 @Injectable()
 export class SchoolService {
@@ -321,26 +321,25 @@ export class SchoolService {
   // }
 
   // 添加访客
-  // async addVisitor(address: IZone, user: IUser, owner: string, reviewer: string, expireTime: Date) {
-  //   await this.schoolExist(address._id, user._id)
-  //   const school: SchoolDTO = {
-  //     zone: address.zoneId,
-  //     address: address._id,
-  //     user: user._id,
-  //     checkResult: 4,
-  //     isMonitor: true,
-  //     applicationTime: new Date(),
-  //     addTime: new Date(),
-  //     type: 'visitor',
-  //     checkTime: new Date(),
-  //     expireTime,
-  //     reviewer,
-  //     owner,
-  //   }
-  //   const creatSchool = await this.schoolModel.create(school);
-  //   await this.addToDevice(address, user, creatSchool._id, expireTime);
-  //   return
-  // }
+  async addVisitor(address: IZone, user: IUser, reviewer: string, expireTime: Date) {
+    await this.existCheck(address._id, user._id)
+    const visitor: VisitorDTO = {
+      zone: address.zoneId,
+      address: address._id,
+      user: user._id,
+      checkResult: 4,
+      applicationTime: new Date(),
+      type: 'visitor',
+      expireTime,
+      owner: reviewer,
+      reviewer,
+      addTime: new Date(),
+      checkTime: new Date(),
+    }
+    const createVisitor = await this.schoolModel.create(visitor)
+    await this.addToDevice(address, user, createVisitor.id, visitor.expireTime)
+    return
+  }
 
   // 根据id查询
   async findById(id: string): Promise<ISchool> {
@@ -567,6 +566,34 @@ export class SchoolService {
       return this.sendVerifyMessage(student.address.houseNumber, user.username, '学生', parent.user.openId)
     })
     return
+  }
+
+  // 扫码添加访客
+  async addVisitorByScan(visitor: CreateVisitorDTO, userId: string) {
+    const zone: IZone = await this.zoneService.findById(visitor.zone)
+    await this.isOwner(zone._id, userId)
+
+    const expireTime = moment().startOf('d').add(1, 'd').toDate()
+    const user = await this.weixinUtil.scan(visitor.key)
+    if (user.type !== 'user') {
+      throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
+    }
+    return await this.addVisitor(zone, user, userId, expireTime)
+  }
+
+  //保安添加访客
+  async addVisitorByGuard(visitor: CreateVisitorDTO, userId: string) {
+    const user: any = await this.weixinUtil.scan(visitor.key);
+    const guard = await this.roleService.findOneByCondition({ role: 3, isDelete: false, zone: visitor.zone })
+    if (!guard) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const expireTime = moment().startOf('d').add(1, 'd').toDate()
+    if (user.type !== 'user') {
+      throw new ApiException('二维码有误', ApiErrorCode.QRCODE_ERROR, 406);
+    }
+    const zone = await this.zoneService.findById(visitor.zone)
+    return await this.addVisitor(zone, user, userId, expireTime)
   }
 
   // 接受常访客申请
