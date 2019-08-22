@@ -232,10 +232,9 @@ export class SchoolController {
   async getVisitorLink(
     @Query('address', new MongodIdPipe()) address: string,
     @Query('type') type: string,
-    @Query('name') name: string,
     @Request() req: any
   ) {
-    const data = await this.schoolService.getLink(address, req.user, name, type);
+    const data = await this.schoolService.getLink(address, req.user, type);
     return { statusCode: 200, data };
   }
 

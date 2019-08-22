@@ -447,19 +447,18 @@ export class SchoolService {
    * 班主任功能
    */
   // 生成访问链接
-  async getLink(address: string, user: IUser, name: string, type: string) {
+  async getLink(address: string, user: IUser, type: string) {
     const zone: IZone = await this.zoneService.findById(address)
     await this.isOwner(zone._id, user._id)
     const key = uuid()
     const client = this.redis.getClient()
     const value = {
-      name,
       address: zone._id,
+      houseNumber: zone.houseNumber,
       type,
       username: user.username,
-      reviewer: user._id,
     };
-    await client.set(key, JSON.stringify(value), 'EX', 60 * 60);
+    await client.set(key, JSON.stringify(value), 'EX', 24 * 60 * 60);
     return key
   }
 
