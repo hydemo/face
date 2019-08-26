@@ -160,7 +160,6 @@ export class SchoolService {
         isParent = true
       }
     })
-    console.log(student, user)
     if (String(student.owner) !== String(user) || !isParent) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -865,7 +864,8 @@ export class SchoolService {
     if (!data || data.isDelete) {
       return null
     }
-    await this.isParentOrHeadTeacher(data, String(user))
+
+    data.type === 'student' ? await this.isParentOrHeadTeacher(data, String(user)) : await this.isOwner(data.address, user)
     const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: school, isDelete: false })
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
