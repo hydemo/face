@@ -186,12 +186,14 @@ export class CallbackController {
     // await this.faceService.fix()
     // await this.residentService.fix()
 
-    const data = await this.socUtil.qrcodeAddress(code, '1')
-    console.log(data, 'data')
+    // const data = await this.socUtil.qrcodeAddress(code, '1')
+    // console.log(data, 'data')
     // await this.roleService.fix()
     // const user = { _id: 1, username: '11' }
     // const img = await this.camera.getImg('user/e604b4db-54ce-4971-8db9-ca8a56554a61.jpg')
     // await this.camera.addToDevice(user, img)
+    const data = await this.socUtil.qrcodeAddress(code, '2')
+    console.log(data)
     return
 
   }

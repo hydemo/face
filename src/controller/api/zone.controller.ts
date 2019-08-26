@@ -29,7 +29,7 @@ import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 
 @ApiUseTags('zones')
 @ApiBearerAuth()
-@UseGuards(AuthGuard(), UserRolesGuard)
+// @UseGuards(AuthGuard(), UserRolesGuard)
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/zones')
 export class ZoneController {
@@ -83,6 +83,21 @@ export class ZoneController {
     await this.zoneService.addByQrcode(zone);
     return { status: 200, msg: '添加成功' }
   }
+
+  @ApiOkResponse({
+    description: '二维码添加小区',
+    type: CreateZoneDTO,
+    isArray: true,
+  })
+  // @UserRoles(0)
+  // @Post('/qrcode/:id')
+  // @ApiOperation({ title: '二维码添加小区', description: '二维码添加小区' })
+  // async addSubByQrcode(
+  //   @Param('id', new MongodIdPipe()) id: string,
+  // ) {
+  //   await this.zoneService.addChildren(id);
+  //   return { status: 200, msg: '添加成功' }
+  // }
 
   @ApiOkResponse({
     description: '待申请房屋列表',

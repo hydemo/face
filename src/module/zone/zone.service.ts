@@ -157,6 +157,7 @@ export class ZoneService {
   // 处理分区
   async partition(parent: string) {
     const partitions: IZone[] = await this.zoneModel.find({ parent, buildingType: '61' }).sort({ name: 1 })
+    console.log(partitions, '111')
     await Promise.all(partitions.map(async (partition, index) => {
       const name: RegExp = new RegExp(partition.name, 'i')
       await this.zoneModel.update({ name }, { partition: partition._id, partitionSort: index })

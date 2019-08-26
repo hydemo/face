@@ -160,7 +160,7 @@ export class SchoolService {
         isParent = true
       }
     })
-    if (String(student.owner) !== user || !isParent) {
+    if (String(student.owner) !== String(user) || !isParent) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     return

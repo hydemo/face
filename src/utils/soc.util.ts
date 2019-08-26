@@ -26,21 +26,29 @@ export class SOCUtil {
     const md: string = md5(this.config.socAppId + this.config.socAppSecret + currdate + json.replace(/\r\n/g, ''));
     const token = md.toUpperCase()
     const tranId = (Date.now() / 1000).toFixed(0);
-    const result = await axios({
-      method: 'post',
-      url: this.config.socUrl,
-      headers: {
-        'Content-Type': 'application/json',
-        token,
-        tranId,
-        serviceId,
-        serviceValue: serviceId,
-        versionCode: '',
-        appid: this.config.socAppId,
-      },
-      data: json,
-    })
-    return JSON.parse(decodeURIComponent(result.data))
+    try {
+      const result = await axios({
+        method: 'post',
+        url: this.config.socUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          token,
+          tranId,
+          serviceId,
+          serviceValue: serviceId,
+          versionCode: '',
+          appid: this.config.socAppId,
+        },
+        data: json,
+      })
+      return JSON.parse(decodeURIComponent(result.data))
+
+    } catch (error) {
+      return false
+    }
+
+    // console.log(result.data)
+    // console.log(decodeURI(result.data))
   }
 
   /**
@@ -57,14 +65,17 @@ export class SOCUtil {
       ],
       pages: [
         {
-          "psize": "15",
-          "tcount": "",
+          "psize": "200",
+          "tcount": "1",
           "pno": pno,
-          "tsize": "",
+          "tsize": "1",
         }
       ]
     }
     const result = await this.socRequest(data, 'dzfwpt_qrcode')
+    if (!result) {
+      return this.qrcodeAddress(code, pno)
+    }
     return { list: result.datas, page: result.pages[0] }
   }
 
@@ -90,6 +101,10 @@ export class SOCUtil {
       ]
     }
     const result = await this.socRequest(data, 'xjpt_xxba_addrewm_bs')
+    if (!result) {
+      return this.address(code)
+    }
+    // console.log(result, 'result')
     return result.datas[0]
   }
 
