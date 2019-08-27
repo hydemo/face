@@ -41,9 +41,10 @@ export class MessageController {
   @ApiOperation({ title: '尾部补全', description: '尾部补全' })
   async getTail(
     @Query('skip') skip: number,
+    @Query('messageType') messageType: string,
     @Request() req: any,
   ) {
-    const data = await this.messageService.getTail(skip, req.user._id);
+    const data = await this.messageService.getTail(skip, req.user._id, messageType);
     return { statusCode: 200, data };
 
   }

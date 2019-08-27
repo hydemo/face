@@ -60,8 +60,13 @@ export class MessageService {
   }
 
   // 滚动补全
-  async getTail(skip: number, receiver: string): Promise<IMessage | null> {
-    const condition = { isDelete: false, receiver, type: };
+  async getTail(skip: number, receiver: string, type: string): Promise<IMessage | null> {
+    const condition: any = { isDelete: false, receiver };
+    if (type === 'black') {
+      condition.type = 'black'
+    } else {
+      condition.type = { $ne: 'black' }
+    }
     const list = await this.messageModel
       .find(condition)
       .limit(1)
