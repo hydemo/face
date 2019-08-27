@@ -30,9 +30,10 @@ export class MessageController {
   @ApiOperation({ title: '获取消息列表', description: '获取消息列表' })
   myMessages(
     @Query() pagination: Pagination,
+    @Query('messageType') messageType: string,
     @Request() req: any,
   ) {
-    return this.messageService.findAll(pagination, req.user._id);
+    return this.messageService.findAll(pagination, req.user._id, messageType);
   }
 
 
