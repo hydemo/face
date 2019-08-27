@@ -39,7 +39,13 @@ export class MessageService {
 
   // 查询全部数据
   async findAll(pagination: Pagination, receiver: string, type: string): Promise<IList<IMessage>> {
-    const condition = { isDelete: false, receiver };
+
+    const condition: any = { isDelete: false, receiver };
+    if (type === 'black') {
+      condition.type = 'black'
+    } else {
+      condition.type = { $ne: 'black' }
+    }
     const list = await this.messageModel
       .find(condition)
       .limit(pagination.limit)
@@ -55,7 +61,7 @@ export class MessageService {
 
   // 滚动补全
   async getTail(skip: number, receiver: string): Promise<IMessage | null> {
-    const condition = { isDelete: false, receiver };
+    const condition = { isDelete: false, receiver, type: };
     const list = await this.messageModel
       .find(condition)
       .limit(1)
