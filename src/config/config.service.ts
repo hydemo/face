@@ -140,7 +140,10 @@ export class ConfigService {
       MANAGEMENT_CARD_NUMBER: Joi.string().required(),
 
       MANAGEMENT_PHONE: Joi.string().required(),
+
       LOG: Joi.string().required(),
+
+      LOG_SOC: Joi.string().required(),
 
       LOG_IP: Joi.string().required(),
 
@@ -394,6 +397,10 @@ export class ConfigService {
 
   get LOG(): string {
     return this.envConfig.LOG
+  }
+
+  get LOG_SOC(): string {
+    return this.envConfig.LOG_SOC
   }
 
   get LOG_IP(): string {

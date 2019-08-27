@@ -11,6 +11,10 @@ export interface ILogRecord extends Document {
   ipCount: number;
   // 总访问量
   totalCount: number;
+  // 一标三实
+  socCount: number,
+  // 一标三实总量
+  socTotal: number,
   // 住户上传数
   residentCount: number;
   // 住户信息上报总量

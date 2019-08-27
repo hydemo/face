@@ -61,6 +61,7 @@ import { ContactModule } from './module/contact/contact.module';
 import { ContactController } from './controller/api/contact.controller';
 import { SchoolModule } from './module/school/school.module';
 import { SchoolController } from './controller/api/school.controller';
+import { CMSRoleController } from './controller/cms/role.controller';
 
 @Module({
   imports: [
@@ -119,6 +120,7 @@ import { SchoolController } from './controller/api/school.controller';
     CMSBlackController,
     CMSMediaController,
     CMSAreaController,
+    CMSRoleController,
     ZoneController,
     UserController,
     ResidentController,

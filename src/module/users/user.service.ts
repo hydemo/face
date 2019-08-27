@@ -51,14 +51,15 @@ export class UserService {
   async findAll(pagination: Pagination): Promise<IList<IUser>> {
     const search: any = [];
     const condition: any = {};
+    console.log(pagination)
     if (pagination.search) {
       const sea = JSON.parse(pagination.search);
       for (const key in sea) {
         if (key === 'base' && sea[key]) {
           const username: RegExp = new RegExp(sea[key], 'i');
-          const phone: RegExp = new RegExp(sea[key], 'i');
+          // const phone: RegExp = new RegExp(sea[key], 'i');
           search.push({ username });
-          search.push({ phone });
+          // search.push({ phone });
         } else if (sea[key] === 0 || sea[key]) {
           condition[key] = sea[key];
         }
@@ -67,6 +68,7 @@ export class UserService {
         condition.$or = search;
       }
     }
+    console.log(condition, 'condition')
     const list = await this.userModel
       .find(condition)
       .sort({ lastLoginTime: -1 })

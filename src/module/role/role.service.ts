@@ -67,6 +67,14 @@ export class RoleService {
   }
 
   // 创建数据
+  async createByCMS(role: RoleDTO): Promise<IRole | null> {
+    role.reviewer = role.user
+    console.log(role, 'sss')
+    const creatRole = await this.roleModel.create(role);
+    return creatRole;
+  }
+
+  // 创建数据
   async findById(id: string): Promise<IRole | null> {
     return await this.roleModel.findById(id).lean().exec()
   }
@@ -184,7 +192,35 @@ export class RoleService {
     }
     return null
   }
-
+  // 用户列表
+  async findAll(pagination: Pagination, role: number): Promise<IList<IRole>> {
+    const search: any = [];
+    const condition: any = { role };
+    if (pagination.search) {
+      const sea = JSON.parse(pagination.search);
+      for (const key in sea) {
+        if (key === 'base' && sea[key]) {
+        } else if (sea[key] === 0 || sea[key]) {
+          condition[key] = sea[key];
+        }
+      }
+      if (search.length) {
+        condition.$or = search;
+      }
+    }
+    const list = await this.roleModel
+      .find(condition)
+      .sort({ lastLoginTime: -1 })
+      .limit(pagination.limit)
+      .skip((pagination.offset - 1) * pagination.limit)
+      .populate({ path: 'user', model: 'user', select: '_id username faceUrl phone' })
+      .populate({ path: 'zone', model: 'zone' })
+      .populate({ path: 'area', model: 'area' })
+      .populate({ path: 'reviewer', model: 'user', select: '_id username' })
+      .exec();
+    const total = await this.roleModel.countDocuments(condition);
+    return { list, total };
+  }
   // 查询全部数据
   async findByManagement(pagination: Pagination, user: string) {
     if (!pagination.zone) {

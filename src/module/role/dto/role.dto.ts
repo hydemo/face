@@ -50,6 +50,11 @@ export class RoleDTO {
   readonly checkResult: number;
 
   reviewer: string;
+
+  @IsMongoId()
+  @Type(() => String)
+  @ApiModelProperty({ description: '用户' })
+  readonly area?: string;
 }
 
 export class CreateAdminRole {
@@ -74,6 +79,8 @@ export class CreateAdminRole {
   @Type(() => Number)
   @ApiModelProperty({ description: '同步结果' })
   readonly checkResult: number;
+
+
 }
 
 export class CreatePoliceRole {

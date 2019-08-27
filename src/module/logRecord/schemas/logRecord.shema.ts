@@ -12,6 +12,10 @@ export const LogRecordSchema = new mongoose.Schema(
     ipCount: { type: Number, default: 0 },
     // 总访问量
     totalCount: { type: Number, default: 0 },
+    // 一标三实
+    socCount: { type: Number, default: 0 },
+    // 一标三实总量
+    socTotal: Number,
     // 住户上传数
     residentCount: { type: Number, default: 0 },
     // 住户信息上报总量

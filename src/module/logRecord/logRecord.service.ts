@@ -49,6 +49,7 @@ export class LogRecordService {
     const client = this.redis.getClient()
     const userExist = await client.hget(this.config.LOG, this.config.LOG_USER)
     const totalExist = await client.hget(this.config.LOG, this.config.LOG_TOTAL)
+    const socExist = await client.hget(this.config.LOG, this.config.LOG_SOC)
     const residentExist = await client.hget(this.config.LOG, this.config.LOG_RESIDENT)
     const enRecordExist = await client.hget(this.config.LOG, this.config.LOG_ENRECORD)
     const deviceExist = await client.hget(this.config.LOG, this.config.LOG_DEVICE)
@@ -62,6 +63,9 @@ export class LogRecordService {
     }
     if (!totalExist) {
       await client.hset(this.config.LOG, this.config.LOG_TOTAL, 0)
+    }
+    if (!socExist) {
+      await client.hset(this.config.LOG, this.config.LOG_SOC, 0)
     }
     if (!residentExist) {
       await client.hset(this.config.LOG, this.config.LOG_RESIDENT, 0)
@@ -126,6 +130,7 @@ export class LogRecordService {
     const ips: string[] = await client.hkeys(this.config.LOG_IP)
     const ipCount = ips.length
     const totalCount = Number(await client.hget(this.config.LOG, this.config.LOG_TOTAL))
+    const socCount = Number(await client.hget(this.config.LOG, this.config.LOG_SOC))
     const residentCount = Number(await client.hget(this.config.LOG, this.config.LOG_RESIDENT))
     const enRecordCount = Number(await client.hget(this.config.LOG, this.config.LOG_ENRECORD))
     const deviceCount = Number(await client.hget(this.config.LOG, this.config.LOG_DEVICE))
@@ -134,6 +139,7 @@ export class LogRecordService {
     const openCount = Number(await client.hget(this.config.LOG, this.config.LOG_OPEN))
     const ownerCount = Number(await client.hget(this.config.LOG, this.config.LOG_OWNER))
     await client.hset(this.config.LOG, this.config.LOG_USER, 0)
+    await client.hset(this.config.LOG, this.config.LOG_SOC, 0)
     await client.hset(this.config.LOG, this.config.LOG_TOTAL, 0)
     await client.hset(this.config.LOG, this.config.LOG_RESIDENT, 0)
     await client.hset(this.config.LOG, this.config.LOG_ENRECORD, 0)
@@ -154,6 +160,10 @@ export class LogRecordService {
       ipCount,
       // 总访问量
       totalCount,
+      // 一标三实
+      socCount,
+      // 一标三实总量
+      socTotal: preLog ? socCount + preLog.socTotal : socCount,
       // 住户上传数
       residentCount,
       // 住户信息上报总量
