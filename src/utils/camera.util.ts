@@ -369,7 +369,6 @@ export class CameraUtil {
         url: upData.version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
         data: upData.data,
       })
-      console.log(result.data, 'result.data')
       if (upData.type === 'delete' && upData.version === '1.0.0') {
       }
       let code;
@@ -561,6 +560,9 @@ export class CameraUtil {
           default: code = 'final'
             break;
         }
+      }
+      if (count > 5) {
+        code = 'final'
       }
 
       if (code === 'final' || (code === 'error' && count > 8)) {
