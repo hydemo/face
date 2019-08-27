@@ -443,7 +443,7 @@ export class RoleService {
 
   // 根据id修改
   async blackReceivers(device: IDevice): Promise<IReceiver[]> {
-    const managements: IRole[] = await this.roleModel.find({ zone: device.zone, isDelete: false, role: 1 })
+    const managements: IRole[] = await this.roleModel.find({ zone: device.zone, isDelete: false, role: { $in: [1, 5] } })
     const polices: IRole[] = await this.roleModel.find({ role: 4, isDelete: false, area: device.area })
     const receivers: IReceiver[] = []
     managements.map(management => {
