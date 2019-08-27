@@ -28,6 +28,8 @@ import { IBlack } from '../black/interfaces/black.interfaces';
 import { BlackService } from '../black/black.service';
 import { IRole } from '../role/interfaces/role.interfaces';
 import { RoleService } from '../role/role.service';
+import { ISchool } from '../school/interfaces/school.interfaces';
+import { SchoolService } from '../school/school.service';
 
 interface IReceiver {
   id: string;
@@ -41,6 +43,7 @@ export class CallbackService {
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(OrbitService) private readonly orbitService: OrbitService,
     @Inject(ResidentService) private readonly residentService: ResidentService,
+    @Inject(SchoolService) private readonly schoolService: SchoolService,
     @Inject(MessageService) private readonly messageService: MessageService,
     @Inject(StrangerService) private readonly strangerService: StrangerService,
     @Inject(QiniuUtil) private readonly qiniuUtil: QiniuUtil,
@@ -217,13 +220,24 @@ export class CallbackService {
         position: `${device.position.houseNumber}-${device.description}`
       }
       await this.messageService.createOrbitMessage(message)
+      let userType;
+      switch (receiver.type) {
+        case 'family': userType === '家人'
+          break;
+        case 'student': userType === '小孩'
+          break;
+        case 'visitor': userType === '访客'
+          break;
+        default:
+          break;
+      }
       const application: ApplicationDTO = {
         first: {
-          value: `您的${receiver.type === 'family' ? '家人' : '访客'}${user.username}${device.passType === 1 ? '进入' : '离开'}了${device.position.houseNumber}-${device.description}`,
+          value: `您的${userType}${user.username}${device.passType === 1 ? '进入' : '离开'}了${device.position.houseNumber}-${device.description}`,
           color: "#173177"
         },
         keyword1: {
-          value: receiver.type === 'family' ? '家人' : '访客',
+          value: userType,
           color: "#173177"
         },
         keyword2: {
@@ -304,6 +318,14 @@ export class CallbackService {
     const residents: IResident[] = await this.residentService.findByCondition({
       isDelete: false, user: user._id, checkResult: 2, isMonitor: true
     });
+    const schools: ISchool[] = await this.schoolService.findByCondition({
+      isDelete: false, user: user._id, checkResult: 2, type: 'student'
+    })
+    schools.map(school => {
+      school.parent.map(parent => {
+        receivers.push({ id: parent.user, type: 'student' })
+      })
+    })
     await Promise.all(residents.map(async resident => {
       if (resident.type === 'visitor') {
         await this.visitorReceivers(resident, zone, receivers)

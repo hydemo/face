@@ -17,6 +17,7 @@ import { CryptoUtil } from 'src/utils/crypto.util';
 import { PhoneUtil } from 'src/utils/phone.util';
 import { ConfigModule } from 'src/config/config.module';
 import { RoleModule } from '../role/role.module';
+import { SchoolModule } from '../school/school.module';
 
 
 @Module({
@@ -42,6 +43,7 @@ import { RoleModule } from '../role/role.module';
     ConfigModule,
     ZoneModule,
     RoleModule,
+    SchoolModule,
   ],
 })
 

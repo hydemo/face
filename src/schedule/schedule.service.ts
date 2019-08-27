@@ -18,6 +18,7 @@ import { IResident } from 'src/module/resident/interfaces/resident.interfaces';
 import { IRole } from 'src/module/role/interfaces/role.interfaces';
 import { IBlack } from 'src/module/black/interfaces/black.interfaces';
 import { LogRecordService } from 'src/module/logRecord/logRecord.service';
+import { SchoolService } from 'src/module/school/school.service';
 
 @Injectable()
 export class ScheduleService {
@@ -27,6 +28,7 @@ export class ScheduleService {
     @Inject(CameraUtil) private readonly camera: CameraUtil,
     @Inject(DeviceService) private readonly deviceService: DeviceService,
     @Inject(ResidentService) private readonly residentService: ResidentService,
+    @Inject(SchoolService) private readonly schoolService: SchoolService,
     @Inject(RoleService) private readonly roleService: RoleService,
     @Inject(UserService) private readonly blackService: BlackService,
     @Inject(UserService) private readonly userService: UserService,
@@ -268,6 +270,7 @@ export class ScheduleService {
 
     Schedule.scheduleJob(rule, async () => {
       await this.residentService.removeVisitor()
+      await this.schoolService.removeVisitor()
     });
 
     Schedule.scheduleJob(logRule, async () => {
