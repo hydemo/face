@@ -69,7 +69,6 @@ export class CallbackService {
   async callback(body: any) {
 
     const { Name } = body
-    // console.log(Name, 'name')
     let img: any = null;
     let imgex: any = null;
     let imgBase: any = null;
@@ -201,9 +200,7 @@ export class CallbackService {
 
   // 发送消息
   async sendMessage(orbit: IOrbit, user: IUser, device: IDevice) {
-    console.log(user, 'user')
     const receivers: IReceiver[] = await this.receivers(user, device.zone)
-    console.log(receivers, 'receivers')
     return await Promise.all(receivers.map(async receiver => {
       const receiverUser: IUser | null = await this.userService.findById(receiver.id)
       if (!receiverUser) {
@@ -224,11 +221,11 @@ export class CallbackService {
       await this.messageService.createOrbitMessage(message)
       let userType;
       switch (receiver.type) {
-        case 'family': userType === '家人'
+        case 'family': userType = '家人'
           break;
-        case 'student': userType === '小孩'
+        case 'student': userType = '小孩'
           break;
-        case 'visitor': userType === '访客'
+        case 'visitor': userType = '访客'
           break;
         default:
           break;
@@ -323,7 +320,6 @@ export class CallbackService {
     const schools: ISchool[] = await this.schoolService.findByCondition({
       isDelete: false, user: user._id, checkResult: 2, type: 'student'
     })
-    console.log(schools, 'schools')
     schools.map(school => {
       school.parent.map(parent => {
         receivers.push({ id: parent.user, type: 'student' })
