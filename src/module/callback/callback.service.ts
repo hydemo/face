@@ -256,7 +256,7 @@ export class CallbackService {
           color: "#173177"
         },
       }
-      this.weixinUtil.sendPassMessage(receiverUser.openId, application)
+      this.weixinUtil.sendPassMessage(receiverUser.openId, application, 'user')
     }))
   }
 
@@ -307,7 +307,7 @@ export class CallbackService {
           color: "#173177"
         },
       }
-      this.weixinUtil.sendPassMessage(receiverUser.openId, application)
+      this.weixinUtil.sendPassMessage(receiverUser.openId, application, 'black')
     }))
   }
 

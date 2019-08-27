@@ -155,7 +155,7 @@ export class WeixinUtil {
             }
         });
     }
-    async sendPassMessage(openId: string, data: ApplicationDTO) {
+    async sendPassMessage(openId: string, data: ApplicationDTO, messageType: string) {
         const token = await this.access_token()
         await axios({
             method: 'post',
@@ -163,7 +163,7 @@ export class WeixinUtil {
             data: {
                 touser: openId,
                 template_id: this.config.weixinPassModel,
-                url: `${this.config.url}/message?throwType=weixin`,
+                url: `${this.config.url}/message?throwType=weixin&messageType=${messageType}`,
                 data,
             }
         });
