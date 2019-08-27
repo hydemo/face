@@ -32,6 +32,7 @@ import { P2PErrorService } from 'src/module/p2pError/p2pError.service';
 import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 import { RoleService } from 'src/module/role/role.service';
 import { FaceService } from 'src/module/face/face.service';
+import { CreatePoliceRole } from 'src/module/role/dto/role.dto';
 
 
 @ApiUseTags('callback')
@@ -180,11 +181,21 @@ export class CallbackController {
     @Request() req,
     @Query('code') code: string,
   ) {
+
+    const createRole: CreatePoliceRole = {
+      user: '5d38515b4bda2f535ddea0ed',
+      role: 4,
+      checkResult: 2,
+      reviewer: '5d38515b4bda2f535ddea0ed',
+      area: '5d4bbcdf40fdb006f1c8be03'
+    }
+    await this.roleService.createPoliceByCMS(createRole)
     // await this.callbackService.upDeviceToZOC(code)
     // await this.callbackService.upResidentToZOC(code)
     // await this.camera.getPersionInfo('22', 1, 2)
     // await this.faceService.fix()
     // await this.residentService.fix()
+
 
     // const data = await this.socUtil.qrcodeAddress(code, '1')
     // console.log(data, 'data')
@@ -192,8 +203,8 @@ export class CallbackController {
     // const user = { _id: 1, username: '11' }
     // const img = await this.camera.getImg('user/e604b4db-54ce-4971-8db9-ca8a56554a61.jpg')
     // await this.camera.addToDevice(user, img)
-    const data = await this.socUtil.qrcodeAddress(code, '2')
-    console.log(data)
+    // const data = await this.socUtil.qrcodeAddress(code, '2')
+    // console.log(data)
     return
 
   }

@@ -71,6 +71,10 @@ export class RoleService {
     return await this.roleModel.findById(id).lean().exec()
   }
 
+  async createPoliceByCMS(police: CreatePoliceRole) {
+    return await this.roleModel.create(police)
+  }
+
   // 创建数据
   async createByScan(role: CreateRoleByScanDTO, reviewer: string): Promise<IRole> {
     const user: IUser = await this.weixinUtil.scan(role.key)
