@@ -153,10 +153,10 @@ export class CallbackController {
     // const ips = await client.hkeys('Log_op')
     await client.hset('Log', 'resident', 0)
     const ss = await client.hget('Log', 'resident')
-    if (!ss) {
-      console.log(111)
-    }
-    console.log(typeof (ss), 'as')
+    // if (!ss) {
+    //   console.log(111)
+    // }
+    // console.log(typeof (ss), 'as')
     // await client.del('p2p_listen')
     // // await client.lpush('p2pErrorFinal', '2')
     // await client.del('p2pErrorFinal')

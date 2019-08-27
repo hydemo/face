@@ -55,7 +55,7 @@ export class CMSRoleController {
     @Body() role: RoleDTO,
     @Request() req: any,
   ) {
-    console.log(role, 'role')
+    // console.log(role, 'role')
     await this.roleService.createByCMS(role);
     return { statusCode: 200, msg: '添加成功' };
   }

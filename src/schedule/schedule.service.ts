@@ -31,7 +31,7 @@ export class ScheduleService {
     @Inject(ResidentService) private readonly residentService: ResidentService,
     @Inject(SchoolService) private readonly schoolService: SchoolService,
     @Inject(RoleService) private readonly roleService: RoleService,
-    @Inject(UserService) private readonly blackService: BlackService,
+    @Inject(BlackService) private readonly blackService: BlackService,
     @Inject(UserService) private readonly userService: UserService,
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
@@ -342,12 +342,10 @@ export class ScheduleService {
     });
 
     Schedule.scheduleJob('*/5 * * * * *', async () => {
-      console.log(222)
-      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: { $in: [4, 5] } })
-      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: { $in: [4, 5] } })
-      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: { $in: [4, 5] } })
-      console.log(blacks)
-      const schools: ISchool[] = await this.schoolService.findByCondition({ checkResult: { $in: [4, 5] } })
+      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: { $in: [4, 5] }, isDelete: false })
+      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: { $in: [4, 5] }, isDelete: false })
+      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: { $in: [4, 5] }, isDelete: false })
+      const schools: ISchool[] = await this.schoolService.findByCondition({ checkResult: { $in: [4, 5] }, isDelete: false })
       await Promise.all(residents.map(async resident => {
         const checkResult = await this.faceService.checkResult(resident._id)
         return await this.residentService.updateById(resident._id, { checkResult });
@@ -359,7 +357,6 @@ export class ScheduleService {
       }))
       await Promise.all(blacks.map(async black => {
         const checkResult = await this.faceService.checkResult(black._id)
-        console.log(checkResult, 'checkResult')
         return await this.blackService.updateById(black._id, { checkResult });
 
       }))

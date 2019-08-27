@@ -34,7 +34,7 @@ export class BlackController {
     @Request() req: any
   ) {
     await this.blackService.add(req.user._id, black);
-    return { statusCode: 200, msg: '申请成功成功' };
+    return { statusCode: 200, msg: '添加成功' };
   }
 
   @ApiOkResponse({

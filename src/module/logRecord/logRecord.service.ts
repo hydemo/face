@@ -60,7 +60,6 @@ export class LogRecordService {
     const blackExist = await client.hget(this.config.LOG, this.config.LOG_BLACK)
     const openExist = await client.hget(this.config.LOG, this.config.LOG_OPEN)
     const ownerExist = await client.hget(this.config.LOG, this.config.LOG_OWNER)
-    console.log(userExist, '11')
     if (!userExist) {
       await client.hset(this.config.LOG, this.config.LOG_USER, 0)
     }

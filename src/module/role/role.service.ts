@@ -69,7 +69,6 @@ export class RoleService {
   // 创建数据
   async createByCMS(role: RoleDTO): Promise<IRole | null> {
     role.reviewer = role.user
-    console.log(role, 'sss')
     const creatRole = await this.roleModel.create(role);
     return creatRole;
   }

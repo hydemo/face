@@ -51,7 +51,7 @@ export class BlackService {
 
   async add(user: string, createBlack: CreateBlackDTO) {
     const role = await this.roleService.findOneByCondition({ isDelete: false, role: 4, user })
-    console.log(role, 'role')
+    // console.log(role, 'role')
     if (!role) {
       throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -63,7 +63,7 @@ export class BlackService {
       area: role.area
       // zone,
     }
-    console.log(black, 'black')
+    // console.log(black, 'black')
     const newBlack = await this.blackModel.create(black);
     await this.agree(newBlack._id, user)
   }
@@ -143,7 +143,8 @@ export class BlackService {
   }
 
   async findByCondition(condition: any) {
-    return await this.blackModel.find(condition).populate({ path: 'zone', model: 'zone' }).lean().exec()
+    return await this.blackModel.find(condition)
+    // .populate({ path: 'zone', model: 'zone' }).lean().exec()
   }
 
   // 根据id查询

@@ -77,7 +77,6 @@ export class ContactService {
       .populate({ path: 'contact', model: 'user', select: 'username faceUrl cardNumber phone' })
       .lean()
       .exec();
-    console.log(condition, list, pagination)
     const total = await this.contactModel.countDocuments(condition);
     return { list, total };
   }
