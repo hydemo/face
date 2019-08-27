@@ -15,6 +15,27 @@ export class SOCUtil {
     private readonly cryptoUtil: CryptoUtil,
   ) { }
   /**
+      * 获取随机数
+      */
+  getRandom(length: number): string {
+    const random = Math.floor(Math.random() * Math.pow(10, length - 1) + 1)
+    const randomLenght = random.toString().length
+    const fixLength = length - randomLenght
+    if (fixLength > 0) {
+      return `${'0'.repeat(fixLength)}${random}`
+    }
+    return random.toString()
+  }
+  /**
+ * 生成流水号
+ */
+  getOrder(): string {
+    const title = 'xms'
+    const time = moment().format('YYYYMMDDHHmmss')
+    const random = this.getRandom(15)
+    return `${title}${time}${random}`
+  }
+  /**
    * 封装请求
    *
    */
@@ -114,19 +135,20 @@ export class SOCUtil {
     * @param code 图片数据
     */
   async upload(): Promise<any> {
-
+    const order = this.getOrder()
+    console.log(order, 'xms20190827194423040615613926144', 'xms20190827194541041360501866873')
     const data = {
       datas: [
         {
-          lv_sbxxlsh: uuid().replace(/-/g, ''),
-          lv_gmsfhm: '350583198404040055',
-          lv_xm: '杨晓峰',
+          lv_sbxxlsh: order,
+          lv_gmsfhm: '350583198912246076',
+          lv_xm: '欧阳旭靖',
           lv_zzdz_dzbm: '4DE6E021-F52A-1A9C-E054-90E2BA510A0C',
-          lv_lxdh: '18065361777',
+          lv_lxdh: '13799746707',
           lv_djdw_jgdm: this.config.companyAgencyCode,
           lv_djdw_jgmc: this.config.companyName,
           lv_djr_gmsfhm: '350583198912246076',
-          lv_djr_xm: '欧阳旭靖',
+          lv_djr_xm: '杨晓峰',
           lv_djsj: moment().format('YYYYMMDDHHmmss')
         }
       ],
@@ -140,6 +162,30 @@ export class SOCUtil {
       ]
     }
     const result = await this.socRequest(data, 'shhcj_xxba_jndj')
-    return { list: result.datas, page: result.pages[0] }
+    console.log(result, 'result')
+    if (result.sta.code === '0000') {
+      console.log(333)
+    }
+  }
+
+  async check(order: string) {
+    const data = {
+      datas: [
+        {
+          sbxxlsh: order,
+          cjbs: 'shhcj_xxba_jndj',
+        }
+      ],
+      pages: [
+        {
+          "psize": "15",
+          "tcount": "",
+          "pno": "1",
+          "tsize": "",
+        }
+      ]
+    }
+    const result = await this.socRequest(data, 'shhcj_feedback_cx')
+    console.log(result, 'result')
   }
 }

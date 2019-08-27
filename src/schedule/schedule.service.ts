@@ -357,6 +357,7 @@ export class ScheduleService {
       }))
       await Promise.all(blacks.map(async black => {
         const checkResult = await this.faceService.checkResult(black._id)
+        console.log(checkResult, 'checkResult')
         return await this.blackService.updateById(black._id, { checkResult });
 
       }))

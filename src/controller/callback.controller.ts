@@ -181,15 +181,15 @@ export class CallbackController {
     @Request() req,
     @Query('code') code: string,
   ) {
-
-    const createRole: CreatePoliceRole = {
-      user: '5d38515b4bda2f535ddea0ed',
-      role: 4,
-      checkResult: 2,
-      reviewer: '5d38515b4bda2f535ddea0ed',
-      area: '5d4bbcdf40fdb006f1c8be03'
-    }
-    await this.roleService.createPoliceByCMS(createRole)
+    await this.socUtil.check(code)
+    // const createRole: CreatePoliceRole = {
+    //   user: '5d38515b4bda2f535ddea0ed',
+    //   role: 4,
+    //   checkResult: 2,
+    //   reviewer: '5d38515b4bda2f535ddea0ed',
+    //   area: '5d4bbcdf40fdb006f1c8be03'
+    // }
+    // await this.roleService.createPoliceByCMS(createRole)
     // await this.callbackService.upDeviceToZOC(code)
     // await this.callbackService.upResidentToZOC(code)
     // await this.camera.getPersionInfo('22', 1, 2)
