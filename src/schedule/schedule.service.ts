@@ -19,6 +19,7 @@ import { IRole } from 'src/module/role/interfaces/role.interfaces';
 import { IBlack } from 'src/module/black/interfaces/black.interfaces';
 import { LogRecordService } from 'src/module/logRecord/logRecord.service';
 import { SchoolService } from 'src/module/school/school.service';
+import { ISchool } from 'src/module/school/interfaces/school.interfaces';
 
 @Injectable()
 export class ScheduleService {
@@ -342,8 +343,9 @@ export class ScheduleService {
 
     Schedule.scheduleJob('*/5 * * * * *', async () => {
       const residents: IResident[] = await this.residentService.findByCondition({ checkResult: { $in: [4, 5] } })
-      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
-      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
+      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: { $in: [4, 5] } })
+      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: { $in: [4, 5] } })
+      const schools: ISchool[] = await this.schoolService.findByCondition({ checkResult: { $in: [4, 5] } })
       await Promise.all(residents.map(async resident => {
         const checkResult = await this.faceService.checkResult(resident._id)
         return await this.residentService.updateById(resident._id, { checkResult });
@@ -358,6 +360,12 @@ export class ScheduleService {
         return await this.blackService.updateById(black._id, { checkResult });
 
       }))
+      await Promise.all(schools.map(async school => {
+        const checkResult = await this.faceService.checkResult(school._id)
+        return await this.schoolService.updateById(school._id, { checkResult });
+
+      })
+      )
     });
 
     Schedule.scheduleJob('*/1 * * * *', async () => {
