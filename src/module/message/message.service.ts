@@ -40,14 +40,18 @@ export class MessageService {
   // 查询全部数据
   async findAll(pagination: Pagination, receiver: string): Promise<IList<IMessage>> {
     const condition = { isDelete: false, receiver };
-    const list = await this.messageModel
+    const results = await this.messageModel
       .find(condition)
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ createdAt: -1 })
-      .populate({ path: 'sender', model: 'user' })
-      .lean()
-      .exec();
+    const list = await Promise.all(results.map(async result => {
+      if (result.type === 'black') {
+        return result.populate({ path: 'sender', model: 'black' })
+      } else {
+        return result.populate({ path: 'sender', model: 'user' })
+      }
+    }))
     const total = await this.messageModel.countDocuments(condition);
     return { list, total };
   }
