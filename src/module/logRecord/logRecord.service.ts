@@ -30,11 +30,14 @@ export class LogRecordService {
     const preDate = moment().add(-1, 'd').format('YYYY-MM-DD')
     const preLog: ILogRecord | null = await this.logRecordModel.findOne({ date: preDate })
     const client = this.redis.getClient()
+    const socCount = Number(await client.hget(this.config.LOG, this.config.LOG_SOC))
     const residentCount = Number(await client.hget(this.config.LOG, this.config.LOG_RESIDENT))
     const enRecordCount = Number(await client.hget(this.config.LOG, this.config.LOG_ENRECORD))
     const deviceCount = Number(await client.hget(this.config.LOG, this.config.LOG_DEVICE))
     const data: IUploadRecord = {
       date,
+      socCount,
+      socTotal: preLog ? preLog.socTotal ? preLog.socTotal + socCount : socCount : socCount,
       residentCount,
       residentTotal: preLog ? preLog.residentTotal + residentCount : residentCount,
       enRecordCount,
@@ -206,7 +209,7 @@ export class LogRecordService {
     console.log(condition, 'condition')
     const data: IUserRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ residentCount: 0, residentTotal: 0, enRecordCount: 0, enRecordTotal: 0, deviceCount: 0, deviceTotal: 0 })
+      .select({ residentCount: 0, residentTotal: 0, enRecordCount: 0, enRecordTotal: 0, deviceCount: 0, deviceTotal: 0, socCount: 0, socTotal: 0 })
       .sort({ date: 1 })
       .lean()
       .exec()
@@ -230,7 +233,7 @@ export class LogRecordService {
     }
     const data: IUserRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ residentCount: 0, residentTotal: 0, enRecordCount: 0, enRecordTotal: 0, deviceCount: 0, deviceTotal: 0 })
+      .select({ residentCount: 0, residentTotal: 0, enRecordCount: 0, enRecordTotal: 0, deviceCount: 0, deviceTotal: 0, socCount: 0, socTotal: 0 })
       .sort({ date: 1 })
       .lean()
       .exec()
@@ -249,7 +252,7 @@ export class LogRecordService {
     const condition: any = this.getCondition(type)
     const data: IUploadRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ date: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1 })
+      .select({ date: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1, socCount: 1, socTotal: 1 })
       .sort({ date: 1 })
       .lean()
       .exec()
@@ -273,7 +276,7 @@ export class LogRecordService {
     }
     const data: IUploadRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ date: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1 })
+      .select({ date: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1, socCount: 1, socTotal: 1 })
       .sort({ date: 1 })
       .lean()
       .exec()

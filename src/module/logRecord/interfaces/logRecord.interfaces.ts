@@ -77,6 +77,10 @@ export interface IUserRecord {
 export interface IUploadRecord {
   // 日期
   date: string;
+  // 一标三实
+  socCount: number,
+  // 一标三实总量
+  socTotal: number,
   // 住户上传数
   residentCount: number;
   // 住户信息上报总量
