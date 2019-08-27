@@ -201,6 +201,7 @@ export class CallbackService {
 
   // 发送消息
   async sendMessage(orbit: IOrbit, user: IUser, device: IDevice) {
+    console.log(user, 'user')
     const receivers: IReceiver[] = await this.receivers(user, device.zone)
     console.log(receivers, 'receivers')
     return await Promise.all(receivers.map(async receiver => {
@@ -322,6 +323,7 @@ export class CallbackService {
     const schools: ISchool[] = await this.schoolService.findByCondition({
       isDelete: false, user: user._id, checkResult: 2, type: 'student'
     })
+    console.log(schools, 'schools')
     schools.map(school => {
       school.parent.map(parent => {
         receivers.push({ id: parent.user, type: 'student' })
