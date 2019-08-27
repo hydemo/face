@@ -181,7 +181,7 @@ export class ZoneController {
   ) {
     const zone = await this.zoneService.findById(id)
     await this.blackService.addToZone(req.user._id, zone, black);
-    return { statusCode: 200, msg: '申请成功成功' };
+    return { statusCode: 200, msg: '申请成功' };
   }
 
   @Get('/:id/blacks')
