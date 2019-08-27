@@ -39,13 +39,14 @@ export class MessageService {
 
   // 查询全部数据
   async findAll(pagination: Pagination, receiver: string, type: string): Promise<IList<IMessage>> {
-
+    console.log(type, 'type')
     const condition: any = { isDelete: false, receiver };
     if (type === 'black') {
       condition.type = 'black'
     } else {
       condition.type = { $ne: 'black' }
     }
+    console.log(condition, 'condition')
     const list = await this.messageModel
       .find(condition)
       .limit(pagination.limit)

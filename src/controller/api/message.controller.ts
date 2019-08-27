@@ -33,6 +33,7 @@ export class MessageController {
     @Query('messageType') messageType: string,
     @Request() req: any,
   ) {
+    console.log(messageType, 'messageType')
     return this.messageService.findAll(pagination, req.user._id, messageType);
   }
 
