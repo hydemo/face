@@ -202,6 +202,7 @@ export class CallbackService {
   // 发送消息
   async sendMessage(orbit: IOrbit, user: IUser, device: IDevice) {
     const receivers: IReceiver[] = await this.receivers(user, device.zone)
+    console.log(receivers, 'receivers')
     return await Promise.all(receivers.map(async receiver => {
       const receiverUser: IUser | null = await this.userService.findById(receiver.id)
       if (!receiverUser) {
