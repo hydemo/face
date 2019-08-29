@@ -9,6 +9,7 @@ import { CryptoUtil } from 'src/utils/crypto.util';
 import { ZOCUtil } from 'src/utils/zoc.util';
 import { CameraUtil } from 'src/utils/camera.util';
 import { PhoneUtil } from 'src/utils/phone.util';
+import { ConfigModule } from 'src/config/config.module';
 
 @Module({
   providers: [
@@ -23,6 +24,7 @@ import { PhoneUtil } from 'src/utils/phone.util';
   exports: [ZoneService],
   imports: [
     DatabaseModule,
+    ConfigModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
 })

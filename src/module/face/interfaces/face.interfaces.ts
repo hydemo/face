@@ -6,7 +6,7 @@ export interface IFace extends Document {
   // 设备
   readonly device: IDevice;
   // 用户
-  readonly user: IUser;
+  readonly user: any;
   // 类型
   readonly mode: number;
   // 库索引

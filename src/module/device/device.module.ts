@@ -11,6 +11,7 @@ import { ConfigModule } from 'src/config/config.module';
 import { SOCUtil } from 'src/utils/soc.util';
 import { CameraUtil } from 'src/utils/camera.util';
 import { PhoneUtil } from 'src/utils/phone.util';
+import { FaceModule } from '../face/face.module';
 
 @Module({
   providers: [
@@ -26,6 +27,7 @@ import { PhoneUtil } from 'src/utils/phone.util';
     DatabaseModule,
     ZoneModule,
     ConfigModule,
+    FaceModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
 })

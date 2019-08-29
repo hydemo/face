@@ -4,6 +4,8 @@ import { LogRecordService } from './logRecord.service';
 import { DatabaseModule } from 'src/database/database.module';
 import { logRecordProviders } from './logRecord.providers';
 import { ConfigModule } from 'src/config/config.module';
+import { UserModule } from '../users/user.module';
+import { ResidentModule } from '../resident/resident.module';
 
 @Module({
   providers: [LogRecordService, ...logRecordProviders],
@@ -11,6 +13,8 @@ import { ConfigModule } from 'src/config/config.module';
   imports: [
     DatabaseModule,
     ConfigModule,
+    UserModule,
+    ResidentModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
 })

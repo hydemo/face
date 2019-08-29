@@ -301,7 +301,6 @@ export class CameraUtil {
   * @param face 名单信息
   */
   async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: IFace) {
-    console.log(device, 'device')
     const { username, password, deviceUUID, _id, version, session } = device
     const id = String(_id)
     const timeStamp: number = this.getTemp()
@@ -350,7 +349,6 @@ export class CameraUtil {
     if (!poolExist) {
       await client.hset('p2p_pool', id, 1)
     }
-    console.log(upData, 'updata')
     await client.lpush(`p2p_${id}`, JSON.stringify(upData))
   }
 
@@ -590,7 +588,6 @@ export class CameraUtil {
       }
       return code;
     } catch (error) {
-      console.log(error, 'error')
 
       const newErrorData = { count: count + 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)
@@ -613,11 +610,9 @@ export class CameraUtil {
     return img
   }
 
-  async addToDevice(device: IDevice, user: any, Img: string) {
-    const { username, password, deviceUUID } = device
-    // const deviceUUID = 'umety9isv6as'
-    // const username = 'admin'
-    // const password = 'oyxj19891024'
+  async addToDevice(deviceUUID: string, user: any, Img: string) {
+    const username = 'admin'
+    const password = 'oyxj19891024'
     // const id = String(_id)
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
@@ -625,37 +620,61 @@ export class CameraUtil {
     // console.log(user.faceUrl, 'facedd')
     // const Img = await this.getImg(`${user.faceUrl}`);
     // if (version === '1.0.0') {
-    const ImgName = user.username;
-    const ImgNum = user._id;
+    // const ImgName = user.username;
+    // const ImgNum = user._id;
     const data = {
-      Name: 'WBListInfoREQ',
+      Name: "personListRequest",
       TimeStamp: timeStamp,
       Sign: sign,
-      Mode: 2,
-      Action: 'AddOnePic',
       UUID: deviceUUID,
-      AddOnePic: {
-        Img,
-        ImgName,
-        ImgNum,
+      // Session: session,
+      Data: {
+        Action: 'addPerson',
+        PersonType: 2,
+        PersonInfo: {
+          PersonId: user._id,
+          PersonName: user.username,
+          PersonPhoto: Img
+        }
       }
     }
+    try {
+      const result: any = await axios({
+        method: 'post',
+        url: this.config.p2pUrl2,
+        data,
+      })
+      if (result.data.Code === 1) {
+        return 'success';
+      }
+      let code
+      switch (result.data.Data.Result) {
+        case -3: code = 'success'
+          break;
+        case -21: code = 'success'
+          break;
+        case -15: code = 'imgError'
+          break;
+        case -13: code = 'imgError'
+          break;
+        // case -19: code = 'error'
+        //   break;
+        // case -20: code = 'error'
+        //   break;
+        // default: code = 'final'
+        //   break;
+      }
+      return code
+    } catch (error) {
+      return false
+    }
 
-    const result: any = await axios({
-      method: 'post',
-      url: this.config.p2pUrl,
-      data,
-    })
-    console.log(result.data, 'result')
-    if (result.data.Result === 'ok') {
-      return result.data.AddOnePic;
-    }
-    if (result.data.ErrorCode === -15 || result.data.ErrorCode === -13 || result.data.Code === -15 || result.data.Code === -13) {
-      return 'imgError'
-    }
-    if (result.data.ErrorCode === -3) {
-      // console.log(user, 'user')
-      return 'exist'
-    }
+    // if (result.data.Data.Result === -15 || result.data.ErrorCode === -13 || result.data.Code === -15 || result.data.Code === -13) {
+    //   return 'imgError'
+    // }
+    // if (result.data.ErrorCode === -3) {
+    //   // console.log(user, 'user')
+    //   return 'exist'
+    // }
   }
 }

@@ -198,7 +198,7 @@ export class SchoolService {
   // 添加人员到设备
   async addToDevice(zone: IZone, user: IUser, school: string, expire?: Date) {
     const zoneIds = [...zone.ancestor, zone._id]
-    const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
+    const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds }, enable: true })
     // if (!expire) {
     //   let phone = user.phone
     //   if (!phone) {
@@ -294,7 +294,7 @@ export class SchoolService {
     // 发送审核通过消息
     this.sendVerifyMessage(headTeacher.address.houseNumber, '教务', '班主任', headTeacher.user.openId)
     const client = this.redis.getClient()
-    await client.hincrby(this.config.LOG, this.config.LOG_OWNER, 1)
+    // await client.hincrby(this.config.LOG, this.config.LOG_OWNER, 1)
     return true;
   }
 

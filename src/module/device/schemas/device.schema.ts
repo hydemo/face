@@ -33,7 +33,7 @@ export const DeviceSchema = new mongoose.Schema(
     // 是否绑定
     isBind: { type: Boolean, default: false },
     // 是否删除
-    isDelete: { type: Boolean },
+    isDelete: { type: Boolean, default: false },
     // 广告机
     media: ObjectId,
     // 版本

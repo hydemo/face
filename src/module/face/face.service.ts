@@ -168,8 +168,8 @@ export class FaceService {
 
   // 根据id删除
   async checkResult(bondToObjectId: string): Promise<number> {
-    const isFail = await this.faceModel.findOne({ bondToObjectId, checkResult: 3 })
-    const isPending = await this.faceModel.findOne({ bondToObjectId, checkResult: 1 })
+    const isFail = await this.faceModel.findOne({ bondToObjectId, checkResult: 3, isDelete: false })
+    const isPending = await this.faceModel.findOne({ bondToObjectId, checkResult: 1, isDelete: false })
     if (isFail) {
       return 5
     }
@@ -235,11 +235,17 @@ export class FaceService {
   }
 
   async success(user, device, result) {
-    await this.faceModel.updateMany({ user, device, checkResult: 1, isDelete: false }, {
-      libIndex: result.LibIndex,
-      flieIndex: result.FlieIndex,
-      pic: result.Pic,
+    await this.faceModel.updateMany({ user, device: '5d2949ef86020e6ef275e870', checkResult: 1, isDelete: false }, {
+      // libIndex: result.LibIndex,
+      // flieIndex: result.FlieIndex,
+      // pic: result.Pic,
       checkResult: 2
+    })
+  }
+
+  async disableDevice(device: string) {
+    await this.faceModel.updateMany({ device, isDelete: false }, {
+      isDelete: true
     })
   }
 }

@@ -13,12 +13,15 @@ import { ITask } from '../task/interfaces/task.interfaces';
 import { ZOCUtil } from 'src/utils/zoc.util';
 import { RedisService } from 'nestjs-redis';
 import { ConfigService } from 'src/config/config.service';
+import { FaceService } from '../face/face.service';
+import { IFace } from '../face/interfaces/face.interfaces';
 
 @Injectable()
 export class DeviceService {
   constructor(
     @Inject('DeviceModelToken') private readonly deviceModel: Model<IDevice>,
     @Inject(ZoneService) private readonly zoneService: ZoneService,
+    @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
@@ -63,7 +66,6 @@ export class DeviceService {
   async findByCondition(condition: any): Promise<IDevice[]> {
     return await this.deviceModel.find(condition).lean().exec();
   }
-
   // 查询全部数据
   async findAll(pagination: Pagination): Promise<IList<IDevice>> {
     const search: any = [];
@@ -121,7 +123,7 @@ export class DeviceService {
   }
 
   async findByAreaId(area: string): Promise<IDevice[]> {
-    return await this.deviceModel.find({ area }).lean().exec()
+    return await this.deviceModel.find({ area, enable: true }).lean().exec()
   }
 
   // 绑定旧sim卡
@@ -135,5 +137,29 @@ export class DeviceService {
   // 更新session
   async updateSession(deviceUUID: String, session: string) {
     return await this.deviceModel.findOneAndUpdate({ deviceUUID }, { session });
+  }
+
+  // 停用设备
+  async disable(_id: string) {
+    await this.faceService.disableDevice(_id)
+    return await this.deviceModel.findByIdAndUpdate(_id, { enable: false });
+  }
+  // 启用设备
+  async enable(_id: string, media: string) {
+    return await this.deviceModel.findByIdAndUpdate(_id, { enable: true });
+  }
+
+  // 复制设备
+  async copy(uuid: string, newUUID: string) {
+    const device = await this.deviceModel.findOne({ deviceUUID: uuid })
+    if (!device) {
+      return
+    }
+    const client = this.redis.getClient()
+    await client.hset('copy', newUUID, 1)
+    const faces: IFace[] = await this.faceService.findByCondition({ device: device._id, isDelete: false })
+    await Promise.all(faces.map(async face => {
+      await client.hset(`copy_${newUUID}`, face.user, 1)
+    }))
   }
 }

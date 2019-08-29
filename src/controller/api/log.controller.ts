@@ -6,13 +6,14 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from 'src/common/guard/roles.guard';
 import { LogRecordService } from 'src/module/logRecord/logRecord.service';
+import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
+import { UserRoles } from 'src/common/decorator/roles.decorator';
 
 
 @ApiUseTags('logs')
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-// @UseGuards(AuthGuard())
+@UseGuards(AuthGuard(), UserRolesGuard)
 @Controller('api/logs')
 export class LogController {
   constructor(

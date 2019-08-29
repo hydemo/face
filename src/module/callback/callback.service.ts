@@ -30,6 +30,7 @@ import { IRole } from '../role/interfaces/role.interfaces';
 import { RoleService } from '../role/role.service';
 import { ISchool } from '../school/interfaces/school.interfaces';
 import { SchoolService } from '../school/school.service';
+import { SOCUtil } from 'src/utils/soc.util';
 
 interface IReceiver {
   id: string;
@@ -49,6 +50,7 @@ export class CallbackService {
     @Inject(QiniuUtil) private readonly qiniuUtil: QiniuUtil,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
     @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
+    @Inject(SOCUtil) private readonly socUtil: SOCUtil,
     @Inject(ZoneService) private readonly zoneService: ZoneService,
     @Inject(BlackService) private readonly blackService: BlackService,
     @Inject(RoleService) private readonly roleService: RoleService,
@@ -446,7 +448,7 @@ export class CallbackService {
 
   }
 
-  // 心跳包处理
+  // 上报设备
   async upDeviceToZOC(code: string) {
     const devices: IDevice[] = await this.deviceService.findByZoneId(code)
     const zone = await this.zoneService.findById(code)
@@ -463,16 +465,19 @@ export class CallbackService {
     }))
   }
 
-  // 心跳包处理
+  // 上报人口zoc
   async upResidentToZOC(zone: string) {
+    const client = this.redis.getClient()
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
-    const residents: IResident[] = await this.residentService.findByCondition({ zone, checkResult: 2, isDelete: false })
+    const residents: IResident[] = await this.residentService.findByCondition({ zone, checkResult: { $in: [2, 4, 5] }, isDelete: false })
+    const count = residents.length
     const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
     const deviceIds = devices.map(device => String(device.deviceId))
     const zoneDetail: IZone = await this.zoneService.findById(zone)
     const { detail } = zoneDetail
     const residentDatas: any = []
+
     await Promise.all(residents.map(async resident => {
       const user: IUser | null = await this.userService.updateById(resident.user, {})
       const address: IZone = await this.zoneService.findById(resident.address)
@@ -488,13 +493,53 @@ export class CallbackService {
         }
         phone = owner.phone
       }
-      const data = await this.zocUtil.genResidentData(address.profile, detail, user, deviceIds, phone)
-      residentDatas.push(data)
+      const zocData = await this.zocUtil.genResidentData(address.profile, detail, user, deviceIds, phone)
+      residentDatas.push(zocData)
 
     }))
     await this.zocUtil.genResident(zip, time, residentDatas)
-    const data = await this.zocUtil.upload(zip, time)
-    return data
-  }
+    const zocResult = await this.zocUtil.upload(zip, time)
+    if (zocResult.success) {
+      await this.residentService.updateMany({ zone, checkResult: 2, isDelete: false }, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
+      client.hincrby(this.config.LOG, this.config.LOG_RESIDENT, count)
+    }
 
+    // return data
+  }
+  // 上报人口soc
+  async upResidentToSOC(zone: string) {
+    const client = this.redis.getClient()
+    const residents: IResident[] = await this.residentService.findByCondition({ zone, checkResult: { $in: [2, 4, 5] }, isDelete: false })
+    const count = residents.length
+    const socDatas: any = []
+    console.log()
+    await Promise.all(residents.map(async resident => {
+      const user: IUser | null = await this.userService.updateById(resident.user, {})
+      const address: IZone = await this.zoneService.findById(resident.address)
+      const reviewer: IUser | null = await this.userService.updateById(resident.reviewer, {})
+      const zone: IZone = await this.zoneService.findById(resident.zone)
+      if (!user || !reviewer || !user.cardNumber) {
+        return
+      }
+      let phone = user.phone
+      if (!phone) {
+        const owner: IUser | null = await this.userService.findById(resident.reviewer)
+        if (!owner) {
+          return
+        }
+        phone = owner.phone
+      }
+
+      const socData = await this.socUtil.genResidentData(address.profile.dzbm, user, phone, reviewer, zone.detail)
+      await this.residentService.updateById(resident._id, { SOCOrder: socData.lv_sbxxlsh })
+      socDatas.push(socData)
+
+    }))
+    const socResult = await this.socUtil.upload(socDatas)
+    if (socResult) {
+      await this.residentService.updateMany({ zone, checkResult: 2, isDelete: false }, { isSOCPush: true })
+      client.hincrby(this.config.LOG, this.config.LOG_SOC, count)
+    }
+    console.log(socDatas, 'socd')
+  }
 }

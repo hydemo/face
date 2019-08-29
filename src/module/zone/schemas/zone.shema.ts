@@ -48,6 +48,8 @@ export const ZoneSchema = new mongoose.Schema(
     isZOCPush: { type: Boolean, defaut: false },
     // 智能感知平台包名
     ZOCZip: String,
+    // 上报时间
+    upTime: Date,
     // 小区参数
     profile: {
       // GUID地址编码

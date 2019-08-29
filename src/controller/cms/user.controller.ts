@@ -20,7 +20,7 @@ import { CreateAdminRole, CreatePoliceRole } from 'src/module/role/dto/role.dto'
 
 @ApiUseTags('cms/users')
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-// @UseGuards(AuthGuard(), RolesGuard)
+@UseGuards(AuthGuard(), RolesGuard)
 @Controller('cms/users')
 export class CMSUserController {
   constructor(

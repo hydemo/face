@@ -15,7 +15,7 @@ import { CreateAreaDTO } from 'src/module/area/dto/area.dto';
 @ApiUseTags('cms/area')
 @ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-// @UseGuards(AuthGuard())
+@UseGuards(AuthGuard())
 @Controller('cms/area')
 export class CMSAreaController {
   constructor(

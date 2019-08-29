@@ -142,7 +142,6 @@ export class ScheduleService {
   }
 
   async handelP2P(data, sourceData, dataString, client, type) {
-    // console.log(data, 'data')
     const listenTime = await client.hget('p2p_listen', data.device)
     if (listenTime > 5) {
       await client.hset('p2p_listen', data.device, 0)
@@ -203,9 +202,7 @@ export class ScheduleService {
           }
           p2pData = { ...data, data: { ...deleteData, DeleteOnePic } }
         }
-        // console.log(p2pData)
       }
-      // console.log()
       const result = type === 'p2p' ? await this.camera.handleP2P(p2pData) : await this.camera.handleP2PEroor(sourceData)
       if (result === 'success') {
         await this.faceService.updateById(data.face._id, { checkResult: 2 })
@@ -308,7 +305,6 @@ export class ScheduleService {
         }
         const dataString: any = await client.rpop(`p2p_${pool}`)
         const data = JSON.parse(dataString)
-        // console.log(data, 'data')
         await this.handelP2P(data, data, dataString, client, 'p2p')
       }))
     });
@@ -393,50 +389,40 @@ export class ScheduleService {
       }))
     });
 
-    // Schedule.scheduleJob('*/15 * * * * * ', async () => {
-    //   // const ids = [
-    //   //   // '5d2949ef86020e6ef275e870',
-    //   //   // '5d294ac086020e6ef275e87c', 
-    //   //   // '5d294ba286020e6ef275e8bb', 
-    //   //   // '5d2ada8217785a2bca9ad1bd', 
-    //   //   '5d2adad017785a2bca9ad1c1',
-    //   //   // '5d2d5a6faec31302477e0ef9',
-    //   // ]
-    //   const devices: IDevice[] = await this.deviceService.findByCondition({})
-    //   const client = this.redis.getClient()
-    //   await Promise.all(devices.map(async device => {
-    //     const listenTime = await client.hget('p2p_listen', String(device._id))
-    //     if (Number(listenTime) > 0) {
-    //       return;
-    //     }
-    //     await client.hset('p2p_listen', String(device._id), 1)
-    //     const keys = await client.hkeys(`sync_${device._id}`)
-    //     if (keys.length) {
-    //       const userId = keys[0]
-    //       const user = await this.userService.findById(userId)
-    //       if (!user) {
-    //         return
-    //       }
-    //       // console.log(user.faceUrl, 'face')
-    //       const img = await this.camera.getImg(`${user.faceUrl}`);
-    //       const result = await this.camera.addToDevice(device, user, img)
-    //       if (result === 'imgError') {
-    //         // console.log(user, 'user')
-    //         await client.hset(`imgError_${device._id}`, user._id, user.faceUrl)
-    //         await client.hdel(`sync_${device._id}`, userId)
+    Schedule.scheduleJob('*/15 * * * * * ', async () => {
+      const client = this.redis.getClient()
+      const devices = await client.hkeys('copy')
+      await Promise.all(devices.map(async device => {
+        const listenTime = await client.hget('p2p_listen', String(device))
+        if (Number(listenTime) > 0) {
+          return;
+        }
+        await client.hset('p2p_listen', device, 1)
+        const keys = await client.hkeys(`copy_${device}`)
+        if (keys.length) {
+          const userId = keys[0]
+          const user = await this.userService.findById(userId)
+          if (!user) {
+            return
+          }
+          const img = await this.camera.getImg(`${user.faceUrl}`);
+          const result = await this.camera.addToDevice(device, user, img)
+          if (result === 'imgError') {
+            await client.hset(`copyImgError_${device}`, user._id, user.faceUrl)
+            await client.hdel(`copy_${device}`, userId)
 
-    //       }
-    //       if (result && result.Pic) {
-    //         await this.faceService.success(userId, device._id, result)
-    //         await client.hdel(`sync_${device._id}`, userId)
-    //       }
-    //       if (result === 'exist') {
-    //         await client.hset(`exist_${device._id}`, user._id, user.faceUrl)
-    //         await client.hdel(`sync_${device._id}`, userId)
-    //       }
-    //       await client.hset('p2p_listen', String(device._id), 0)
-    //     }
-    //   }))
-    // });
+          }
+          if (result === 'success') {
+            await this.faceService.success(userId, device._id, result)
+            await client.hdel(`copy_${device}`, userId)
+          }
+          if (result === 'exist') {
+            await client.hset(`copyExist_${device}`, user._id, user.faceUrl)
+            await client.hdel(`copy_${device}`, userId)
+          }
+          await client.hset('p2p_listen', device, 0)
+        }
+      }))
+    });
   }
 }

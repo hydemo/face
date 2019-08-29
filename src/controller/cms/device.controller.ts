@@ -16,7 +16,6 @@ import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 
 
 @ApiUseTags('devices')
-@UseGuards(AuthGuard(), RolesGuard)
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('cms/devices')
 export class CMSDeviceController {
@@ -97,5 +96,6 @@ export class CMSDeviceController {
     await this.deviceService.unbindMedia(_id);
     return { statusCode: 200, msg: '解绑广告机成功' };
   }
+
 
 }

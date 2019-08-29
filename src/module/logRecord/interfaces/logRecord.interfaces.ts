@@ -12,9 +12,9 @@ export interface ILogRecord extends Document {
   // 总访问量
   totalCount: number;
   // 一标三实
-  socCount: number,
+  socCount: number;
   // 一标三实总量
-  socTotal: number,
+  socTotal: number;
   // 住户上传数
   residentCount: number;
   // 住户信息上报总量
@@ -23,6 +23,10 @@ export interface ILogRecord extends Document {
   enRecordCount: number;
   // 刷卡记录上传总量
   enRecordTotal: number;
+  // 物业上传数
+  propertyCoCount: number;
+  // 物业信息上报总量
+  propertyCoTotal: number;
   // 设备上传数
   deviceCount: number;
   // 设备上传总量
@@ -93,4 +97,8 @@ export interface IUploadRecord {
   deviceCount: number;
   // 设备上传总量
   deviceTotal: number;
+  // 物业上传数
+  propertyCoCount: number;
+  // 物业信息上报总量
+  propertyCoTotal: number;
 }

@@ -24,6 +24,10 @@ export const LogRecordSchema = new mongoose.Schema(
     enRecordCount: { type: Number, default: 0 },
     // 刷卡记录上传总量
     enRecordTotal: Number,
+    // 物业上传数
+    propertyCoCount: { type: Number, default: 0 },
+    // 物业信息上报总量
+    propertyCoTotal: Number,
     // 设备上传数
     deviceCount: { type: Number, default: 0 },
     // 设备上传总量

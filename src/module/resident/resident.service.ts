@@ -39,6 +39,7 @@ import { ApplicationDTO } from 'src/common/dto/Message.dto';
 import { PreownerService } from '../preowner/preowner.service';
 import { ZOCUtil } from 'src/utils/zoc.util';
 import { IZoneProfile } from '../zone/interfaces/zonePrifile.interface';
+import { SOCUtil } from 'src/utils/soc.util';
 
 @Injectable()
 export class ResidentService {
@@ -51,6 +52,7 @@ export class ResidentService {
     @Inject(FaceService) private readonly faceService: FaceService,
     @Inject(WeixinUtil) private readonly weixinUtil: WeixinUtil,
     @Inject(ZOCUtil) private readonly zocUtil: ZOCUtil,
+    @Inject(SOCUtil) private readonly socUtil: SOCUtil,
     @Inject(RoleService) private readonly roleService: RoleService,
     @Inject(ConfigService) private readonly config: ConfigService,
     @Inject(PreownerService) private readonly preownerService: PreownerService,
@@ -217,22 +219,44 @@ export class ResidentService {
     }
   }
 
+  // 上报常住人至一标三实
+  async uploadToSoc(id: string, phone: string, dzbm: string) {
+    const resident: IResident | null = await this.residentModel.findById(id)
+    if (!resident) {
+      return
+    }
+    const zone: IZone = await this.zoneService.findById(resident.zone)
+    const user: IUser | null = await this.userService.updateById(resident.user, {})
+    const reviewer: IUser | null = await this.userService.updateById(resident.reviewer, {})
+    if (!user || !reviewer) {
+      return
+    }
+    const socData = await this.socUtil.genResidentData(dzbm, user, phone, reviewer, zone.detail)
+    const result = await this.socUtil.upload([socData])
+    if (result) {
+      const client = this.redis.getClient()
+      client.hincrby(this.config.LOG, this.config.LOG_SOC, 1)
+      await this.residentModel.findByIdAndUpdate(resident, { isSOCPush: true, SOCOrder: socData.lv_sbxxlsh, })
+    }
+  }
+
   // 添加人员到设备
   async addToDevice(zone: IZone, user: IUser, resident: string, expire?: Date) {
     const zoneIds = [...zone.ancestor, zone._id]
-    const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds } })
-    // if (!expire) {
-    //   let phone = user.phone
-    //   if (!phone) {
-    //     const owner = await this.userService.findById(zone.owner)
-    //     if (!owner) {
-    //       return
-    //     }
-    //     phone = owner.phone
-    //   }
-    //   const deviceIds = devices.map(device => String(device.deviceId))
-    //   this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
-    // }
+    const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds }, enable: true })
+    if (!expire) {
+      let phone = user.phone
+      if (!phone) {
+        const owner = await this.userService.findById(zone.owner)
+        if (!owner) {
+          return
+        }
+        phone = owner.phone
+      }
+      const deviceIds = devices.map(device => String(device.deviceId))
+      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
+      this.uploadToSoc(resident, phone, zone.profile.dzbm)
+    }
     const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
       const faceCheck: IFace | null = await this.faceService.findOne({ bondToObjectId: resident, device: device._id, isDelete: false })
@@ -382,6 +406,10 @@ export class ResidentService {
       throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
     }
     return resident;
+  }
+
+  async count(condition): Promise<number> {
+    return await this.residentModel.countDocuments(condition)
   }
   /**
    * 基础功能
@@ -1077,6 +1105,11 @@ export class ResidentService {
   // 根据id修改
   async updateById(id: string, update: any): Promise<IResident | null> {
     return await this.residentModel.findByIdAndUpdate(id, update)
+  }
+
+  // 根据id修改
+  async updateMany(condition: any, update: any): Promise<IResident | null> {
+    return await this.residentModel.updateMany(condition, update)
   }
 
   // 根据id修改

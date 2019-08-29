@@ -4,11 +4,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ILogRecord, IUploadRecord, IUserRecord } from './interfaces/logRecord.interfaces';
 import { RedisService } from 'nestjs-redis';
 import { ConfigService } from 'src/config/config.service';
+import { UserService } from '../users/user.service';
+import { ResidentService } from '../resident/resident.service';
 
 @Injectable()
 export class LogRecordService {
   constructor(
     @Inject('LogRecordModelToken') private readonly logRecordModel: Model<ILogRecord>,
+    @Inject(UserService) private readonly userService: UserService,
+    @Inject(ResidentService) private readonly residentService: ResidentService,
     private redis: RedisService,
     private config: ConfigService,
   ) { }
@@ -33,6 +37,7 @@ export class LogRecordService {
     const socCount = Number(await client.hget(this.config.LOG, this.config.LOG_SOC))
     const residentCount = Number(await client.hget(this.config.LOG, this.config.LOG_RESIDENT))
     const enRecordCount = Number(await client.hget(this.config.LOG, this.config.LOG_ENRECORD))
+    const propertyCoCount = Number(await client.hget(this.config.LOG, this.config.LOG_PROPERTYCO))
     const deviceCount = Number(await client.hget(this.config.LOG, this.config.LOG_DEVICE))
     const data: IUploadRecord = {
       date,
@@ -41,6 +46,8 @@ export class LogRecordService {
       residentCount,
       residentTotal: preLog ? preLog.residentTotal + residentCount : residentCount,
       enRecordCount,
+      propertyCoCount,
+      propertyCoTotal: preLog ? propertyCoCount + preLog.propertyCoTotal : enRecordCount,
       enRecordTotal: preLog ? preLog.enRecordTotal + enRecordCount : enRecordCount,
       deviceCount,
       deviceTotal: preLog ? preLog.deviceTotal + deviceCount : deviceCount,
@@ -55,13 +62,15 @@ export class LogRecordService {
     const socExist = await client.hget(this.config.LOG, this.config.LOG_SOC)
     const residentExist = await client.hget(this.config.LOG, this.config.LOG_RESIDENT)
     const enRecordExist = await client.hget(this.config.LOG, this.config.LOG_ENRECORD)
+    const propertyCoExist = await client.hget(this.config.LOG, this.config.LOG_PROPERTYCO)
     const deviceExist = await client.hget(this.config.LOG, this.config.LOG_DEVICE)
     const verifyExist = await client.hget(this.config.LOG, this.config.LOG_VERIFY)
     const blackExist = await client.hget(this.config.LOG, this.config.LOG_BLACK)
     const openExist = await client.hget(this.config.LOG, this.config.LOG_OPEN)
     const ownerExist = await client.hget(this.config.LOG, this.config.LOG_OWNER)
     if (!userExist) {
-      await client.hset(this.config.LOG, this.config.LOG_USER, 0)
+      const userCount = await this.userService.count({ isPhoneVerify: true })
+      await client.hset(this.config.LOG, this.config.LOG_USER, userCount)
     }
     if (!totalExist) {
       await client.hset(this.config.LOG, this.config.LOG_TOTAL, 0)
@@ -75,11 +84,15 @@ export class LogRecordService {
     if (!enRecordExist) {
       await client.hset(this.config.LOG, this.config.LOG_ENRECORD, 0)
     }
+    if (!propertyCoExist) {
+      await client.hset(this.config.LOG, this.config.LOG_PROPERTYCO, 1)
+    }
     if (!deviceExist) {
-      await client.hset(this.config.LOG, this.config.LOG_DEVICE, 0)
+      await client.hset(this.config.LOG, this.config.LOG_DEVICE, 6)
     }
     if (!verifyExist) {
-      await client.hset(this.config.LOG, this.config.LOG_VERIFY, 0)
+      const verifyCount = await this.userService.count({ isVerify: true })
+      await client.hset(this.config.LOG, this.config.LOG_VERIFY, verifyCount)
     }
     if (!blackExist) {
       await client.hset(this.config.LOG, this.config.LOG_BLACK, 0)
@@ -88,7 +101,8 @@ export class LogRecordService {
       await client.hset(this.config.LOG, this.config.LOG_OPEN, 0)
     }
     if (!ownerExist) {
-      await client.hset(this.config.LOG, this.config.LOG_OWNER, 0)
+      const ownerCount = await this.residentService.count({ type: 'owner', isDelete: false })
+      await client.hset(this.config.LOG, this.config.LOG_OWNER, ownerCount)
     }
   }
 
@@ -135,6 +149,7 @@ export class LogRecordService {
     const socCount = Number(await client.hget(this.config.LOG, this.config.LOG_SOC))
     const residentCount = Number(await client.hget(this.config.LOG, this.config.LOG_RESIDENT))
     const enRecordCount = Number(await client.hget(this.config.LOG, this.config.LOG_ENRECORD))
+    const propertyCoCount = Number(await client.hget(this.config.LOG, this.config.LOG_PROPERTYCO))
     const deviceCount = Number(await client.hget(this.config.LOG, this.config.LOG_DEVICE))
     const verifyCount = Number(await client.hget(this.config.LOG, this.config.LOG_VERIFY))
     const blackCount = Number(await client.hget(this.config.LOG, this.config.LOG_BLACK))
@@ -173,7 +188,11 @@ export class LogRecordService {
       // 刷卡记录上传数
       enRecordCount,
       // 刷卡记录上传总量
-      enRecordTotal: preLog ? enRecordCount + preLog.enRecordCount : enRecordCount,
+      enRecordTotal: preLog ? enRecordCount + preLog.enRecordTotal : enRecordCount,
+      // 物业记录上传数
+      propertyCoCount,
+      // 物业上传总量
+      propertyCoTotal: preLog ? propertyCoCount + preLog.propertyCoTotal : enRecordCount,
       // 设备上传数
       deviceCount,
       // 设备上传总量
@@ -205,10 +224,20 @@ export class LogRecordService {
       return { list: [userRecordToday], today: userRecordToday }
     }
     const condition: any = this.getCondition(type)
-    console.log(condition, 'condition')
     const data: IUserRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ residentCount: 0, residentTotal: 0, enRecordCount: 0, enRecordTotal: 0, deviceCount: 0, deviceTotal: 0, socCount: 0, socTotal: 0 })
+      .select({
+        residentCount: 0,
+        residentTotal: 0,
+        enRecordCount: 0,
+        enRecordTotal: 0,
+        deviceCount: 0,
+        deviceTotal: 0,
+        socCount: 0,
+        socTotal: 0,
+        propertyCoCount: 0,
+        propertyCoTotal: 0,
+      })
       .sort({ date: 1 })
       .lean()
       .exec()
@@ -232,7 +261,18 @@ export class LogRecordService {
     }
     const data: IUserRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ residentCount: 0, residentTotal: 0, enRecordCount: 0, enRecordTotal: 0, deviceCount: 0, deviceTotal: 0, socCount: 0, socTotal: 0 })
+      .select({
+        residentCount: 0,
+        residentTotal: 0,
+        enRecordCount: 0,
+        enRecordTotal: 0,
+        deviceCount: 0,
+        deviceTotal: 0,
+        socCount: 0,
+        socTotal: 0,
+        propertyCoCount: 0,
+        propertyCoTotal: 0,
+      })
       .sort({ date: 1 })
       .lean()
       .exec()
@@ -251,7 +291,19 @@ export class LogRecordService {
     const condition: any = this.getCondition(type)
     const data: IUploadRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ date: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1, socCount: 1, socTotal: 1 })
+      .select({
+        date: 1,
+        residentCount: 1,
+        residentTotal: 1,
+        enRecordCount: 1,
+        enRecordTotal: 1,
+        deviceCount: 1,
+        deviceTotal: 1,
+        socCount: 1,
+        socTotal: 1,
+        propertyCoCount: 1,
+        propertyCoTotal: 1,
+      })
       .sort({ date: 1 })
       .lean()
       .exec()
@@ -275,7 +327,19 @@ export class LogRecordService {
     }
     const data: IUploadRecord[] = await this.logRecordModel
       .find(condition)
-      .select({ date: 1, residentCount: 1, residentTotal: 1, enRecordCount: 1, enRecordTotal: 1, deviceCount: 1, deviceTotal: 1, socCount: 1, socTotal: 1 })
+      .select({
+        date: 1,
+        residentCount: 1,
+        residentTotal: 1,
+        enRecordCount: 1,
+        enRecordTotal: 1,
+        deviceCount: 1,
+        deviceTotal: 1,
+        socCount: 1,
+        socTotal: 1,
+        propertyCoCount: 1,
+        propertyCoTotal: 1,
+      })
       .sort({ date: 1 })
       .lean()
       .exec()

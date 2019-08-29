@@ -7,6 +7,7 @@ import axios from 'axios'
 import { CryptoUtil } from './crypto.util';
 import { IZoneProfile } from 'src/module/zone/interfaces/zonePrifile.interface';
 import { IDetail } from 'src/module/zone/interfaces/detail.interface';
+import { IUser } from 'src/module/users/interfaces/user.interfaces';
 
 @Injectable()
 export class SOCUtil {
@@ -128,44 +129,66 @@ export class SOCUtil {
     // console.log(result, 'result')
     return result.datas[0]
   }
-
+  genResidentData(dzbm: string, user: IUser, phone: string, reviewer: IUser, detail: IDetail) {
+    const order = this.getOrder()
+    const data =
+    {
+      lv_sbxxlsh: order,
+      lv_gmsfhm: user.cardNumber,
+      lv_xm: user.username,
+      lv_zzdz_dzbm: dzbm,
+      lv_lxdh: phone,
+      lv_djdw_jgdm: detail.GAJGJGDM,
+      lv_djdw_jgmc: detail.GAJGJGMC,
+      lv_djr_gmsfhm: reviewer.cardNumber,
+      lv_djr_xm: reviewer.username,
+      lv_djsj: moment().format('YYYYMMDDHHmmss')
+    }
+    return data
+  }
   /**
     * 上传数据
     * 
     * @param code 图片数据
     */
-  async upload(): Promise<any> {
-    const order = this.getOrder()
-    console.log(order, 'xms20190827194423040615613926144', 'xms20190827194541041360501866873')
-    const data = {
-      datas: [
-        {
-          lv_sbxxlsh: order,
-          lv_gmsfhm: '350583198912246076',
-          lv_xm: '欧阳旭靖',
-          lv_zzdz_dzbm: '4DE6E021-F52A-1A9C-E054-90E2BA510A0C',
-          lv_lxdh: '13799746707',
-          lv_djdw_jgdm: this.config.companyAgencyCode,
-          lv_djdw_jgmc: this.config.companyName,
-          lv_djr_gmsfhm: '350583198912246076',
-          lv_djr_xm: '杨晓峰',
-          lv_djsj: moment().format('YYYYMMDDHHmmss')
-        }
-      ],
-      pages: [
-        {
-          "psize": "15",
-          "tcount": "",
-          "pno": "1",
-          "tsize": "",
-        }
-      ]
+  async upload(data): Promise<any> {
+    // const order = this.getOrder()
+    // console.log(order, 'xms20190828161606054305175050110', 'xms20190828161641061573890664984', 'xms20190828161708069922193910883')
+    // const datas = {
+    //   datas: [
+    //     {
+    //       lv_sbxxlsh: order,
+    //       lv_gmsfhm: '350583198912246076',
+    //       lv_xm: '欧阳旭靖',
+    //       lv_zzdz_dzbm: '4DE6E021-F52A-1A9C-E054-90E2BA510A0C',
+    //       lv_lxdh: '13799746707',
+    //       lv_djdw_jgdm: '350583730000',
+    //       lv_djdw_jgmc: '南安市公安局柳城派出所',
+    //       lv_djr_gmsfhm: '350583198912246076',
+    //       lv_djr_xm: '杨晓峰',
+    //       lv_djsj: moment().format('YYYYMMDDHHmmss')
+    //     }
+    //   ],
+    //   pages: [
+    //     {
+    //       "psize": "15",
+    //       "tcount": "",
+    //       "pno": "1",
+    //       "tsize": "",
+    //     }
+    //   ]
+    // }
+    try {
+      const result = await this.socRequest(data, 'shhcj_xxba_jndj')
+      if (result && result.sta.code === '0000') {
+        return true
+      } else {
+        return false
+      }
+    } catch (e) {
+      return false
     }
-    const result = await this.socRequest(data, 'shhcj_xxba_jndj')
-    console.log(result, 'result')
-    if (result.sta.code === '0000') {
-      console.log(333)
-    }
+
   }
 
   async check(order: string) {

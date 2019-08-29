@@ -46,7 +46,7 @@ export class RoleService {
   // 创建警察段
   async createPolice(role: CreatePoliceRole): Promise<IRole | null> {
     const creatRole = await this.roleModel.create(role);
-    const devices = await this.deviceService.findByCondition({ area: role.area })
+    const devices = await this.deviceService.findByCondition({ area: role.area, enable: true })
     const user: IUser | null = await this.userService.findById(role.user)
     if (!user) {
       throw new ApiException('用户不存在', ApiErrorCode.NO_EXIST, 406);
@@ -98,7 +98,7 @@ export class RoleService {
       reviewer
     }
     const result = await this.roleModel.create(createRole);
-    const devices: IDevice[] = await this.deviceService.findByCondition({ zone: role.zone })
+    const devices: IDevice[] = await this.deviceService.findByCondition({ zone: role.zone, enable: true })
     await this.addToDevice(devices, user, result._id)
     return result
   }
@@ -287,7 +287,7 @@ export class RoleService {
       area: userRole.area
     }
     const result = await this.roleModel.create(createRole);
-    const devices = await this.deviceService.findByCondition({ area: userRole.area })
+    const devices = await this.deviceService.findByCondition({ area: userRole.area, enable: true })
     await this.addToDevice(devices, user, result._id)
     return result
   }
@@ -500,10 +500,6 @@ export class RoleService {
     }))
 
     await Promise.all(rols.map(async rol => {
-      // const count = await this.faceService.count({ bondToObjectId: rol._id, isDelete: false })
-      // if (count < 6) {
-      //   console.log(rol.user, count)
-      // }
       await this.faceService.fixBount(rol, 'role')
 
 

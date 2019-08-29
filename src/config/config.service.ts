@@ -155,6 +155,8 @@ export class ConfigService {
 
       LOG_ENRECORD: Joi.string().required(),
 
+      LOG_PROPERTYCO: Joi.string().required(),
+
       LOG_DEVICE: Joi.string().required(),
 
       LOG_VERIFY: Joi.string().required(),
@@ -441,6 +443,10 @@ export class ConfigService {
 
   get LOG_OWNER(): string {
     return this.envConfig.LOG_OWNER
+  }
+
+  get LOG_PROPERTYCO(): string {
+    return this.envConfig.LOG_PROPERTYCO
   }
 
 }

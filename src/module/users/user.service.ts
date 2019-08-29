@@ -402,4 +402,7 @@ export class UserService {
       }
     }
   }
+  async count(condition) {
+    return await this.userModel.countDocuments(condition)
+  }
 }

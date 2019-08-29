@@ -15,6 +15,7 @@ import { ZoneProfileDTO } from './dto/zonePrifile.dto';
 import { IChildren } from './interfaces/children.interface';
 import { IDetail } from './interfaces/detail.interface';
 import { ZOCUtil } from 'src/utils/zoc.util';
+import { ConfigService } from 'src/config/config.service';
 
 @Injectable()
 export class ZoneService {
@@ -23,6 +24,7 @@ export class ZoneService {
     @Inject(SOCUtil) private socUtil: SOCUtil,
     @Inject(ZOCUtil) private zocUtil: ZOCUtil,
     private readonly redis: RedisService,
+    private readonly config: ConfigService,
   ) { }
 
   // 创建数据
@@ -157,7 +159,6 @@ export class ZoneService {
   // 处理分区
   async partition(parent: string) {
     const partitions: IZone[] = await this.zoneModel.find({ parent, buildingType: '61' }).sort({ name: 1 })
-    console.log(partitions, '111')
     await Promise.all(partitions.map(async (partition, index) => {
       const name: RegExp = new RegExp(partition.name, 'i')
       await this.zoneModel.update({ name }, { partition: partition._id, partitionSort: index })
@@ -273,13 +274,15 @@ export class ZoneService {
     createParent.hasPartition = children.hasPartition
     await this.zoneModel.findByIdAndUpdate(createParent._id, { children: children.children, hasPartition: children.hasPartition })
     // 上报物业信息
-    // const time = moment().format('YYYYMMDDHHmmss');
-    // const zip = await this.zocUtil.genZip()
-    // await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
-    // const zocResult: any = await this.zocUtil.upload(zip, time)
-    // if (zocResult.success) {
-    //   await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname })
-    // }
+    const time = moment().format('YYYYMMDDHHmmss');
+    const zip = await this.zocUtil.genZip()
+    await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
+    const zocResult: any = await this.zocUtil.upload(zip, time)
+    if (zocResult.success) {
+      await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
+      const client = this.redis.getClient()
+      await client.hincrby(this.config.LOG, this.config.LOG_PROPERTYCO, 1)
+    }
 
   }
 

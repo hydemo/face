@@ -151,8 +151,8 @@ export class CallbackController {
   async handle(@Request() req) {
     const client = this.redis.getClient()
     // const ips = await client.hkeys('Log_op')
-    await client.hset('Log', 'resident', 0)
-    const ss = await client.hget('Log', 'resident')
+    // await client.hset('Log', 'resident', 0)
+    // const ss = await client.hget('Log', 'resident')
     // if (!ss) {
     //   console.log(111)
     // }
@@ -165,9 +165,7 @@ export class CallbackController {
     // await client.rpush('p2p', '44')
     // console.log(await client.rpop('p2p'))
     // co
-    const preDate = moment('2019-03-31').add(-1, 'M').format('YYYY-MM-DD')
-    const now = moment('2019-03-30').format('YYYY-MM-DD')
-    console.log(preDate, now, ss)
+
     return
   }
 
@@ -181,6 +179,9 @@ export class CallbackController {
     @Request() req,
     @Query('code') code: string,
   ) {
+
+    // await this.callbackService.upResidentToSOC(code)
+    // await this.callbackService.upResidentToZOC(code)
     await this.socUtil.check(code)
     // const createRole: CreatePoliceRole = {
     //   user: '5d38515b4bda2f535ddea0ed',
