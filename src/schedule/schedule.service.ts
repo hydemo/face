@@ -364,7 +364,7 @@ export class ScheduleService {
       )
     });
 
-    Schedule.scheduleJob('*/1 * * * *', async () => {
+    Schedule.scheduleJob('*/2 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
