@@ -1131,7 +1131,7 @@ export class ResidentService {
   }
 
   async getResidentByCardNumber(cardNumber: string): Promise<IResident[]> {
-    const user: IUser | null = await this.userService.findOneByCondition({ cardNumber })
+    const user: IUser | null = await this.userService.findOneByCondition({ cardNumber, checkResult: { $ne: 1 } })
     if (!user) {
       return []
     }

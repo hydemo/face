@@ -12,11 +12,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { OrbitService } from 'src/module/orbit/orbit.service';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { UserService } from 'src/module/users/user.service';
+import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
+import { UserRoles } from 'src/common/decorator/roles.decorator';
 
 @ApiUseTags('orbits')
 @ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-@UseGuards(AuthGuard())
+@UseGuards(AuthGuard(), UserRolesGuard)
+
 @Controller('api/orbits')
 export class OrbitController {
   constructor(
@@ -62,6 +65,7 @@ export class OrbitController {
 
   }
 
+  @UserRoles(4)
   @ApiOkResponse({
     description: '根据身份证查询轨迹',
     isArray: true,
@@ -80,6 +84,7 @@ export class OrbitController {
     return this.orbitService.myOrbits(pagination, user._id, 'police');
   }
 
+  // @UserRoles(4)
   @ApiOkResponse({
     description: '根据用户id查询轨迹',
     isArray: true,

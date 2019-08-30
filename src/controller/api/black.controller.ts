@@ -7,15 +7,15 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { BlackService } from 'src/module/black/black.service';
 import { BlackDTO, CreateBlackDTO } from 'src/module/black/dto/black.dto';
+import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
 
 
 @ApiUseTags('blacks')
-@UseGuards(AuthGuard(), RolesGuard)
+@UseGuards(AuthGuard(), UserRolesGuard)
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/blacks')
 export class BlackController {
