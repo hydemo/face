@@ -450,27 +450,25 @@ export class CallbackService {
 
   // 上报设备
   async upDeviceToZOC(code: string) {
-    const client = this.redis.getClient()
-    await client.hincrby(this.config.LOG, this.config.LOG_DEVICE, 2)
-    // const devices: IDevice[] = await this.deviceService.findByZoneId(code)
-    // const zone = await this.zoneService.findById(code)
-    // const { detail, propertyCo } = zone
-    // await Promise.all(devices.map(async device => {
-    //   const time = moment().format('YYYYMMDDHHmmss');
-    //   const zip = await this.zocUtil.genZip()
-    //   // await this.zocUtil.genResident(zip, time, residents)
-    //   await this.zocUtil.genBasicAddr(zip, time, detail)
-    //   await this.zocUtil.genManufacturer(zip, time)
-    //   await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
-    //   await this.zocUtil.genDevice(zip, time, detail, device)
-    //   const result = await this.zocUtil.upload(zip, time)
-    //   console.log(result, 'result')
-    //   if (result.success) {
-    //     await this.deviceService.updateById(device._id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
-    //     const client = this.redis.getClient()
-    //     await client.hincrby(this.config.LOG, this.config.LOG_DEVICE, 1)
-    //   }
-    // }))
+    const devices: IDevice[] = await this.deviceService.findByZoneId(code)
+    const zone = await this.zoneService.findById(code)
+    const { detail, propertyCo } = zone
+    await Promise.all(devices.map(async device => {
+      const time = moment().format('YYYYMMDDHHmmss');
+      const zip = await this.zocUtil.genZip()
+      // await this.zocUtil.genResident(zip, time, residents)
+      await this.zocUtil.genBasicAddr(zip, time, detail)
+      await this.zocUtil.genManufacturer(zip, time)
+      await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
+      await this.zocUtil.genDevice(zip, time, detail, device)
+      const result = await this.zocUtil.upload(zip, time)
+      console.log(result, 'result')
+      if (result.success) {
+        await this.deviceService.updateById(device._id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
+        const client = this.redis.getClient()
+        await client.hincrby(this.config.LOG, this.config.LOG_DEVICE, 1)
+      }
+    }))
   }
 
   // 上报人口zoc

@@ -181,7 +181,7 @@ export class CallbackController {
   ) {
 
     // await this.callbackService.upResidentToSOC(code)
-    await this.callbackService.upDeviceToZOC(code)
+    // await this.callbackService.upDeviceToZOC(code)
     await this.socUtil.check(code)
     // await this.socUtil.upload('')
     // const createRole: CreatePoliceRole = {
