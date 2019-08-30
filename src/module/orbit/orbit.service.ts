@@ -75,6 +75,7 @@ export class OrbitService {
       .sort({ passTime: -1 })
       .populate({ path: 'device', model: 'device' })
       .populate({ path: 'zone', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
+      .populate({ path: 'user', model: 'user', select: 'username faceUrl' })
       .lean()
       .exec();
     const total = await this.orbitModel.countDocuments(condition);
