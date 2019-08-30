@@ -454,8 +454,8 @@ export class ZOCUtil {
 * 生成刷卡记录
 */
   async genEnRecord(zip: any, time: String, detail: IDetail, user: any, device: IDevice, phone: string): Promise<boolean> {
-    // const url = `${this.config.zocUrl}/api/check/gate/record`;
-    // const token = await this.getToken()
+    const url = `${this.config.zocUrl}/api/check/gate/record`;
+    const token = await this.getToken()
     if (!phone) {
       return false
     }
@@ -487,16 +487,16 @@ export class ZOCUtil {
       CRLX: 1,
     }
     // 参数校验
-    // const result = await axios({
-    //   method: 'post',
-    //   url,
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: token,
-    //   },
-    //   data,
-    // });
-    // console.log(result.data, 'record')
+    const result = await axios({
+      method: 'post',
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+      data,
+    });
+    console.log(result.data, 'record')
 
     const json = JSON.stringify([data])
     const filename = `EnRecord-${time}.json`
