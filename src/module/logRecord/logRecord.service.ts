@@ -139,7 +139,8 @@ export class LogRecordService {
   }
   // 生成当天数据
   async genLog() {
-    const preDate = moment().add(-1, 'd').format('YYYY-MM-DD')
+    const preDate = moment().add(-2, 'd').format('YYYY-MM-DD')
+    const date = moment().add(-1, 'd').format('YYYY-MM-DD')
     const preLog: ILogRecord | null = await this.logRecordModel.findOne({ date: preDate })
     const client = this.redis.getClient()
     const userCount = Number(await client.hget(this.config.LOG, this.config.LOG_USER))
@@ -168,7 +169,7 @@ export class LogRecordService {
     await client.del(this.config.LOG_IP)
     const log = {
       // 日期
-      date: preDate,
+      date,
       // 用户增长量
       userCount,
       // 总用户数
