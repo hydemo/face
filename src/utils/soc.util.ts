@@ -63,9 +63,12 @@ export class SOCUtil {
         },
         data: json,
       })
+      decodeURI(result.data.sta[0].des)
+      console.log(decodeURI(result.data.sta[0].des))
       return JSON.parse(decodeURIComponent(result.data))
 
     } catch (error) {
+      console.log(error, 'error')
       return false
     }
 
@@ -152,34 +155,35 @@ export class SOCUtil {
     * @param code 图片数据
     */
   async upload(data): Promise<any> {
-    // const order = this.getOrder()
-    // console.log(order, 'xms20190828161606054305175050110', 'xms20190828161641061573890664984', 'xms20190828161708069922193910883')
-    // const datas = {
-    //   datas: [
-    //     {
-    //       lv_sbxxlsh: order,
-    //       lv_gmsfhm: '350583198912246076',
-    //       lv_xm: '欧阳旭靖',
-    //       lv_zzdz_dzbm: '4DE6E021-F52A-1A9C-E054-90E2BA510A0C',
-    //       lv_lxdh: '13799746707',
-    //       lv_djdw_jgdm: '350583730000',
-    //       lv_djdw_jgmc: '南安市公安局柳城派出所',
-    //       lv_djr_gmsfhm: '350583198912246076',
-    //       lv_djr_xm: '杨晓峰',
-    //       lv_djsj: moment().format('YYYYMMDDHHmmss')
-    //     }
-    //   ],
-    //   pages: [
-    //     {
-    //       "psize": "15",
-    //       "tcount": "",
-    //       "pno": "1",
-    //       "tsize": "",
-    //     }
-    //   ]
-    // }
+    const order = this.getOrder()
+    console.log(order, 'xms20190828161606054305175050110', 'xms20190828161641061573890664984', 'xms20190828161708069922193910883')
+    const datas = {
+      datas: [
+        {
+          lv_sbxxlsh: order,
+          lv_gmsfhm: '350583198912246076',
+          lv_xm: '欧阳旭靖',
+          lv_zzdz_dzbm: '4DE6E021-F52A-1A9C-E054-90E2BA510A0C',
+          lv_lxdh: '13799746707',
+          lv_djdw_jgdm: '350583730000',
+          lv_djdw_jgmc: '南安市公安局柳城派出所',
+          lv_djr_gmsfhm: '350583198912246076',
+          lv_djr_xm: '杨晓峰',
+          lv_djsj: moment().format('YYYYMMDDHHmmss')
+        }
+      ],
+      pages: [
+        {
+          "psize": "15",
+          "tcount": "",
+          "pno": "1",
+          "tsize": "",
+        }
+      ]
+    }
     try {
-      const result = await this.socRequest(data, 'shhcj_xxba_jndj')
+      const result = await this.socRequest(datas, 'shhcj_xxba_jndj')
+      console.log(result, 'result')
       if (result && result.sta.code === '0000') {
         return true
       } else {

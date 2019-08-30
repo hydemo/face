@@ -40,4 +40,6 @@ export interface IDevice extends Document {
 
   readonly session: string;
 
+  isZOCPush: boolean;
+
 }
