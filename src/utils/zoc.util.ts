@@ -81,10 +81,10 @@ export class ZOCUtil {
   /**
    * 获取10位时间戳
    */
-  getTemp(): number {
+  getTemp(): string {
     let tmp = Date.now().toString();
     tmp = tmp.substr(0, 10);
-    return Number(tmp);
+    return tmp;
   }
   /**
    * 获取签名
@@ -249,6 +249,8 @@ export class ZOCUtil {
    * 生成住户信息数据
    */
   async genResidentData(profile: IZoneProfile, detail: IDetail, user: IUser, deviceIds: string[], phone) {
+    // const url = `${this.config.zocUrl}/api/check/gate/resident`;
+    // const token = await this.getToken()
     const order = await this.getOrder()
     const data = {
       SBXXLSH: order,
@@ -291,6 +293,17 @@ export class ZOCUtil {
       MJZH: '',
       MJMM: '',
     }
+    // 参数校验
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'residnet')
     return data
   }
 
@@ -394,8 +407,8 @@ export class ZOCUtil {
  * 生成门禁设备信息
  */
   async genDevice(zip: any, time: String, address: IDetail, device: IDevice): Promise<boolean> {
-    // const url = `${this.config.zocUrl}/api/check/gate/device`;
-    // const token = await this.getToken()
+    const url = `${this.config.zocUrl}/api/check/gate/device`;
+    const token = await this.getToken()
     const data = {
       MJCS: this.config.companyName,
       SBXQDZBM: address.SYSTEMID,
@@ -416,17 +429,18 @@ export class ZOCUtil {
       FWFGSL: '0',
       FWFGDZBM: []
     }
+    console.log(data, 'data')
     // 参数校验
-    // const result = await axios({
-    //   method: 'post',
-    //   url,
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: token,
-    //   },
-    //   data,
-    // });
-    // console.log(result.data, 'device')
+    const result = await axios({
+      method: 'post',
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+      data,
+    });
+    console.log(result.data, 'device')
 
     const json = JSON.stringify([data])
     const filename = `Device-${time}.json`

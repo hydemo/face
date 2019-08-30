@@ -462,7 +462,6 @@ export class CallbackService {
       await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
       await this.zocUtil.genDevice(zip, time, detail, device)
       const result = await this.zocUtil.upload(zip, time)
-      console.log(result, 'result')
       if (result.success) {
         await this.deviceService.updateById(device._id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
         const client = this.redis.getClient()
