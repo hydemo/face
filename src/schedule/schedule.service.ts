@@ -263,7 +263,7 @@ export class ScheduleService {
 
     const logRule = new Schedule.RecurrenceRule();
     logRule.second = 0;
-    logRule.minute = 0;
+    logRule.minute = 1;
     logRule.hour = 0;
 
     Schedule.scheduleJob(rule, async () => {
