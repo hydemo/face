@@ -63,6 +63,7 @@ export class SOCUtil {
         },
         data: json,
       })
+      console.log(result.data)
       // decodeURI(result.data.sta[0].des)
       // console.log(decodeURI(result.data.sta[0].des))
       return JSON.parse(decodeURIComponent(result.data))
