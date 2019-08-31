@@ -441,7 +441,7 @@ export class CameraUtil {
       }
       if (code === 'final') {
         let face;
-        if (upData.type === 'add' || upData.type === 'delet') {
+        if (upData.type === 'add' || upData.type === 'delete') {
           face = upData.face._id
         } else {
           face = upData.face[0]._id
@@ -513,7 +513,7 @@ export class CameraUtil {
             break;
           case -20: code = 'error'
             break;
-          default: code = 'final'
+          default: { code = 'final', msg = JSON.stringify(result.data) }
             break;
         }
 
@@ -556,15 +556,12 @@ export class CameraUtil {
             break;
           case -20: code = 'error'
             break;
-          default: code = 'final'
+          default: { code = 'final', msg = JSON.stringify(result.data) }
             break;
         }
       }
-      if (count > 5) {
-        code = 'final'
-      }
 
-      if (code === 'final' || (code === 'error' && count > 8)) {
+      if (code === 'final' || count > 8) {
         let face;
         if (upData.type === 'add' || upData.type === 'delete') {
           face = upData.face._id
@@ -589,7 +586,21 @@ export class CameraUtil {
       }
       return code;
     } catch (error) {
-      console.log(error, 'error')
+      if (count > 8) {
+        let face;
+        if (upData.type === 'add' || upData.type === 'delete') {
+          face = upData.face._id
+        } else {
+          face = upData.face[0]._id
+        }
+        const error: P2PErrorDTO = {
+          face,
+          msg: 'neworkError',
+        }
+        await this.p2pErrorService.create(error)
+        await this.phoneUtil.sendP2PError()
+        return 'error'
+      }
       const newErrorData = { count: count + 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)
       if (!poolExist) {
