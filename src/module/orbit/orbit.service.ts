@@ -29,6 +29,10 @@ export class OrbitService {
   async findByCondition(condition: any): Promise<IOrbit[]> {
     return await this.orbitModel.find(condition).lean().exec();
   }
+  // 根据条件查询
+  async findById(condition: any): Promise<IOrbit> {
+    return await this.orbitModel.findById(condition).lean().exec();
+  }
 
   // 查询全部数据
   async findAll(pagination: Pagination): Promise<IList<IOrbit>> {

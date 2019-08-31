@@ -12,7 +12,7 @@ import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { ZoneService } from 'src/module/zone/zone.service';
-import { CreateZoneDTO, CreateZoneByScanDTO } from 'src/module/zone/dto/zone.dto';
+import { CreateZoneDTO, CreateZoneByScanDTO, CreateSubZoneByScanDTO } from 'src/module/zone/dto/zone.dto';
 import { IZone } from 'src/module/zone/interfaces/zone.interfaces';
 import { UserRoles } from 'src/common/decorator/roles.decorator';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
@@ -52,7 +52,22 @@ export class ZoneController {
   zoneList(@Query() pagination: Pagination) {
     return this.zoneService.findAll(pagination);
   }
+  @ApiOkResponse({
+    description: '心跳数据',
+  })
 
+  @Post('/tests')
+
+  @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  async test(
+    @Request() req,
+    @Query('code') code: string,
+  ) {
+
+    // await this.callbackService.upResidentToSOC(code)
+    // await this.callbackService.upDeviceToZOC(code)
+    await this.zoneService.addSameSubZone(code)
+  }
 
   @ApiOkResponse({
     description: '二维码获取小区详情',
@@ -60,14 +75,14 @@ export class ZoneController {
     isArray: true,
   })
   // @UserRoles(0)
-  @Get('/qrcode')
-  @ApiOperation({ title: '二维码获取小区详情', description: '二维码获取小区详情' })
-  async qrcode(
-    @Query('code') code: string,
-  ) {
-    const data = await this.zoneService.qrcode(code);
-    return { status: 200, data }
-  }
+  // @Get('/qrcode')
+  // @ApiOperation({ title: '二维码获取小区详情', description: '二维码获取小区详情' })
+  // async qrcode(
+  //   @Query('code') code: string,
+  // ) {
+  //   const data = await this.zoneService.qrcode(code);
+  //   return { status: 200, data }
+  // }
 
   @ApiOkResponse({
     description: '二维码添加小区',
@@ -81,6 +96,37 @@ export class ZoneController {
     @Body() zone: CreateZoneByScanDTO,
   ) {
     await this.zoneService.addByQrcode(zone);
+    return { status: 200, msg: '添加成功' }
+  }
+
+  @ApiOkResponse({
+    description: '二维码添加小区',
+    type: CreateZoneDTO,
+    isArray: true,
+  })
+  // @UserRoles(0)
+  @Post('/no-qrcode')
+  @ApiOperation({ title: '二维码添加小区', description: '二维码添加小区' })
+  async addByNoQrcode(
+    @Body() zone: CreateZoneByScanDTO,
+  ) {
+    await this.zoneService.addByNoQrcode(zone);
+    return { status: 200, msg: '添加成功' }
+  }
+
+  @ApiOkResponse({
+    description: '二维码添加小区',
+    type: CreateZoneDTO,
+    isArray: true,
+  })
+  // @UserRoles(0)
+  @Post('/:id/qrcode')
+  @ApiOperation({ title: '二维码添加小区', description: '二维码添加小区' })
+  async addSubZoneByQrcode(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Body() zone: CreateSubZoneByScanDTO,
+  ) {
+    await this.zoneService.addSubZoneByQrCode(id, zone);
     return { status: 200, msg: '添加成功' }
   }
 
@@ -255,4 +301,20 @@ export class ZoneController {
     await this.rentService.recyle(req.user._id, address);
     return { statusCode: 200, msg: '房屋回收成功' };
   }
+
+  // @ApiOkResponse({
+  //   description: '心跳数据',
+  // })
+  // @Post('/tests')
+
+  // @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  // async test(
+  //   @Request() req,
+  //   @Query('code') code: string,
+  // ) {
+
+  //   // await this.callbackService.upResidentToSOC(code)
+  //   // await this.callbackService.upDeviceToZOC(code)
+  //   await this.zoneService.addSameSbuZone(code)
+  // }
 }

@@ -33,6 +33,7 @@ import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 import { RoleService } from 'src/module/role/role.service';
 import { FaceService } from 'src/module/face/face.service';
 import { CreatePoliceRole } from 'src/module/role/dto/role.dto';
+import { UserService } from 'src/module/users/user.service';
 
 
 @ApiUseTags('callback')
@@ -55,6 +56,8 @@ export class CallbackController {
     private readonly residentService: ResidentService,
     private readonly roleService: RoleService,
     private readonly faceService: FaceService,
+    private readonly userService: UserService,
+    private readonly zoneService: ZoneService,
   ) {
 
   }
@@ -178,6 +181,7 @@ export class CallbackController {
   async test(
     @Request() req,
     @Query('code') code: string,
+    @Query('code1') code1: string,
   ) {
 
     // await this.callbackService.upResidentToSOC(code)
@@ -197,9 +201,15 @@ export class CallbackController {
     // await this.camera.getPersionInfo('22', 1, 2)
     // await this.faceService.fix()
     // await this.residentService.fix()
+    // const user = await this.userService.findById(code)
+    // if (!user) {
+    //   return
+    // }
+    // const img = await this.camera.getImg(`${user.faceUrl}`);
+    // const data = await this.camera.addToDevice(code1, user, img)
+    // const data = await this.camera.getPersionInfo(code, code1, 2)
+    // const data = await this.socUtil.qrcodeAddress(code)
 
-
-    // const data = await this.socUtil.qrcodeAddress(code, '1')
     // console.log(data, 'data')
     // await this.roleService.fix()
     // const user = { _id: 1, username: '11' }
@@ -207,6 +217,7 @@ export class CallbackController {
     // await this.camera.addToDevice(user, img)
     // const data = await this.socUtil.qrcodeAddress(code, '2')
     // console.log(data)
+    // await this.zoneService.fix(code, code1)
     return
 
   }

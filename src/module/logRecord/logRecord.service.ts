@@ -193,7 +193,7 @@ export class LogRecordService {
       // 物业记录上传数
       propertyCoCount,
       // 物业上传总量
-      propertyCoTotal: preLog ? propertyCoCount + preLog.propertyCoTotal : enRecordCount,
+      propertyCoTotal: preLog ? propertyCoCount + preLog.propertyCoTotal : propertyCoCount,
       // 设备上传数
       deviceCount,
       // 设备上传总量

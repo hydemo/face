@@ -413,7 +413,7 @@ export class ScheduleService {
 
     //       }
     //       if (result === 'success') {
-    //         await this.faceService.success(userId, device._id, result)
+    //         await this.faceService.success(userId, device, result)
     //         await client.hdel(`copy_${device}`, userId)
     //       }
     //       if (result === 'exist') {

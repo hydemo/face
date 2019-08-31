@@ -371,8 +371,8 @@ export class ZOCUtil {
   * 生成小区物业信息
   */
   async genPropertyCo(zip: any, time: String, propertyCo: IPropertyCo, detail: IDetail): Promise<boolean> {
-    // const url = `${this.config.zocUrl}/api/check/gate/property`;
-    // const token = await this.getToken()
+    const url = `${this.config.zocUrl}/api/check/gate/property`;
+    const token = await this.getToken()
     const data = {
       WYGS: propertyCo.name,
       JGDM: propertyCo.creditCode,
@@ -385,16 +385,16 @@ export class ZOCUtil {
       QU_ID: detail.QU_ID,
     }
     // 参数校验
-    // const result = await axios({
-    //   method: 'post',
-    //   url,
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: token,
-    //   },
-    //   data,
-    // });
-    // console.log(result.data, 'propertyCo')
+    const result = await axios({
+      method: 'post',
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+      data,
+    });
+    console.log(result.data, 'propertyCo')
 
     const json = JSON.stringify([data])
     const filename = `PropertyCo-${time}.json`
@@ -453,10 +453,10 @@ export class ZOCUtil {
   /**
 * 生成刷卡记录
 */
-  async genEnRecord(zip: any, time: String, detail: IDetail, user: any, device: IDevice, phone: string): Promise<boolean> {
+  async genEnRecord(zip: any, time: String, detail: IDetail, user: any, device: IDevice, owner: IUser): Promise<boolean> {
     const url = `${this.config.zocUrl}/api/check/gate/record`;
     const token = await this.getToken()
-    if (!phone) {
+    if (!user.cardNumber || !owner.phone) {
       return false
     }
     const data = {
@@ -466,16 +466,16 @@ export class ZOCUtil {
       KMSJ: this.getTemp(),
       ICMJKKH: '',
       ICMJKLX: '',
-      ZHXM: '',
-      ZHSJHM: '',
-      ZHSFZ: '',
+      ZHXM: user.username,
+      ZHSJHM: user.phone ? user.phone : owner.phone,
+      ZHSFZ: user.cardNumber,
       ZHXB: '',
       ZHMZ: '',
       ZHJG: '',
       ZHSFZDZ: '',
-      HZXM: user.username,
-      HZSJHM: phone,
-      HZSFZ: user.cardNumber,
+      HZXM: owner.username,
+      HZSJHM: owner.phone,
+      HZSFZ: owner.cardNumber,
       MJCSDM: this.config.companyCreditCode,
       MJJLX: '04',
       MJJBH: String(device.deviceId),
@@ -497,13 +497,17 @@ export class ZOCUtil {
       data,
     });
     console.log(result.data, 'record')
+    if (result.data.status === 100) {
+      const json = JSON.stringify([data])
+      const filename = `EnRecord-${time}.json`
+      const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
+      const folder = zip.folder('EnRecord')
+      folder.file(filename, desData)
+      return true
+    } else {
+      return false
+    }
 
-    const json = JSON.stringify([data])
-    const filename = `EnRecord-${time}.json`
-    const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
-    const folder = zip.folder('EnRecord')
-    folder.file(filename, desData)
-    return true
   }
 
   /**

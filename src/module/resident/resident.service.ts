@@ -255,7 +255,7 @@ export class ResidentService {
       }
       const deviceIds = devices.map(device => String(device.deviceId))
       this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
-      this.uploadToSoc(resident, phone, zone.profile.dzbm)
+      // this.uploadToSoc(resident, phone, zone.profile.dzbm)
     }
     const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
@@ -1100,6 +1100,12 @@ export class ResidentService {
   // 根据用户id查询住客列表
   async findByCondition(condition: any): Promise<IResident[]> {
     return await this.residentModel.find(condition)
+  }
+
+
+  // 根据用户id查询住客列表
+  async findOneByCondition(condition: any): Promise<IResident | null> {
+    return await this.residentModel.findOne(condition).populate({ path: 'address', model: 'zone' })
   }
 
   // 根据id修改

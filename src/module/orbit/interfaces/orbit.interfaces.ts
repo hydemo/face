@@ -6,9 +6,9 @@ import { IAttribute } from './attribut.interface';
 
 export interface IOrbit extends Document {
   // 用户
-  readonly user: IUser;
+  readonly user: any;
   // 设备
-  readonly device: IDevice;
+  readonly device: any;
   // 区域
   readonly zone: IZone;
   // 通过时间

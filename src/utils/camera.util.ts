@@ -102,17 +102,17 @@ export class CameraUtil {
     return false
   }
 
-  async getPersionInfo(PersonId: string, device: any, PersonType: number) {
-    const { username, password, deviceUUID, session } = device
+  async getPersionInfo(PersonId: string, deviceUUID: string, PersonType: number) {
+    // const { username, password, deviceUUID, session } = device
     // const deviceUUID = 'umet9bgg8bqu'
-    // const username = 'admin'
-    // const password = 'oyxj19891024'
+    const username = 'admin'
+    const password = 'oyxj19891024'
     const timeStamp = this.getTemp()
     // const session = 'null_1564132555'
     const Sign = this.sign(username, password, deviceUUID, timeStamp)
     const data = {
       Name: 'personListRequest',
-      Session: session,
+      // Session: session,
       UUID: deviceUUID,
       TimeStamp: timeStamp,
       Sign,
@@ -130,6 +130,7 @@ export class CameraUtil {
       url: this.config.p2pUrl2,
       data
     });
+    console.log(result, 'result')
     // console.log(result.data, 'data')
     if (result.data.Code === 1106) {
       return false
@@ -644,6 +645,7 @@ export class CameraUtil {
         url: this.config.p2pUrl2,
         data,
       })
+      console.log(result, 'result')
       if (result.data.Code === 1) {
         return 'success';
       }

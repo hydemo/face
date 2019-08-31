@@ -78,6 +78,23 @@ export class CreateZoneByScanDTO {
   readonly layer: number;
 }
 
+export class CreateSubZoneByScanDTO {
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '区域名称' })
+  readonly name: string;
+
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '二维码' })
+  readonly code: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  @ApiModelProperty({ description: '物业地址' })
+  readonly layer: number;
+}
+
 export class ZoneDTO {
   @IsString()
   @Type(() => String)
@@ -147,7 +164,7 @@ export class ZoneDTO {
 
   hasPartition?: boolean;
   detail?: any;
-  profile: ZoneProfileDTO;
+  profile?: ZoneProfileDTO;
   // 建筑类型 50:建筑物 60:单元房 61：梯位
   buildingType: string;
   // 分区id

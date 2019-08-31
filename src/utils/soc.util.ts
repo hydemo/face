@@ -82,7 +82,27 @@ export class SOCUtil {
    * 
    * @param code 地址二维码
    */
-  async qrcodeAddress(code: string, pno: string): Promise<any> {
+  async qrcodeAddress(code: string): Promise<IZoneProfile[]> {
+
+    const result = await this.qrcodeAddressByNo(code, '1')
+    let list: IZoneProfile[] = result.list
+    const page = result.page
+    const totalPage = page.tsize
+    let pno = 1
+    while (Number(totalPage) > pno) {
+      pno += 1
+      const nextPage = await this.qrcodeAddressByNo(code, `${pno}`)
+      list = [...list, ...nextPage.list]
+    }
+    return list
+  }
+
+  /**
+  * 根据二维码获取地址库信息
+  * 
+  * @param code 地址二维码
+  */
+  async qrcodeAddressByNo(code: string, pno: string): Promise<any> {
     const data = {
       datas: [
         {
@@ -100,7 +120,7 @@ export class SOCUtil {
     }
     const result = await this.socRequest(data, 'dzfwpt_qrcode')
     if (!result) {
-      return this.qrcodeAddress(code, pno)
+      return this.qrcodeAddressByNo(code, pno)
     }
     return { list: result.datas, page: result.pages[0] }
   }
@@ -155,7 +175,7 @@ export class SOCUtil {
     * 
     * @param code 图片数据
     */
-  async upload(datas): Promise<any> {
+  async upload(datas: any[]): Promise<any> {
     const order = this.getOrder()
     console.log(order, 'xms20190831023646031828153957013', 'xms20190831023724013193156361568')
     const data = {
