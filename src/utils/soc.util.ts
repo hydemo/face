@@ -63,7 +63,7 @@ export class SOCUtil {
         },
         data: json,
       })
-      console.log(result.data)
+      // console.log(result.data)
       // decodeURI(result.data.sta[0].des)
       // console.log(decodeURI(result.data.sta[0].des))
       return JSON.parse(decodeURIComponent(result.data))
@@ -157,7 +157,7 @@ export class SOCUtil {
     */
   async upload(datas): Promise<any> {
     const order = this.getOrder()
-    console.log(order, 'xms20190830133249005536142172541', 'xms20190830133335098642507195960', 'xms20190828161708069922193910883')
+    console.log(order, 'xms20190831023646031828153957013', 'xms20190831023724013193156361568')
     const data = {
       datas
     }
@@ -165,7 +165,7 @@ export class SOCUtil {
     //   datas: [
     //     {
     //       lv_sbxxlsh: order,
-    //       lv_gmsfhm: '350583198912246075',
+    //       lv_gmsfhm: '350583198912246076',
     //       lv_xm: '欧阳旭靖',
     //       lv_zzdz_dzbm: '4DE6E021-F52A-1A9C-E054-90E2BA510A0C',
     //       lv_lxdh: '13799746707',
