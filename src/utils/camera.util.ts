@@ -463,7 +463,7 @@ export class CameraUtil {
       }
       return code
     } catch (error) {
-      // console.log(error)
+      console.log(error)
       const errorData = { count: 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)
       if (!poolExist) {
@@ -588,7 +588,7 @@ export class CameraUtil {
       }
       return code;
     } catch (error) {
-
+      console.log(error, 'error')
       const newErrorData = { count: count + 1, upData }
       const poolExist = await client.hget('p2pError_pool', upData.device)
       if (!poolExist) {
