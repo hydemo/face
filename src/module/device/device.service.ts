@@ -150,7 +150,7 @@ export class DeviceService {
     return await this.deviceModel.findByIdAndUpdate(_id, { enable: false });
   }
   // 启用设备
-  async enable(_id: string, media: string) {
+  async enable(_id: string) {
     return await this.deviceModel.findByIdAndUpdate(_id, { enable: true });
   }
 

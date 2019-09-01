@@ -97,5 +97,25 @@ export class CMSDeviceController {
     return { statusCode: 200, msg: '解绑广告机成功' };
   }
 
+  @Put('/:_id/disable')
+  @ApiOkResponse({
+    description: '禁用设备',
+  })
+  @ApiOperation({ title: '禁用设备', description: '禁用设备' })
+  async disable(@Param('_id', new MongodIdPipe()) _id: string) {
+    await this.deviceService.disable(_id);
+    return { statusCode: 200, msg: '禁用设备' };
+  }
+
+  @Put('/:_id/disable')
+  @ApiOkResponse({
+    description: '启用设备',
+  })
+  @ApiOperation({ title: '启用设备', description: '启用设备' })
+  async enable(@Param('_id', new MongodIdPipe()) _id: string) {
+    await this.deviceService.enable(_id);
+    return { statusCode: 200, msg: '启用设备' };
+  }
+
 
 }

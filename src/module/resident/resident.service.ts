@@ -1128,7 +1128,7 @@ export class ResidentService {
 
   async getResidentByAddress(address: string): Promise<IResident[]> {
     return this.residentModel
-      .find({ address, isDelete: false })
+      .find({ address, isDelete: false, checkResult: { $nin: [1, 3] } })
       .populate({ path: 'user', model: 'user', select: '_id username' })
       .populate({ path: 'reviewer', model: 'user', select: 'username' })
       .populate({ path: 'address', model: 'zone', select: 'houseNumber' })
@@ -1137,7 +1137,7 @@ export class ResidentService {
   }
 
   async getResidentByCardNumber(cardNumber: string): Promise<IResident[]> {
-    const user: IUser | null = await this.userService.findOneByCondition({ cardNumber, checkResult: { $ne: 1 } })
+    const user: IUser | null = await this.userService.findOneByCondition({ cardNumber, checkResult: { $nin: [1, 3] } })
     if (!user) {
       return []
     }
