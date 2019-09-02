@@ -253,6 +253,7 @@ export class CameraUtil {
     const ImgName = faceData.username;
     const ImgNum = faceData.user;
     const Mode = faceData.mode;
+    console.log(faceData, 'faceData')
     const Img = await this.getImg(faceData.imgUrl)
     if (version === '1.0.0') {
       data = {
@@ -526,6 +527,7 @@ export class CameraUtil {
    * @param url 图片地址
    */
   async getImg(url: string): Promise<string> {
+    console.log(url, 'url')
     const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/650x/gravity/Center/crop/650x950/format/jpg/blur/1x0/quality/90|imageslim`, { responseType: 'arraybuffer' })
     const img = new Buffer(result.data, 'binary').toString('base64')
     return img
