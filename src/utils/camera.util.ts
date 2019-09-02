@@ -374,14 +374,14 @@ export class CameraUtil {
       // }
       return code
     } catch (error) {
-      const client = this.redis.getClient()
+      // const client = this.redis.getClient()
       console.log(error)
-      const errorData = { ...faceData, count: 1 + faceData.count, }
+      // const errorData = { ...faceData, count: 1 + faceData.count, }
       // const poolExist = await client.hget('p2pError_pool', upData.device)
       // if (!poolExist) {
       //   await client.hset('p2pError_pool', upData.device, 1)
       // }
-      await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
+      // await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
       return 'error'
     }
   }
