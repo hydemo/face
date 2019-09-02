@@ -83,28 +83,23 @@ export class PhoneUtil {
    * @author:oy
    */
   async sendDeviceError(location: string, id: string) {
-    const client = this.redis.getClient()
-    const isP2pError = await client.get('phone_device');
-    if (!isP2pError) {
-      client.set('phone_device', 'send', 'EX', 60 * 60)
-      return new Promise((resolve, reject) => {
-        const accessKeyId = this.config.phoneAccessKey;
-        const secretAccessKey = this.config.phoneAccessSecret;
-        //生成手机连接    
-        const smsClient = new SMSClient({ accessKeyId, secretAccessKey });
-        //发送短信
-        smsClient.sendSMS({
-          PhoneNumbers: this.config.phoneNumber,
-          SignName: this.config.signThinkThenModel,
-          TemplateCode: this.config.deviceErrorModel,
-          TemplateParam: `{ "location": "${location}", "uuid": "${id}" }`
-        }).then((res) => {
-          resolve(true)
-        }, (err) => {
-          reject(err)
-        })
-      });
-    }
+    return new Promise((resolve, reject) => {
+      const accessKeyId = this.config.phoneAccessKey;
+      const secretAccessKey = this.config.phoneAccessSecret;
+      //生成手机连接    
+      const smsClient = new SMSClient({ accessKeyId, secretAccessKey });
+      //发送短信
+      smsClient.sendSMS({
+        PhoneNumbers: this.config.phoneNumber,
+        SignName: this.config.signThinkThenModel,
+        TemplateCode: this.config.deviceErrorModel,
+        TemplateParam: `{ "location": "${location}", "uuid": "${id}" }`
+      }).then((res) => {
+        resolve(true)
+      }, (err) => {
+        reject(err)
+      })
+    });
   }
 
   /*

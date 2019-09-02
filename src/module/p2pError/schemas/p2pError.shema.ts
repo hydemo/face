@@ -6,6 +6,7 @@ export const P2PErrorSchema = new mongoose.Schema(
   {
     face: ObjectId,
     msg: String,
+    type: String,
   },
   { collection: 'p2pError', versionKey: false, timestamps: true },
 );

@@ -59,7 +59,7 @@ export class DeviceService {
     creatDevice.area = zone.area
     creatDevice.isZOCPush = false
     await creatDevice.save();
-    this.uploadToZoc(createDeviceDTO.zone, creatDevice)
+    // this.uploadToZoc(createDeviceDTO.zone, creatDevice)
     await this.zoneService.incDeviceCount(creatDevice.zone, 1);
     return creatDevice;
   }

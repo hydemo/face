@@ -111,7 +111,7 @@ export class FaceService {
     let isAdd = false
     deviceFaces.map(deviceFace => {
       if (deviceFace.deviceId === deviceId) {
-        deviceFace.faces.push(face)
+        deviceFace.faces.push(String(face._id))
         if (face.mode > 1) {
           deviceFace.mode = face.mode
         }
@@ -119,35 +119,95 @@ export class FaceService {
       }
     })
     if (!isAdd) {
-      const faces = [face]
-      deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode })
+      const faces = [String(face._id)]
+      deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode, face })
     }
     return
   }
   // 根据条件更新
-  async updatePic(user: IUser, img: string) {
-    // await this.residentService.updateByUser(user._id)
+  async updatePic(user: IUser, imgUrl: string) {
     const faces: IFace[] = await this.faceModel.find({ user: user._id, isDelete: false }).populate({ path: 'device', model: 'device' })
     const deviceFaces: any = []
+    const client = this.redis.getClient()
     for (let face of faces) {
-      await this.faceModel.findByIdAndUpdate(face._id, { checkResult: 1, faceUrl: img })
+      if (!face.device.enable) {
+        continue
+      }
+      switch (face.bondType) {
+        case 'resident':
+          client.hset('pending_resident', `${face.bondToObjectId}`, 1)
+          break;
+        case 'role':
+          client.hset('pending_role', `${face.bondToObjectId}`, 1)
+          break;
+        case 'school':
+          client.hset('pending_school', `${face.bondToObjectId}`, 1)
+          break;
+        case 'black':
+          client.hset('pending_black', `${face.bondToObjectId}`, 1)
+          break;
+        default:
+          break;
+      }
+      await this.faceModel.findByIdAndUpdate(face._id, { checkResult: 1 })
       this.genFaces(deviceFaces, String(face.device._id), face)
     }
     deviceFaces.map(async deviceFace => {
-      await this.cameraUtil.updateOnePic(deviceFace.faces, user, img, deviceFace.mode)
+      const { _id, version } = deviceFace.face.device
+      const data = {
+        count: 0,
+        user: String(user._id),
+        imgUrl,
+        faces: deviceFace.faces,
+        username: user.username,
+        mode: deviceFace.mode,
+        face: String(deviceFace.face._id),
+      }
+      const poolExist = await client.hget('p2p_pool', String(_id))
+      if (!poolExist) {
+        await client.hset('p2p_pool', String(_id), 1)
+      }
+      await client.hincrby('img', imgUrl, 1)
+      if (version === '1.0.0') {
+        await client.lpush(`p2p_${_id}`, JSON.stringify({
+          ...data,
+          LibIndex: deviceFace.face.libIndex,
+          FlieIndex: deviceFace.face.flieIndex,
+          Pic: deviceFace.face.pic,
+          type: 'update-delete',
+        }))
+        await client.lpush(`p2p_${_id}`, JSON.stringify({ ...data, type: 'update-add' }))
+      } else if (version === '1.1.0') {
+        await client.lpush(`p2p_${_id}`, JSON.stringify({ ...data, type: 'update' }))
+      }
+
     })
   }
 
   // 根据条件更新
-  async addOnePic(face: CreateFaceDTO, device: IDevice, user: IPic, mode: number, img: string, ) {
-    // if (device.version === '1.1.0') {
-    //   // const exist = await this.cameraUtil.getPersionInfo(user._id, device, mode)
-    //   // if (exist) {
-    //     return await this.faceModel.create({ ...face, checkResult: 2 })
-    //   }
-    // }
+  async addOnePic(face: CreateFaceDTO, device: IDevice, user: IPic, mode: number, imgUrl) {
+    if (!device.enable) {
+      return
+    }
     const createFace = await this.faceModel.create(face)
-    return await this.cameraUtil.addOnePic(device, user, mode, img, createFace)
+    const data = {
+      count: 0,
+      type: 'add',
+      user: String(user._id),
+      imgUrl,
+      username: user.username,
+      face: createFace._id,
+      mode,
+      faces: [String(createFace._id)]
+    }
+
+    const client = this.redis.getClient()
+    const poolExist = await client.hget('p2p_pool', String(device._id))
+    if (!poolExist) {
+      await client.hset('p2p_pool', String(device._id), 1)
+    }
+    await client.lpush(`p2p_${device._id}`, JSON.stringify(data))
+    await client.hincrby('img', imgUrl, 1)
   }
 
   // 根据id删除
@@ -158,7 +218,27 @@ export class FaceService {
     if (faceCount === 1 && faceToDelete) {
       // const exist = await this.cameraUtil.getPersionInfo(faceToDelete.user, faceToDelete.device, faceToDelete.mode)
       // if (exist) {
-      await this.cameraUtil.deleteOnePic(faceToDelete)
+      const { _id, enable } = faceToDelete.device
+      if (!enable) {
+        return
+      }
+      const data = {
+        count: 0,
+        user: String(faceToDelete.user),
+        type: 'delete',
+        face: faceToDelete._id,
+        LibIndex: faceToDelete.libIndex,
+        FlieIndex: faceToDelete.flieIndex,
+        Pic: faceToDelete.pic,
+        mode: faceToDelete.mode,
+        faces: [String(faceToDelete._id)]
+      }
+      const client = this.redis.getClient()
+      const poolExist = await client.hget('p2p_pool', String(_id))
+      if (!poolExist) {
+        await client.hset('p2p_pool', String(_id), 1)
+      }
+      await client.lpush(`p2p_${_id}`, JSON.stringify(data))
       checkResult = 1
       // }
     }
@@ -193,55 +273,61 @@ export class FaceService {
     await this.faceModel.updateMany({}, { checkResult: 2 })
   }
 
-  async fixBount(bound, type) {
-    const client = this.redis.getClient()
-    const ids = ['5d2949ef86020e6ef275e870', '5d294ac086020e6ef275e87c', '5d294ba286020e6ef275e8bb', '5d2ada8217785a2bca9ad1bd', '5d2adad017785a2bca9ad1c1', '5d2d5a6faec31302477e0ef9']
-    await Promise.all(ids.map(async id => {
-      const exist = await this.faceModel.findOne({ bondToObjectId: bound._id, device: id, isDelete: false })
-      if (!exist) {
-        const faceExist = await this.faceModel.findOne({ user: bound.user, device: id, isDelete: false })
-        if (faceExist) {
-          return
-          // const face: CreateFaceDTO = {
-          //   device: id,
-          //   user: bound.user,
-          //   mode: 2,
-          //   bondToObjectId: bound._id,
-          //   bondType: type,
-          //   zone: bound.zone,
-          //   checkResult: 2,
-          //   libIndex: faceExist.libIndex,
-          //   flieIndex: faceExist.flieIndex,
-          //   pic: faceExist.pic,
-          //   // faceUrl: user.faceUrl,
-          // }
-          // await this.faceModel.create(face)
-        } else {
-          const face: CreateFaceDTO = {
-            device: id,
-            user: bound.user,
-            mode: 2,
-            bondToObjectId: bound._id,
-            bondType: type,
-            zone: bound.zone,
-            checkResult: 1,
-            // faceUrl: user.faceUrl,
-          }
-          await this.faceModel.create(face)
-          await client.hset(`sync_${id}`, bound.user, 1)
-        }
-      }
-    }))
-  }
+  // async fixBount(bound, type) {
+  //   const client = this.redis.getClient()
+  //   const ids = ['5d2949ef86020e6ef275e870', '5d294ac086020e6ef275e87c', '5d294ba286020e6ef275e8bb', '5d2ada8217785a2bca9ad1bd', '5d2adad017785a2bca9ad1c1', '5d2d5a6faec31302477e0ef9']
+  //   await Promise.all(ids.map(async id => {
+  //     const exist = await this.faceModel.findOne({ bondToObjectId: bound._id, device: id, isDelete: false })
+  //     if (!exist) {
+  //       const faceExist = await this.faceModel.findOne({ user: bound.user, device: id, isDelete: false })
+  //       if (faceExist) {
+  //         return
+  //         // const face: CreateFaceDTO = {
+  //         //   device: id,
+  //         //   user: bound.user,
+  //         //   mode: 2,
+  //         //   bondToObjectId: bound._id,
+  //         //   bondType: type,
+  //         //   zone: bound.zone,
+  //         //   checkResult: 2,
+  //         //   libIndex: faceExist.libIndex,
+  //         //   flieIndex: faceExist.flieIndex,
+  //         //   pic: faceExist.pic,
+  //         //   // faceUrl: user.faceUrl,
+  //         // }
+  //         // await this.faceModel.create(face)
+  //       } else {
+  //         const face: CreateFaceDTO = {
+  //           device: id,
+  //           user: bound.user,
+  //           mode: 2,
+  //           bondToObjectId: bound._id,
+  //           bondType: type,
+  //           zone: bound.zone,
+  //           checkResult: 1,
+  //           // faceUrl: user.faceUrl,
+  //         }
+  //         await this.faceModel.create(face)
+  //         await client.hset(`sync_${id}`, bound.user, 1)
+  //       }
+  //     }
+  //   }))
+  // }
 
   async success(user, device, result) {
-    await this.faceModel.updateMany({ user, device: '5d2949ef86020e6ef275e870', checkResult: 1, isDelete: false }, {
-      // libIndex: result.LibIndex,
-      // flieIndex: result.FlieIndex,
-      // pic: result.Pic,
-      checkResult: 2
-    })
+    let update: any = { checkResult: 2 }
+
+    if (result.LibIndex) {
+      update = {
+        libIndex: result.LibIndex,
+        flieIndex: result.FlieIndex,
+        pic: result.Pic,
+        checkResult: 2
+      }
+    }
+    await this.faceModel.updateMany({ user, device, checkResult: 1, isDelete: false }, update)
   }
+
 
   async disableDevice(device: string) {
     await this.faceModel.updateMany({ device, isDelete: false }, {

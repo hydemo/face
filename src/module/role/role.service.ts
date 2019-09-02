@@ -105,7 +105,6 @@ export class RoleService {
 
   // 添加人员到设备
   async addToDevice(devices: IDevice[], user: IUser, bondToObjectId: string) {
-    const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
       const faceExist: IFace | null = await this.faceService.findOne({ user: user._id, device: device._id, isDelete: false, checkResult: 2 })
       if (faceExist) {
@@ -134,7 +133,7 @@ export class RoleService {
           zone: device.zone,
           // faceUrl: user.faceUrl
         }
-        return await this.faceService.addOnePic(face, device, user, this.config.whiteMode, img)
+        return await this.faceService.addOnePic(face, device, user, this.config.whiteMode, user.faceUrl)
       }
     }))
     const checkResult = await this.faceService.checkResult(bondToObjectId)
@@ -497,12 +496,6 @@ export class RoleService {
     await Promise.all(roles.map(async role => {
       await this.faceService.remove(role._id)
       await this.roleModel.findByIdAndRemove(role._id)
-    }))
-
-    await Promise.all(rols.map(async rol => {
-      await this.faceService.fixBount(rol, 'role')
-
-
     }))
   }
 }

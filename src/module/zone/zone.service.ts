@@ -324,15 +324,15 @@ export class ZoneService {
     createParent.hasPartition = children.hasPartition
     await this.zoneModel.findByIdAndUpdate(createParent._id, { children: children.children, hasPartition: children.hasPartition })
     // 上报物业信息
-    const time = moment().format('YYYYMMDDHHmmss');
-    const zip = await this.zocUtil.genZip()
-    await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
-    const zocResult: any = await this.zocUtil.upload(zip, time)
-    if (zocResult.success) {
-      await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
-      const client = this.redis.getClient()
-      await client.hincrby(this.config.LOG, this.config.LOG_PROPERTYCO, 1)
-    }
+    // const time = moment().format('YYYYMMDDHHmmss');
+    // const zip = await this.zocUtil.genZip()
+    // await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
+    // const zocResult: any = await this.zocUtil.upload(zip, time)
+    // if (zocResult.success) {
+    //   await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
+    //   const client = this.redis.getClient()
+    //   await client.hincrby(this.config.LOG, this.config.LOG_PROPERTYCO, 1)
+    // }
 
   }
 

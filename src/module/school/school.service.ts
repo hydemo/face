@@ -211,7 +211,6 @@ export class SchoolService {
     //   const deviceIds = devices.map(device => String(device.deviceId))
     //   this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, school)
     // }
-    const img = await this.cameraUtil.getImg(user.faceUrl)
     await Promise.all(devices.map(async device => {
       const faceCheck: IFace | null = await this.faceService.findOne({ bondToObjectId: school, device: device._id, isDelete: false })
       if (faceCheck) {
@@ -227,12 +226,11 @@ export class SchoolService {
           bondType: 'school',
           zone: zone.zoneId,
           checkResult: 1,
-          // faceUrl: user.faceUrl,
         }
         if (expire) {
           face.expire = expire;
         }
-        return await this.faceService.addOnePic(face, device, user, this.config.whiteMode, img)
+        return await this.faceService.addOnePic(face, device, user, this.config.whiteMode, user.faceUrl)
       }
       const face: CreateFaceDTO = {
         device: device._id,
@@ -245,7 +243,6 @@ export class SchoolService {
         bondType: 'school',
         zone: zone.zoneId,
         checkResult: 2,
-        // faceUrl: user.faceUrl,
       }
       if (expire) {
         face.expire = expire;

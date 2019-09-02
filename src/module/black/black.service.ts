@@ -169,22 +169,18 @@ export class BlackService {
     if (!user) {
       return
     }
-    const img = await this.cameraUtil.getImg(black.faceUrl)
     devices.map(async device => {
       const face = {
         device: device._id,
         user: black._id,
         mode: 2,
-        // libIndex: '',
-        // flieIndex: '',
-        // pic: '',
         bondToObjectId: black._id,
         bondType: 'black',
         zone: black.zone,
         checkResult: 1,
         faceUrl: black.faceUrl
       }
-      return await this.faceService.addOnePic(face, device, black, this.config.blackMode, img)
+      return await this.faceService.addOnePic(face, device, black, this.config.blackMode, black.faceUrl)
     })
     const checkResult = await this.faceService.checkResult(id)
     await this.blackModel.findByIdAndUpdate(id, {

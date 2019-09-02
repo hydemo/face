@@ -145,25 +145,27 @@ export class CameraUtil {
    * 
    * @param face 名单信息
    */
-  async deleteOnePic(face: IFace) {
-    const { device } = face
-    const { username, password, deviceUUID, _id, version, session } = device
-    const id = String(_id)
+  async deleteOnePic(device: IDevice, faceData: any) {
+    const { username, password, deviceUUID, version, session } = device
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     let data: any;
+    const LibIndex = faceData.LibIndex;
+    const FlieIndex = faceData.FlieIndex;
+    const Mode = faceData.mode;
+    const Pic = faceData.Pic
     if (version === '1.0.0') {
       data = {
         Name: 'WBListInfoREQ',
         TimeStamp: timeStamp,
         Sign: sign,
-        Mode: face.mode,
+        Mode,
         Action: 'DeleteOnePic',
         UUID: deviceUUID,
         DeleteOnePic: {
-          LibIndex: face.libIndex,
-          FlieIndex: face.flieIndex,
-          Pic: face.pic,
+          LibIndex,
+          FlieIndex,
+          Pic,
         }
       }
     } else if (version === '1.1.0') {
@@ -176,18 +178,12 @@ export class CameraUtil {
         UUID: deviceUUID,
         Data: {
           Action: 'deletePerson',
-          PersonType: face.mode,
-          PersonId: face.user,
+          PersonType: Mode,
+          PersonId: faceData.user,
         }
       }
     }
-    const upData = { data, face, type: 'delete', device: id, version }
-    const client = this.redis.getClient()
-    const poolExist = await client.hget('p2p_pool', id)
-    if (!poolExist) {
-      await client.hset('p2p_pool', id, 1)
-    }
-    await client.lpush(`p2p_${id}`, JSON.stringify(upData))
+    return await this.handleRequest(data, version, faceData.face, faceData.type)
   }
 
   /**
@@ -195,80 +191,28 @@ export class CameraUtil {
    * 
    * @param face 名单信息
    */
-  async updateOnePic(faces: IFace[], user: IUser, img: string, Mode: number) {
-    if (!faces.length) {
-      return
-    }
-    const client = this.redis.getClient()
-    const face = faces[0]
-    // await this.deleteOnePic(face[0])
-    const { username, password, deviceUUID, _id, version, session } = face.device
-    const id = String(_id)
-    const Img = await this.getImg(img)
-    const ImgName = user.username;
-    const ImgNum = user._id;
+  async updateOnePic(device: IDevice, faceData: any) {
+    const { username, password, deviceUUID, version, session } = device
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
-    if (version === '1.0.0') {
-      const deleteData = {
-        Name: 'WBListInfoREQ',
-        TimeStamp: timeStamp,
-        Sign: sign,
-        Mode,
-        Action: 'DeleteOnePic',
-        UUID: deviceUUID,
-        DeleteOnePic: {
-          LibIndex: face.libIndex,
-          FlieIndex: face.flieIndex,
-          Pic: face.pic,
+    const Img = await this.getImg(faceData.imgUrl)
+    const data = {
+      Name: "personListRequest",
+      TimeStamp: timeStamp,
+      Sign: sign,
+      UUID: deviceUUID,
+      Session: session,
+      Data: {
+        Action: 'editPerson',
+        PersonType: faceData.mode,
+        PersonInfo: {
+          PersonId: faceData.user,
+          PersonName: faceData.username,
+          PersonPhoto: Img
         }
       }
-      const p2pDelete = { data: deleteData, face: faces, type: 'update-delete', device: _id, version }
-      const poolExist = await client.hget('p2p_pool', id)
-      if (!poolExist) {
-        await client.hset('p2p_pool', id, 1)
-      }
-      await client.lpush(`p2p_${id}`, JSON.stringify(p2pDelete))
-      const addData = {
-        Name: 'WBListInfoREQ',
-        TimeStamp: timeStamp,
-        Sign: sign,
-        Mode,
-        Action: 'AddOnePic',
-        UUID: deviceUUID,
-        AddOnePic: {
-          Img,
-          ImgName,
-          ImgNum,
-        }
-      }
-      const upData = { data: addData, face: faces, type: 'update-add', device: _id, username: user.username, version }
-      await client.lpush(`p2p_${id}`, JSON.stringify(upData))
-    } else if (version === '1.1.0') {
-      const data = {
-        Name: "personListRequest",
-        TimeStamp: timeStamp,
-        Sign: sign,
-        UUID: deviceUUID,
-        Session: session,
-        Data: {
-          Action: 'editPerson',
-          PersonType: Mode,
-          PersonInfo: {
-            PersonId: user._id,
-            PersonName: user.username,
-            PersonPhoto: Img
-          }
-        }
-      }
-      const upData = { data, face: faces, type: 'update', device: id, username: user.username, version }
-      const client = this.redis.getClient()
-      const poolExist = await client.hget('p2p_pool', id)
-      if (!poolExist) {
-        await client.hset('p2p_pool', id, 1)
-      }
-      await client.lpush(`p2p_${id}`, JSON.stringify(upData))
     }
+    return await this.handleRequest(data, version, faceData.face, faceData.type)
     // return await this.addOnePic(face[0].device, pic, face[0].mode, Img, face)
   }
 
@@ -301,17 +245,16 @@ export class CameraUtil {
   * @param user 用户信息
   * @param face 名单信息
   */
-  async addOnePic(device: IDevice, user: IPic, Mode: number, Img: string, face: IFace) {
-    const { username, password, deviceUUID, _id, version, session } = device
-    const id = String(_id)
+  async addOnePic(device: IDevice, faceData: any) {
+    const { username, password, deviceUUID, version, session } = device
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     let data: any
-    // console.log(user.faceUrl, 'facedd')
-    // const Img = await this.getImg(`${user.faceUrl}`);
+    const ImgName = faceData.username;
+    const ImgNum = faceData.user;
+    const Mode = faceData.mode;
+    const Img = await this.getImg(faceData.imgUrl)
     if (version === '1.0.0') {
-      const ImgName = user.username;
-      const ImgNum = user._id;
       data = {
         Name: 'WBListInfoREQ',
         TimeStamp: timeStamp,
@@ -336,45 +279,34 @@ export class CameraUtil {
           Action: 'addPerson',
           PersonType: Mode,
           PersonInfo: {
-            PersonId: user._id,
-            PersonName: user.username,
+            PersonId: ImgNum,
+            PersonName: ImgName,
             PersonPhoto: Img
           }
         }
       }
     }
-
-    const upData = { data, face, type: 'add', device: id, username: user.username, version }
-    const client = this.redis.getClient()
-    const poolExist = await client.hget('p2p_pool', id)
-    if (!poolExist) {
-      await client.hset('p2p_pool', id, 1)
-    }
-    await client.lpush(`p2p_${id}`, JSON.stringify(upData))
+    return await this.handleRequest(data, version, faceData.face, faceData.type)
   }
 
   /**
-  * 添加单张图片
+  * 处理请求
   * 
-  * @param username 设备信息
-  * @param user 用户信息
-  * @param face 名单信息
+  * @param data 请求参数
+  
   */
-  async handleP2P(upData) {
-    const client = this.redis.getClient()
+  async handleRequest(data, version, face, type) {
     try {
       const result: any = await axios({
         method: 'post',
-        url: upData.version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
-        data: upData.data,
+        url: version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
+        data,
       })
-      if (upData.type === 'delete' && upData.version === '1.0.0') {
-      }
       let code;
       let msg;
-      if (upData.version === '1.0.0') {
+      if (version === '1.0.0') {
         if (result.data.Result === 'ok') {
-          return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : 'success';
+          return data.Data.Action === 'AddOnePic' ? result.data.AddOnePic : 'success';
         }
         if (result.data.Code === -15 || result.data.Code === -13) {
           return 'imgError'
@@ -395,32 +327,12 @@ export class CameraUtil {
           default: { code = 'final', msg = JSON.stringify(result.data) }
             break;
         }
-
-      } else if (upData.version === '1.1.0') {
+      } else if (version === '1.1.0') {
         if (result.data.Code === 1) {
           return 'success';
         }
         if (result.data.Code === 1106) {
-          const data = upData.data
-          const result = await axios({
-            method: 'post',
-            url: this.config.p2pUrl2,
-            data: {
-              Name: "personListRequest",
-              TimeStamp: data.TimeStamp,
-              Sign: data.Sign,
-              UUID: data.UUID,
-              Session: data.UUID,
-              Data: {
-                Action: 'addPerson',
-                PersonType: data.Data.PersonType,
-                PersonInfo: data.Data.PersonInfo
-              }
-            }
-          });
-          if (result.data.Result === 'ok') {
-            return 'success'
-          }
+          return 'noExist'
         }
         switch (result.data.Data.Result) {
           case -3: code = 'success'
@@ -440,176 +352,172 @@ export class CameraUtil {
         }
       }
       if (code === 'final') {
-        let face;
-        if (upData.type === 'add' || upData.type === 'delete') {
-          face = upData.face._id
-        } else {
-          face = upData.face[0]._id
-        }
         const error: P2PErrorDTO = {
           face,
           msg,
+          type,
         }
         await this.p2pErrorService.create(error)
         await this.phoneUtil.sendP2PError()
-        return 'error'
+        return 'final'
       }
-      if (code === 'error') {
-        const errorData = { count: 1, upData }
-        const poolExist = await client.hget('p2pError_pool', upData.device)
-        if (!poolExist) {
-          await client.hset('p2pError_pool', upData.device, 1)
-        }
-        await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
-      }
+      // if (code === 'error') {
+      //   return 'error'
+      // const errorData = { count: 1, upData }
+      // const poolExist = await client.hget('p2pError_pool', upData.device)
+      // if (!poolExist) {
+      //   await client.hset('p2pError_pool', upData.device, 1)
+      // }
+      // await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
+      // }
       return code
     } catch (error) {
-      console.log(error)
-      const errorData = { count: 1, upData }
-      const poolExist = await client.hget('p2pError_pool', upData.device)
-      if (!poolExist) {
-        await client.hset('p2pError_pool', upData.device, 1)
-      }
-      await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
+      // console.log(error)
+      // const errorData = { count: 1, upData }
+      // const poolExist = await client.hget('p2pError_pool', upData.device)
+      // if (!poolExist) {
+      //   await client.hset('p2pError_pool', upData.device, 1)
+      // }
+      // await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
       return 'error'
     }
   }
-  /**
-  * 处理p2p异常，重传5次
-  * 
-  * @param username 设备信息
-  * @param user 用户信息
-  * @param face 名单信息
-  */
-  async handleP2PEroor(errorData: any) {
-    const client = this.redis.getClient()
-    const { upData, count } = errorData
-    try {
-      const result: any = await axios({
-        method: 'post',
-        url: upData.version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
-        data: upData.data,
-      })
-      console.log(result.data, 'result')
-      let code;
-      let msg
-      if (upData.version === '1.0.0') {
-        if (result.data.Result === 'ok') {
-          return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : 'success';
-        }
-        if (result.data.Code === -15 || result.data.Code === -13) {
-          return 'imgError'
-        }
-        switch (result.data.ErrorCode) {
-          case -3: code = 'success'
-            break;
-          case -6: code = 'success'
-            break;
-          case -15: code = 'imgError'
-            break;
-          case -13: code = 'imgError'
-            break;
-          case -19: code = 'error'
-            break;
-          case -20: code = 'error'
-            break;
-          default: { code = 'final', msg = JSON.stringify(result.data) }
-            break;
-        }
+  // /**
+  // * 处理p2p异常，重传5次
+  // * 
+  // * @param username 设备信息
+  // * @param user 用户信息
+  // * @param face 名单信息
+  // */
+  // async handleP2PEroor(errorData: any) {
+  //   const client = this.redis.getClient()
+  //   const { upData, count } = errorData
+  //   try {
+  //     const result: any = await axios({
+  //       method: 'post',
+  //       url: upData.version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
+  //       data: upData.data,
+  //     })
+  //     console.log(result.data, 'result')
+  //     let code;
+  //     let msg
+  //     if (upData.version === '1.0.0') {
+  //       if (result.data.Result === 'ok') {
+  //         return upData.data.Action === 'AddOnePic' ? result.data.AddOnePic : 'success';
+  //       }
+  //       if (result.data.Code === -15 || result.data.Code === -13) {
+  //         return 'imgError'
+  //       }
+  //       switch (result.data.ErrorCode) {
+  //         case -3: code = 'success'
+  //           break;
+  //         case -6: code = 'success'
+  //           break;
+  //         case -15: code = 'imgError'
+  //           break;
+  //         case -13: code = 'imgError'
+  //           break;
+  //         case -19: code = 'error'
+  //           break;
+  //         case -20: code = 'error'
+  //           break;
+  //         default: { code = 'final', msg = JSON.stringify(result.data) }
+  //           break;
+  //       }
 
-      } else if (upData.version === '1.1.0') {
-        if (result.data.Code === 1) {
-          return 'success';
-        }
-        if (result.data.Code === 1106) {
-          const data = upData.data
-          const result = await axios({
-            method: 'post',
-            url: this.config.p2pUrl2,
-            data: {
-              Name: "personListRequest",
-              TimeStamp: data.TimeStamp,
-              Sign: data.Sign,
-              UUID: data.UUID,
-              Session: data.UUID,
-              Data: {
-                Action: 'addPerson',
-                PersonType: data.Data.PersonType,
-                PersonInfo: data.Data.PersonInfo
-              }
-            }
-          });
-          if (result.data.Result === 'ok') {
-            return 'success'
-          }
-        }
-        switch (result.data.Data.Result) {
-          case -3: code = 'success'
-            break;
-          case -21: code = 'success'
-            break;
-          case -15: code = 'imgError'
-            break;
-          case -13: code = 'imgError'
-            break;
-          case -19: code = 'error'
-            break;
-          case -20: code = 'error'
-            break;
-          default: { code = 'final', msg = JSON.stringify(result.data) }
-            break;
-        }
-      }
+  //     } else if (upData.version === '1.1.0') {
+  //       if (result.data.Code === 1) {
+  //         return 'success';
+  //       }
+  //       if (result.data.Code === 1106) {
+  //         const data = upData.data
+  //         const result = await axios({
+  //           method: 'post',
+  //           url: this.config.p2pUrl2,
+  //           data: {
+  //             Name: "personListRequest",
+  //             TimeStamp: data.TimeStamp,
+  //             Sign: data.Sign,
+  //             UUID: data.UUID,
+  //             Session: data.UUID,
+  //             Data: {
+  //               Action: 'addPerson',
+  //               PersonType: data.Data.PersonType,
+  //               PersonInfo: data.Data.PersonInfo
+  //             }
+  //           }
+  //         });
+  //         if (result.data.Result === 'ok') {
+  //           return 'success'
+  //         }
+  //       }
+  //       switch (result.data.Data.Result) {
+  //         case -3: code = 'success'
+  //           break;
+  //         case -21: code = 'success'
+  //           break;
+  //         case -15: code = 'imgError'
+  //           break;
+  //         case -13: code = 'imgError'
+  //           break;
+  //         case -19: code = 'error'
+  //           break;
+  //         case -20: code = 'error'
+  //           break;
+  //         default: { code = 'final', msg = JSON.stringify(result.data) }
+  //           break;
+  //       }
+  //     }
 
-      if (code === 'final' || count > 8) {
-        let face;
-        if (upData.type === 'add' || upData.type === 'delete') {
-          face = upData.face._id
-        } else {
-          face = upData.face[0]._id
-        }
-        const error: P2PErrorDTO = {
-          face,
-          msg,
-        }
-        await this.p2pErrorService.create(error)
-        await this.phoneUtil.sendP2PError()
-        return 'error'
-      }
-      if (code === 'error') {
-        const newErrorData = { count: count + 1, upData }
-        const poolExist = await client.hget('p2pError_pool', upData.device)
-        if (!poolExist) {
-          await client.hset('p2pError_pool', upData.device, 1)
-        }
-        await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
-      }
-      return code;
-    } catch (error) {
-      if (count > 8) {
-        let face;
-        if (upData.type === 'add' || upData.type === 'delete') {
-          face = upData.face._id
-        } else {
-          face = upData.face[0]._id
-        }
-        const error: P2PErrorDTO = {
-          face,
-          msg: 'neworkError',
-        }
-        await this.p2pErrorService.create(error)
-        await this.phoneUtil.sendP2PError()
-        return 'error'
-      }
-      const newErrorData = { count: count + 1, upData }
-      const poolExist = await client.hget('p2pError_pool', upData.device)
-      if (!poolExist) {
-        await client.hset('p2pError_pool', upData.device, 1)
-      }
-      await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
-      return 'error'
-    }
-  }
+  //     if (code === 'final' || count > 8) {
+  //       let face;
+  //       if (upData.type === 'add' || upData.type === 'delete') {
+  //         face = upData.face._id
+  //       } else {
+  //         face = upData.face[0]._id
+  //       }
+  //       const error: P2PErrorDTO = {
+  //         face,
+  //         msg,
+  //       }
+  //       await this.p2pErrorService.create(error)
+  //       await this.phoneUtil.sendP2PError()
+  //       return 'error'
+  //     }
+  //     if (code === 'error') {
+  //       const newErrorData = { count: count + 1, upData }
+  //       const poolExist = await client.hget('p2pError_pool', upData.device)
+  //       if (!poolExist) {
+  //         await client.hset('p2pError_pool', upData.device, 1)
+  //       }
+  //       await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
+  //     }
+  //     return code;
+  //   } catch (error) {
+  //     if (count > 8) {
+  //       let face;
+  //       if (upData.type === 'add' || upData.type === 'delete') {
+  //         face = upData.face._id
+  //       } else {
+  //         face = upData.face[0]._id
+  //       }
+  //       const error: P2PErrorDTO = {
+  //         face,
+  //         msg: 'neworkError',
+  //       }
+  //       await this.p2pErrorService.create(error)
+  //       await this.phoneUtil.sendP2PError()
+  //       return 'error'
+  //     }
+  //     const newErrorData = { count: count + 1, upData }
+  //     const poolExist = await client.hget('p2pError_pool', upData.device)
+  //     if (!poolExist) {
+  //       await client.hset('p2pError_pool', upData.device, 1)
+  //     }
+  //     await client.lpush(`p2pError_${upData.device}`, JSON.stringify(newErrorData))
+  //     return 'error'
+  //   }
+  // }
 
   /**
    * 根据图片地址生成base64

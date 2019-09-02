@@ -41,6 +41,7 @@ export class ScheduleService {
   async getOpenId(face: IFace) {
     let openId;
     let type;
+    let username;
     switch (face.bondType) {
       case 'resident': {
         const resident: IResident | null = await this.residentService.findById(face.bondToObjectId)
@@ -61,7 +62,8 @@ export class ScheduleService {
           return { openId, type, isMe: false }
         }
         openId = user.openId;
-        return { openId, type, isMe: true }
+        username = user.username;
+        return { openId, type, isMe: true, username }
       }
       case 'role': {
         const role: IRole | null = await this.roleService.findById(face.bondToObjectId)
@@ -78,9 +80,9 @@ export class ScheduleService {
           if (!review) {
             return null
           }
-          return { openId: review.openId, type }
+          return { openId: review.openId, type, username: user.username }
         }
-        return { openId: user.openId, type }
+        return { openId: user.openId, type, username: user.username }
       }
       case 'black': {
         const black: IBlack | null = await this.blackService.findById(face.bondToObjectId)
@@ -92,7 +94,7 @@ export class ScheduleService {
         if (!user) {
           return null
         }
-        return { openId: user.openId, type }
+        return { openId: user.openId, type, username: user.username }
       }
       default:
         break;
@@ -100,7 +102,11 @@ export class ScheduleService {
     return ''
   }
 
-  async sendP2PError(username, face: IFace, client) {
+  async sendP2PError(faceId: string, client) {
+    const face = await this.faceService.findById(faceId)
+    if (!face) {
+      return
+    }
     const openId = await this.getOpenId(face)
     if (!openId) {
       return
@@ -112,7 +118,7 @@ export class ScheduleService {
     if (!send && openId) {
       const message: ApplicationDTO = {
         first: {
-          value: `您提交的${username}的${openId.type}申请人脸检测失败`,
+          value: `您提交的${openId.username}的${openId.type}申请人脸检测失败`,
           color: "#173177"
         },
         keyword1: {
@@ -120,7 +126,7 @@ export class ScheduleService {
           color: "#173177"
         },
         keyword2: {
-          value: `${username}`,
+          value: `${openId.username}`,
           color: "#173177"
         },
         keyword3: {
@@ -140,119 +146,112 @@ export class ScheduleService {
       await client.set(openId.openId, 1, 'EX', 60 * 2)
     }
   }
-
-  async handelP2P(data, sourceData, dataString, client, type) {
-    const listenTime = await client.hget('p2p_listen', data.device)
-    if (listenTime > 5) {
-      await client.hset('p2p_listen', data.device, 0)
-      return
+  async handResult(res, data, pool, client) {
+    let result = res
+    if (res === 'noExist') {
+      const newData = { ...data, type: 'add' }
+      client.rpush(`p2p_${pool}`, `${newData}`)
     }
-    if (listenTime > 0) {
-      client.rpush(`p2p_${data.device}`, dataString)
-      await client.hincrby('p2p_listen', data.device, 1)
-      return;
-    }
-    if (!data.device) {
-      return
-    }
-    let result: any
-    await client.hset('p2p_listen', data.device, 1)
-    if (data.type === 'add') {
-      const faceExist = await this.faceService.findOne({
-        user: data.face.user,
-        device: data.face.device,
-        isDelete: false,
-        checkResult: 2,
-      })
-      if (faceExist) {
-        result = {
-          LibIndex: faceExist.libIndex,
-          FlieIndex: faceExist.flieIndex,
-          Pic: faceExist.pic,
-        }
+    if (res === 'error') {
+      if (data.count > 8) {
+        result = 'final'
       } else {
-        result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
-      }
-      if (result === 'imgError') {
-        await this.faceService.updateById(data.face._id, { checkResult: 3 })
-        await this.sendP2PError(data.username, data.face, client)
-      } else if (result === 'success') {
-        await this.faceService.updateById(data.face._id, { checkResult: 2 })
-      } else if (result && result.Pic && data.version === '1.0.0') {
-        const face = {
-          libIndex: result.LibIndex,
-          flieIndex: result.FlieIndex,
-          pic: result.Pic,
-          checkResult: 2
+        const errorData = { ...data, count: data.count + 1 }
+        const poolExist = await client.hget('p2pError_pool', pool)
+        if (!poolExist) {
+          await client.hset('p2pError_pool', pool, 1)
         }
-        await this.faceService.updateById(data.face._id, face)
-      } else if (result === 'final') {
-        await this.faceService.updateById(data.face._id, { checkResult: 3 })
+        await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
       }
-    } else if (data.type === 'delete') {
-      let p2pData = data
-      const faceExist: IFace | null = await this.faceService.findById(data.face._id)
-      if (faceExist && data.version === '1.0.0') {
-        const deleteData = data.data
-        if (!deleteData.DeleteOnePic.Pic || !deleteData.DeleteOnePic.LibIndex || !deleteData.DeleteOnePic.FlieIndex) {
-          const DeleteOnePic = {
-            Pic: faceExist.pic,
+    }
+    if (result === 'imgError') {
+      await Promise.all(data.faces.map(async id => {
+        await this.faceService.updateById(id, { checkResult: 3 })
+      }))
+    } else if (result === 'success') {
+      await Promise.all(data.faces.map(async id => {
+        await this.faceService.updateById(id, { checkResult: 2 })
+      }))
+    } else if (result && result.Pic) {
+      const update = {
+        libIndex: result.LibIndex,
+        flieIndex: result.FlieIndex,
+        pic: result.Pic,
+        checkResult: 2
+      }
+      await Promise.all(data.faces.map(async id => {
+        await this.faceService.updateById(id, update)
+      }))
+    } else if (result === 'final') {
+      await Promise.all(data.faces.map(async id => {
+        await this.faceService.updateById(id, { checkResult: 3 })
+      }))
+    }
+  }
+
+
+  async handelP2P(data, device: IDevice, pool, client) {
+    let result
+    switch (data.type) {
+      case 'add': {
+        const faceExist = await this.faceService.findOne({
+          user: data.face.user,
+          device: data.face.device,
+          isDelete: false,
+          checkResult: 2,
+        })
+        if (faceExist) {
+          result = {
             LibIndex: faceExist.libIndex,
             FlieIndex: faceExist.flieIndex,
+            Pic: faceExist.pic,
           }
-          p2pData = { ...data, data: { ...deleteData, DeleteOnePic } }
+        } else {
+          result = await this.camera.addOnePic(data, device)
         }
+        await this.handResult(result, data, pool, client)
       }
-      const result = type === 'p2p' ? await this.camera.handleP2P(p2pData) : await this.camera.handleP2PEroor(sourceData)
-      if (result === 'success') {
-        await this.faceService.updateById(data.face._id, { checkResult: 2 })
+        break;
+      case 'delete': {
+        let deleteData = data
+        const faceExist: IFace | null = await this.faceService.findById(data.face._id)
+        if (faceExist && device.version === '1.0.0') {
+          if (!data.Pic || !data.LibIndex || !data.FlieIndex) {
+            deleteData = {
+              ...data,
+              Pic: faceExist.pic,
+              LibIndex: faceExist.libIndex,
+              FlieIndex: faceExist.flieIndex,
+            }
+          }
+        }
+        result = await this.camera.deleteOnePic(deleteData, device)
+        await this.handResult(result, data, pool, client)
       }
+        break;
+      case 'update': {
+        const faceExist: any = await this.faceService.findById(data.face)
+        if (!faceExist) {
+          return
+        }
+        result = await this.camera.updateOnePic(data, device)
+        await this.handResult(result, data, pool, client)
+      }
+        break;
+      case 'update-add': {
+        result = await this.camera.addOnePic(data, device)
+        await this.handResult(result, data, pool, client)
+      }
+        break;
+      case 'update-delete': {
+        result = await this.camera.deleteOnePic(data, device)
+        await this.handResult(result, data, pool, client)
+      }
+        break;
 
-    } else if (data.type === 'update-add') {
-      result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
-      if (result === 'imgError') {
-        await this.faceService.updateById(data.face[0]._id, { checkResult: 3 })
-        await this.sendP2PError(data.username, data.face[0], client)
-      } else if (result && result.Pic) {
-        const update = {
-          libIndex: result.LibIndex,
-          flieIndex: result.FlieIndex,
-          pic: result.Pic,
-          checkResult: 2
-        }
-        await Promise.all(data.face.map(async face => {
-          await this.faceService.updateById(face._id, update)
-        }))
-      } else if (result === 'final') {
-        await Promise.all(data.face.map(async face => {
-          await this.faceService.updateById(face._id, { checkResult: 3 })
-        }))
-      }
-    } else if (data.type === 'update-delete') {
-      const faceExist: any = await this.faceService.findById(data.face[0]._id)
-      await this.residentService.updateByUser(faceExist.user)
-      type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
-    } else if (data.type === 'update') {
-      const faceExist: any = await this.faceService.findById(data.face[0]._id)
-      let result: any = true
-      if (faceExist) {
-        await this.residentService.updateByUser(faceExist.user)
-        result = type === 'p2p' ? await this.camera.handleP2P(sourceData) : await this.camera.handleP2PEroor(sourceData)
-      }
-      if (result === 'imgError') {
-        await this.faceService.updateById(data.face[0]._id, { checkResult: 3 })
-        await this.sendP2PError(data.username, data.face[0], client)
-      } else if (result === 'success') {
-        await Promise.all(data.face.map(async face => {
-          await this.faceService.updateById(face._id, { checkResult: 2 })
-        }))
-      } else if (result === 'final') {
-        await Promise.all(data.face.map(async face => {
-          await this.faceService.updateById(face._id, { checkResult: 3 })
-        }))
-      }
+      default:
+        break;
     }
-    return await client.hset('p2p_listen', data.device, 0)
   }
 
   async enableSchedule() {
@@ -275,7 +274,7 @@ export class ScheduleService {
       await this.logService.genLog()
     });
 
-    Schedule.scheduleJob('*/2 * * * *', async () => {
+    Schedule.scheduleJob('*/4 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
@@ -283,7 +282,7 @@ export class ScheduleService {
       }))
     });
 
-    Schedule.scheduleJob('*/16 * * * * *', async () => {
+    Schedule.scheduleJob('*/15 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
       await Promise.all(pools.map(async  pool => {
@@ -293,7 +292,7 @@ export class ScheduleService {
           return
         }
         const device: IDevice = await this.deviceService.findById(pool)
-        if (!device) {
+        if (!device || !device.enable) {
           await client.hdel('p2p_pool', pool)
           return
         }
@@ -304,8 +303,20 @@ export class ScheduleService {
           return
         }
         const dataString: any = await client.rpop(`p2p_${pool}`)
+        const listenTime = await client.hget('p2p_listen', pool)
+        if (listenTime && Number(listenTime) > 5) {
+          await client.hset('p2p_listen', pool, 0)
+          return
+        }
+        if (Number(listenTime) > 0) {
+          client.rpush(`p2p_${pool}`, dataString)
+          await client.hincrby('p2p_listen', pool, 1)
+          return;
+        }
         const data = JSON.parse(dataString)
-        await this.handelP2P(data, data, dataString, client, 'p2p')
+        await client.hset('p2p_listen', data.device, 1)
+        await this.handelP2P(data, device, pool, client)
+        await client.hset('p2p_listen', data.device, 0)
       }))
     });
 
@@ -319,7 +330,7 @@ export class ScheduleService {
           return
         }
         const device: IDevice = await this.deviceService.findById(pool)
-        if (!device) {
+        if (!device || !device.enable) {
           await client.hdel('p2pError_pool', pool)
           return
         }
@@ -329,15 +340,51 @@ export class ScheduleService {
           return
         }
         const dataString: any = await client.rpop(`p2pError_${pool}`)
-        const errorData = JSON.parse(dataString)
-        const { upData } = errorData
-        await this.handelP2P(upData, errorData, dataString, client, 'p2pError')
+
+        const listenTime = await client.hget('p2p_listen', pool)
+        if (listenTime && Number(listenTime) > 5) {
+          await client.hset('p2p_listen', pool, 0)
+          return
+        }
+        if (Number(listenTime) > 0) {
+          client.rpush(`p2p_${pool}`, dataString)
+          await client.hincrby('p2p_listen', pool, 1)
+          return;
+        }
+        const data = JSON.parse(dataString)
+        await client.hset('p2p_listen', data.device, 1)
+        await this.handelP2P(data, device, pool, client)
+        await client.hset('p2p_listen', data.device, 0)
       }))
 
 
     });
 
+    // 状态确认
     Schedule.scheduleJob('*/5 * * * * *', async () => {
+      const client = this.redis.getClient()
+      const pendingResidents = await client.hkeys('pending_resident')
+      const pendingRoles = await client.hkeys('pending_role')
+      const pendingSchools = await client.hkeys('pending_school')
+      const pendingBlacks = await client.hkeys('pending_black')
+
+      await Promise.all(pendingResidents.map(async id => {
+        await this.residentService.updateById(id, { checkResult: 4 });
+        await client.hdel('pending_resident', id)
+      }))
+      await Promise.all(pendingRoles.map(async id => {
+        await this.roleService.updateById(id, { checkResult: 4 });
+        await client.hdel('pending_role', id)
+      }))
+      await Promise.all(pendingSchools.map(async id => {
+        await this.schoolService.updateById(id, { checkResult: 4 });
+        await client.hdel('pending_school', id)
+      }))
+      await Promise.all(pendingBlacks.map(async id => {
+        await this.blackService.updateById(id, { checkResult: 4 });
+        await client.hdel('pending_black', id)
+      }))
+
       const residents: IResident[] = await this.residentService.findByCondition({ checkResult: { $in: [4, 5] }, isDelete: false })
       const roles: IRole[] = await this.roleService.findByCondition({ checkResult: { $in: [4, 5] }, isDelete: false })
       const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: { $in: [4, 5] }, isDelete: false })
@@ -364,7 +411,8 @@ export class ScheduleService {
       )
     });
 
-    Schedule.scheduleJob('*/2 * * * *', async () => {
+    // 设备计时
+    Schedule.scheduleJob('*/3 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
@@ -372,8 +420,7 @@ export class ScheduleService {
       }))
     });
 
-
-
+    // 设备异常报警
     Schedule.scheduleJob('*/30 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
