@@ -183,7 +183,7 @@ export class CameraUtil {
         }
       }
     }
-    return await this.handleRequest(data, version, faceData.face, faceData.type)
+    return await this.handleRequest(data, version, faceData, String(device._id))
   }
 
   /**
@@ -212,7 +212,7 @@ export class CameraUtil {
         }
       }
     }
-    return await this.handleRequest(data, version, faceData.face, faceData.type)
+    return await this.handleRequest(data, version, faceData, String(device._id))
     // return await this.addOnePic(face[0].device, pic, face[0].mode, Img, face)
   }
 
@@ -286,7 +286,7 @@ export class CameraUtil {
         }
       }
     }
-    return await this.handleRequest(data, version, faceData.face, faceData.type)
+    return await this.handleRequest(data, version, faceData, String(device._id))
   }
 
   /**
@@ -295,7 +295,7 @@ export class CameraUtil {
   * @param data 请求参数
   
   */
-  async handleRequest(data, version, face, type) {
+  async handleRequest(data, version, faceData, pool) {
     try {
       const result: any = await axios({
         method: 'post',
@@ -353,9 +353,9 @@ export class CameraUtil {
       }
       if (code === 'final') {
         const error: P2PErrorDTO = {
-          face,
+          face: faceData.face,
           msg,
-          type,
+          type: faceData.type,
         }
         await this.p2pErrorService.create(error)
         await this.phoneUtil.sendP2PError()
@@ -372,13 +372,14 @@ export class CameraUtil {
       // }
       return code
     } catch (error) {
+      const client = this.redis.getClient()
       // console.log(error)
-      // const errorData = { count: 1, upData }
+      const errorData = { ...faceData, count: 1 + faceData.count, }
       // const poolExist = await client.hget('p2pError_pool', upData.device)
       // if (!poolExist) {
       //   await client.hset('p2pError_pool', upData.device, 1)
       // }
-      // await client.lpush(`p2pError_${upData.device}`, JSON.stringify(errorData))
+      await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
       return 'error'
     }
   }

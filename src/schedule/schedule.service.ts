@@ -314,9 +314,9 @@ export class ScheduleService {
           return;
         }
         const data = JSON.parse(dataString)
-        await client.hset('p2p_listen', data.device, 1)
+        await client.hset('p2p_listen', pool, 1)
         await this.handelP2P(data, device, pool, client)
-        await client.hset('p2p_listen', data.device, 0)
+        await client.hset('p2p_listen', pool, 0)
       }))
     });
 
@@ -352,9 +352,9 @@ export class ScheduleService {
           return;
         }
         const data = JSON.parse(dataString)
-        await client.hset('p2p_listen', data.device, 1)
+        await client.hset('p2p_listen', pool, 1)
         await this.handelP2P(data, device, pool, client)
-        await client.hset('p2p_listen', data.device, 0)
+        await client.hset('p2p_listen', pool, 0)
       }))
 
 
