@@ -150,8 +150,10 @@ export class ScheduleService {
     console.log(res, 'res')
     let result = res
     if (res === 'noExist') {
+      console.log(data, 'data')
       const newData = { ...data, type: 'add' }
-      client.rpush(`p2p_${pool}`, `${newData}`)
+      console.log(newData, 'newData')
+      client.rpush(`p2pError_${pool}`, `${newData}`)
     }
     if (res === 'error') {
       if (data.count > 8) {
