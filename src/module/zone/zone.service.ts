@@ -437,7 +437,7 @@ export class ZoneService {
 
     const list = await this.zoneModel
       .find(condition)
-      .select({ name: 1, _id: 1, hasChildren: 1, houseNumber: 1, owner: 1 })
+      .select({ name: 1, _id: 1, hasChildren: 1, houseNumber: 1, owner: 1, buildingType: 1 })
       .sort({ nameLength: 1, name: 1 })
     const total = await this.zoneModel
       .countDocuments(condition)

@@ -181,7 +181,6 @@ export class ZoneController {
     @Query('type') type: string,
     @Request() req: any,
   ) {
-    let zones: string[] = []
     // if (type === 'family') {
     //   const residents: IResident[] = await this.residentService.findByCondition({
     //     user: req.user._id,
