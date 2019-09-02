@@ -180,7 +180,6 @@ export class ZoneService {
     const newZone = await this.zoneModel.findById(newId)
     if (!newZone) { return }
     const detail: IDetail = await this.socUtil.address(newZone.profile.dzbm)
-    console.log(detail, 'detal')
     await this.zoneModel.findByIdAndUpdate(id, { detail, profile: newZone.profile })
   }
 

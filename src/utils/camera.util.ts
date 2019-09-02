@@ -96,6 +96,7 @@ export class CameraUtil {
         }
       }
     });
+    console.log(result.data, 'result')
     if (result.data.Result === 'ok') {
       return true
     }
@@ -130,7 +131,7 @@ export class CameraUtil {
       url: this.config.p2pUrl2,
       data
     });
-    console.log(result, 'result')
+    console.log(result.data, 'result')
     // console.log(result.data, 'data')
     if (result.data.Code === 1106) {
       return false
@@ -253,7 +254,6 @@ export class CameraUtil {
     const ImgName = faceData.username;
     const ImgNum = faceData.user;
     const Mode = faceData.mode;
-    console.log(faceData, 'faceData')
     const Img = await this.getImg(faceData.imgUrl)
     if (version === '1.0.0') {
       data = {
@@ -298,15 +298,11 @@ export class CameraUtil {
   */
   async handleRequest(data, version, faceData) {
     try {
-      const url = version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2
-      console.log(url, 'url')
-      console.log(data, 'data')
       const result: any = await axios({
         method: 'post',
         url: version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
         data,
       })
-      console.log(result, 'result')
       let code;
       let msg;
       if (version === '1.0.0') {
@@ -531,7 +527,6 @@ export class CameraUtil {
    * @param url 图片地址
    */
   async getImg(url: string): Promise<string> {
-    console.log(url, 'url')
     const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/650x/gravity/Center/crop/650x950/format/jpg/blur/1x0/quality/90|imageslim`, { responseType: 'arraybuffer' })
     const img = new Buffer(result.data, 'binary').toString('base64')
     return img
@@ -571,7 +566,7 @@ export class CameraUtil {
         url: this.config.p2pUrl2,
         data,
       })
-      console.log(result, 'result')
+      console.log(result.data, 'result')
       if (result.data.Code === 1) {
         return 'success';
       }

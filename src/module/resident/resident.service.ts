@@ -244,7 +244,6 @@ export class ResidentService {
   async addToDevice(zone: IZone, user: IUser, resident: string, expire?: Date) {
     const zoneIds = [...zone.ancestor, zone._id]
     const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds }, enable: true })
-    console.log(devices, 'devices')
     if (!expire) {
       let phone = user.phone
       if (!phone) {

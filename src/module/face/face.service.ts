@@ -334,4 +334,27 @@ export class FaceService {
       isDelete: true
     })
   }
+
+  async check() {
+    const faces = await this.faceModel
+      .find({ checkResult: 1, isDelete: false, zone: { $ne: '5d2588d3a7a2293344401e84' } })
+      .populate({ path: 'device', model: 'device' })
+      .populate({ path: 'user', model: 'user' })
+    // if (!face) {
+    //   return
+    // }
+    // if (face.device.version === '1.0.0' && face.pic) {
+    //   await this.updatePic(face.user, face.user.faceUrl)
+    // }
+    // const result = await this.cameraUtil.getPersionInfo(String(face.user._id), face.device.deviceUUID, face.mode)
+    // if (!result) {
+    //   const faces = await this.faceModel.find({ user: face.user._id, isDelete: false })
+    //   console.log(faces)
+    // }
+    // if (result) {
+    // await this.updatePic(face.user, face.user.faceUrl)
+    // }
+    // console.log(result, 'result')
+    await Promise.all(faces.map(async face => await this.updatePic(face.user, face.user.faceUrl)))
+  }
 }

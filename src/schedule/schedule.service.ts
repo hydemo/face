@@ -147,16 +147,14 @@ export class ScheduleService {
     }
   }
   async handResult(res, data, pool, client) {
-    console.log(res, 'res')
     let result = res
     if (res === 'noExist') {
-      console.log(data, 'data')
       const newData = { ...data, type: 'add' }
-      const poolExist = await client.hget('p2pError_pool', pool)
+      const poolExist = await client.hget('p2p_pool', pool)
       if (!poolExist) {
-        await client.hset('p2pError_pool', pool, 1)
+        await client.hset('p2p_pool', pool, 1)
       }
-      client.rpush(`p2pError_${pool}`, JSON.stringify(newData))
+      client.rpush(`p2p_${pool}`, JSON.stringify(newData))
     }
     if (res === 'error') {
       if (data.count > 8) {

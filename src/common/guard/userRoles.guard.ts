@@ -12,7 +12,6 @@ export class UserRolesGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         // 通过反射获取请求路由是否添加了 @UserRoles() 注解，如果没有添加，则代表不需要进行认证
         const roles = this.reflector.get<number[]>('userRoles', context.getHandler());
-        console.log(roles, 'roles')
         if (!roles) {
             return true
         }

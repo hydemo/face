@@ -518,7 +518,6 @@ export class CallbackService {
     const residents: IResident[] = await this.residentService.findByCondition({ zone, checkResult: { $in: [2, 4, 5] }, isDelete: false })
     const count = residents.length
     const socDatas: any = []
-    console.log()
     await Promise.all(residents.map(async resident => {
       const user: IUser | null = await this.userService.updateById(resident.user, {})
       const address: IZone = await this.zoneService.findById(resident.address)
@@ -546,7 +545,6 @@ export class CallbackService {
       await this.residentService.updateMany({ zone, checkResult: 2, isDelete: false }, { isSOCPush: true })
       client.hincrby(this.config.LOG, this.config.LOG_SOC, count)
     }
-    console.log(socDatas, 'socd')
   }
 
   async test(id) {
