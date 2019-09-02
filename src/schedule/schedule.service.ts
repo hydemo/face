@@ -152,8 +152,11 @@ export class ScheduleService {
     if (res === 'noExist') {
       console.log(data, 'data')
       const newData = { ...data, type: 'add' }
-      console.log(newData, 'newData')
-      client.rpush(`p2pError_${pool}`, `${newData}`)
+      const poolExist = await client.hget('p2pError_pool', pool)
+      if (!poolExist) {
+        await client.hset('p2pError_pool', pool, 1)
+      }
+      client.rpush(`p2pError_${pool}`, JSON.stringify(newData))
     }
     if (res === 'error') {
       if (data.count > 8) {
