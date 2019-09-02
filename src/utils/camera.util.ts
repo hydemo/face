@@ -183,7 +183,7 @@ export class CameraUtil {
         }
       }
     }
-    return await this.handleRequest(data, version, faceData, String(device._id))
+    return await this.handleRequest(data, version, faceData)
   }
 
   /**
@@ -212,7 +212,7 @@ export class CameraUtil {
         }
       }
     }
-    return await this.handleRequest(data, version, faceData, String(device._id))
+    return await this.handleRequest(data, version, faceData)
     // return await this.addOnePic(face[0].device, pic, face[0].mode, Img, face)
   }
 
@@ -287,7 +287,7 @@ export class CameraUtil {
         }
       }
     }
-    return await this.handleRequest(data, version, faceData, String(device._id))
+    return await this.handleRequest(data, version, faceData)
   }
 
   /**
@@ -296,8 +296,11 @@ export class CameraUtil {
   * @param data 请求参数
   
   */
-  async handleRequest(data, version, faceData, pool) {
+  async handleRequest(data, version, faceData) {
     try {
+      const url = version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2
+      console.log(url, 'url')
+      console.log(data, 'data')
       const result: any = await axios({
         method: 'post',
         url: version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
