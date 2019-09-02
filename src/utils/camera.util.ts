@@ -145,7 +145,7 @@ export class CameraUtil {
    * 
    * @param face 名单信息
    */
-  async deleteOnePic(device: IDevice, faceData: any) {
+  async deleteOnePic(faceData: any, device: IDevice) {
     const { username, password, deviceUUID, version, session } = device
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
@@ -191,7 +191,7 @@ export class CameraUtil {
    * 
    * @param face 名单信息
    */
-  async updateOnePic(device: IDevice, faceData: any) {
+  async updateOnePic(faceData: any, device: IDevice) {
     const { username, password, deviceUUID, version, session } = device
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
@@ -245,7 +245,7 @@ export class CameraUtil {
   * @param user 用户信息
   * @param face 名单信息
   */
-  async addOnePic(device: IDevice, faceData: any) {
+  async addOnePic(faceData: any, device: IDevice) {
     const { username, password, deviceUUID, version, session } = device
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
