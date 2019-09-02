@@ -147,6 +147,7 @@ export class ScheduleService {
     }
   }
   async handResult(res, data, pool, client) {
+    console.log(res, 'res')
     let result = res
     if (res === 'noExist') {
       const newData = { ...data, type: 'add' }
@@ -165,6 +166,7 @@ export class ScheduleService {
       }
     }
     if (result === 'imgError') {
+      await this.sendP2PError(data.face, client)
       await Promise.all(data.faces.map(async id => {
         await this.faceService.updateById(id, { checkResult: 3 })
       }))
