@@ -303,6 +303,7 @@ export class CameraUtil {
         url: version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
         data,
       })
+      console.log(result, 'result')
       let code;
       let msg;
       if (version === '1.0.0') {
@@ -374,7 +375,7 @@ export class CameraUtil {
       return code
     } catch (error) {
       const client = this.redis.getClient()
-      // console.log(error)
+      console.log(error)
       const errorData = { ...faceData, count: 1 + faceData.count, }
       // const poolExist = await client.hget('p2pError_pool', upData.device)
       // if (!poolExist) {
