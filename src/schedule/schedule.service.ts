@@ -432,13 +432,13 @@ export class ScheduleService {
     });
 
     // 设备计时
-    Schedule.scheduleJob('*/3 * * * *', async () => {
-      const client = this.redis.getClient()
-      const keys = await client.hkeys('device')
-      await Promise.all(keys.map(async key => {
-        await client.hincrby('device', key, 1)
-      }))
-    });
+    // Schedule.scheduleJob('*/3 * * * *', async () => {
+    //   const client = this.redis.getClient()
+    //   const keys = await client.hkeys('device')
+    //   await Promise.all(keys.map(async key => {
+    //     await client.hincrby('device', key, 1)
+    //   }))
+    // });
 
     // 设备异常报警
     Schedule.scheduleJob('*/30 * * * *', async () => {
