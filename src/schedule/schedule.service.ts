@@ -148,6 +148,7 @@ export class ScheduleService {
   }
   async handResult(res, data, pool, client) {
     let result = res
+    const { imgUrl } = data
     if (res === 'noExist') {
       const newData = { ...data, type: 'add' }
       const poolExist = await client.hget('p2p_pool', pool)
@@ -173,10 +174,12 @@ export class ScheduleService {
       await Promise.all(data.faces.map(async id => {
         await this.faceService.updateById(id, { checkResult: 3 })
       }))
+      await client.hincrby('img', imgUrl, -1)
     } else if (result === 'success') {
       await Promise.all(data.faces.map(async id => {
         await this.faceService.updateById(id, { checkResult: 2 })
       }))
+      await client.hincrby('img', imgUrl, -1)
     } else if (result && result.Pic) {
       const update = {
         libIndex: result.LibIndex,
@@ -187,10 +190,12 @@ export class ScheduleService {
       await Promise.all(data.faces.map(async id => {
         await this.faceService.updateById(id, update)
       }))
+      await client.hincrby('img', imgUrl, -1)
     } else if (result === 'final') {
       await Promise.all(data.faces.map(async id => {
         await this.faceService.updateById(id, { checkResult: 3 })
       }))
+      await client.hincrby('img', imgUrl, -1)
     }
   }
 
