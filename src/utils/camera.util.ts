@@ -313,7 +313,7 @@ export class CameraUtil {
       let msg;
       if (version === '1.0.0') {
         if (result.data.Result === 'ok') {
-          return data.Data.Action === 'AddOnePic' ? result.data.AddOnePic : 'success';
+          return data.Action === 'AddOnePic' ? result.data.AddOnePic : 'success';
         }
         if (result.data.Code === -15 || result.data.Code === -13) {
           return 'imgError'
