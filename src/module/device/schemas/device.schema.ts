@@ -43,7 +43,7 @@ export const DeviceSchema = new mongoose.Schema(
     // 设备id
     deviceId: { type: Number, unique: true },
     // 是否推送到智能感知平台
-    isZOCPush: { type: Boolean, defaut: false },
+    isZOCPush: { type: Boolean, default: false },
     // 智能感知平台包名
     ZOCZip: String,
     // 智能感知平台上传时间

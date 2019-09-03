@@ -284,7 +284,7 @@ export class ScheduleService {
       await this.logService.genLog()
     });
 
-    Schedule.scheduleJob('*/4 * * * *', async () => {
+    Schedule.scheduleJob('*/5 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
@@ -377,6 +377,15 @@ export class ScheduleService {
       const pendingRoles = await client.hkeys('pending_role')
       const pendingSchools = await client.hkeys('pending_school')
       const pendingBlacks = await client.hkeys('pending_black')
+
+      const imgs = await client.hkeys('img')
+
+      await Promise.all(imgs.map(async key => {
+        const count = await client.hget('img', key)
+        if (Number(count) < 1) {
+          await client.hdel('imgBase64', key)
+        }
+      }))
 
       await Promise.all(pendingResidents.map(async id => {
         await this.residentService.updateById(id, { checkResult: 4 });

@@ -45,7 +45,7 @@ export const ZoneSchema = new mongoose.Schema(
     // 设备数
     deviceCount: { type: Number, default: 0 },
     // 是否推送到智能感知平台
-    isZOCPush: { type: Boolean, defaut: false },
+    isZOCPush: { type: Boolean, default: false },
     // 智能感知平台包名
     ZOCZip: String,
     // 上报时间

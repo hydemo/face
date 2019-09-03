@@ -37,11 +37,11 @@ export const ResidentSchema = new mongoose.Schema(
     // 是否推送
     isPush: { type: Boolean, default: false },
     // 是否推送社会化信息采集平台
-    isSOCPush: { type: Boolean, defaut: false },
+    isSOCPush: { type: Boolean, default: false },
     // 社会化信息采集平台订单号
     SOCOrder: String,
     // 是否推送到智能感知平台
-    isZOCPush: { type: Boolean, defaut: false },
+    isZOCPush: { type: Boolean, default: false },
     // 智能感知平台包名
     ZOCZip: String,
     // 智能感知平台上传时间

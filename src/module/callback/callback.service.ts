@@ -476,8 +476,14 @@ export class CallbackService {
     const client = this.redis.getClient()
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
-    const residents: IResident[] = await this.residentService.findByCondition({ zone, checkResult: { $in: [2, 4, 5] }, isDelete: false })
+    const residents: IResident[] = await this.residentService.findByCondition({
+      zone,
+      isZOCPush: null,
+      checkResult: { $nin: [1, 3] },
+      type: { $ne: 'visitor' },
+    })
     const count = residents.length
+    console.log(count)
     const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
     const deviceIds = devices.map(device => String(device.deviceId))
     const zoneDetail: IZone = await this.zoneService.findById(zone)
@@ -505,6 +511,7 @@ export class CallbackService {
     }))
     await this.zocUtil.genResident(zip, time, residentDatas)
     const zocResult = await this.zocUtil.upload(zip, time)
+    console.log(zocResult, 'zocResult')
     if (zocResult.success) {
       await this.residentService.updateMany({ zone, checkResult: 2, isDelete: false }, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
       client.hincrby(this.config.LOG, this.config.LOG_RESIDENT, count)
