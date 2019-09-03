@@ -32,7 +32,7 @@ export interface IUser extends Document {
   // 城市
   readonly city: string;
   // 人脸图片
-  readonly faceUrl: string;
+  faceUrl: string;
   // 身份证号
   cardNumber: string;
   // unionId

@@ -530,6 +530,9 @@ export class ResidentService {
       client.hincrby(this.config.LOG, this.config.LOG_VERIFY, 1)
     } else if (createUser.isPhoneVerify) {
       throw new ApiException('身份证已被注册,请通过扫一扫添加', ApiErrorCode.PHONE_EXIST, 406);
+    } else if (!createUser.faceUrl) {
+      createUser.faceUrl = family.user.faceUrl
+      await createUser.save()
     }
     await this.residentExist(family.address, createUser._id)
     return await this.addFamily(family.isMonitor, false, createUser, zone, owner.user, userId)
