@@ -535,13 +535,16 @@ export class CameraUtil {
   async getImg(url: string): Promise<string | null> {
     try {
       const client = this.redis.getClient()
+      const imgCount = await client.hget('img', url)
       const imgExist = await client.hget('imgBase64', 'url')
       if (imgExist) {
         return imgExist
       }
       const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/650x/gravity/Center/crop/650x950/format/jpg/blur/1x0/quality/90|imageslim`, { responseType: 'arraybuffer' })
       const img = new Buffer(result.data, 'binary').toString('base64')
-      await client.hset('imgBase64', url, img)
+      if (imgCount && Number(imgCount) > 0) {
+        await client.hset('imgBase64', url, img)
+      }
       return img
     } catch (error) {
       return null
