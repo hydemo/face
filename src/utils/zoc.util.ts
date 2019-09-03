@@ -548,6 +548,7 @@ export class ZOCUtil {
   async genImage(zip: any, time: String, address: IDetail, img: string): Promise<boolean> {
     // const url = `${this.config.zocUrl}/api/check/gate/image`;
     const ZP = await this.cameraUtil.getImg(img)
+    if (!ZP) { return false }
     // const token = await this.getToken()
     const data = {
       CASE_ID: this.getOrder(),

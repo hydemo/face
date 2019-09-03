@@ -507,6 +507,9 @@ export class ResidentService {
 
   // 手动录入常住人
   async addFamilyByInput(family: CreateFamilyDTO, userId: string, ip: string): Promise<IResident> {
+    if (!family.user.faceUrl) {
+      throw new ApiException('照片不能为空', ApiErrorCode.PHONE_EXIST, 406);
+    }
     const zone: IZone = await this.zoneService.findById(family.address)
     await this.isFamily(zone._id, userId)
     const owner: IResident | null = await this.hasOwner(family.address)
@@ -1147,5 +1150,38 @@ export class ResidentService {
       .populate({ path: 'address', model: 'zone', select: 'houseNumber' })
       .lean()
       .exec()
+  }
+
+  async fix() {
+    const client = this.redis.getClient()
+    const keys = await client.hkeys('no_Resident')
+    await Promise.all(keys.map(async key => {
+      const resident = await this.residentModel
+        .findById(key)
+        .populate({ path: 'address', model: 'zone' })
+        .populate({ path: 'user', model: 'user' })
+      if (!resident) {
+        return
+      }
+      await this.addToDevice(resident.address, resident.user, String(resident._id))
+      // if (!faceExist) {
+      //   // await this.fac
+      //   // await client.hset('no_Resident', String(resident._id), 1)
+      //   await this.faceService.addOnePic()
+      // }
+    }))
+    // const residents = await this.residentModel.find({ checkResult: { $nin: [1, 3] }, isDelete: false })
+    // await Promise.all(residents.map(async resident => {
+    //   const devices = await this.deviceService.findByCondition({ zone: resident.zone, enable: true })
+    //   await Promise.all(devices.map(async device => {
+    //     const faceExist = await this.faceService.findOne({ device: device._id, bondToObjectId: resident._id, isDelete: false })
+    //     if (!faceExist) {
+    //       // await this.fac
+    //       // await client.hset('no_Resident', String(resident._id), 1)
+    //       await this.faceService.addOnePic()
+    //     }
+    //   }))
+
+    // }))
   }
 }

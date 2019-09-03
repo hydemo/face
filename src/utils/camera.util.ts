@@ -197,6 +197,9 @@ export class CameraUtil {
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const Img = await this.getImg(faceData.imgUrl)
+    if (!Img) {
+      return 'imgError'
+    }
     const data = {
       Name: "personListRequest",
       TimeStamp: timeStamp,
@@ -255,6 +258,9 @@ export class CameraUtil {
     const ImgNum = faceData.user;
     const Mode = faceData.mode;
     const Img = await this.getImg(faceData.imgUrl)
+    if (!Img) {
+      return 'imgError'
+    }
     if (version === '1.0.0') {
       data = {
         Name: 'WBListInfoREQ',
@@ -526,10 +532,15 @@ export class CameraUtil {
    * 
    * @param url 图片地址
    */
-  async getImg(url: string): Promise<string> {
-    const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/650x/gravity/Center/crop/650x950/format/jpg/blur/1x0/quality/90|imageslim`, { responseType: 'arraybuffer' })
-    const img = new Buffer(result.data, 'binary').toString('base64')
-    return img
+  async getImg(url: string): Promise<string | null> {
+    try {
+      const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/650x/gravity/Center/crop/650x950/format/jpg/blur/1x0/quality/90|imageslim`, { responseType: 'arraybuffer' })
+      const img = new Buffer(result.data, 'binary').toString('base64')
+      return img
+    } catch (error) {
+      return null
+    }
+
   }
 
   async addToDevice(deviceUUID: string, user: any, Img: string) {
