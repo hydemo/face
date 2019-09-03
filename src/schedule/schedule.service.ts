@@ -384,6 +384,7 @@ export class ScheduleService {
         const count = await client.hget('img', key)
         if (Number(count) < 1) {
           await client.hdel('imgBase64', key)
+          await client.hdel('img', key)
         }
       }))
 
