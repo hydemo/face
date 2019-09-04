@@ -254,8 +254,11 @@ export class ScheduleService {
       }
         break;
       case 'update-delete': {
-        result = await this.camera.deleteOnePic(data, device)
-        await this.handResult(result, data, pool, client)
+        const faceCheck = await this.faceService.findById(data.face)
+        if (faceCheck && faceCheck.checkResult === 1) {
+          result = await this.camera.deleteOnePic(data, device)
+          await this.handResult(result, data, pool, client)
+        }
       }
         break;
 
