@@ -1157,6 +1157,7 @@ export class ResidentService {
 
   async deleteOwner(id: string, user: string) {
     const data: IResident | null = await this.residentModel.findById(id).lean()
+    console.log(data, 'data')
     if (!data || data.isDelete) {
       return null
     }

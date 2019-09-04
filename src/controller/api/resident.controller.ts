@@ -132,6 +132,7 @@ export class ResidentController {
   }
 
 
+
   @Delete('/:id')
   @ApiOkResponse({
     description: '删除常住人/访客',
@@ -141,6 +142,7 @@ export class ResidentController {
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any,
   ) {
+    console.log(id, 11)
     await this.residentService.deleteById(id, req.user._id);
     return { statusCode: 200, msg: '删除成功' };
   }
@@ -155,9 +157,12 @@ export class ResidentController {
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any,
   ) {
+    console.log(id, 22)
     await this.residentService.deleteOwner(id, req.user._id);
     return { statusCode: 200, msg: '删除成功' };
   }
+
+
 
   @Put('/:id/family')
   @ApiOkResponse({
