@@ -1169,8 +1169,8 @@ export class ResidentService {
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
-    await this.residentModel.findById(id)
-    await this.zoneService.deleteOwner(data.zone)
+    await this.residentModel.findByIdAndDelete(id)
+    await this.zoneService.deleteOwner(data.address)
     return
   }
 
