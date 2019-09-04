@@ -148,7 +148,7 @@ export class ZoneService {
 
   // 更新业主
   async deleteOwner(id: string) {
-    return await this.zoneModel.findByIdAndUpdate(id, { owner: { $unset: 1 } })
+    return await this.zoneModel.findByIdAndUpdate(id, { $unset: { owner: 1 } })
   }
 
   // 设备数变动
