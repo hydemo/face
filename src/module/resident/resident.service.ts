@@ -254,7 +254,7 @@ export class ResidentService {
         phone = owner.phone
       }
       const deviceIds = devices.map(device => String(device.deviceId))
-      // this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
+      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
       // this.uploadToSoc(resident, phone, zone.profile.dzbm)
     }
     await Promise.all(devices.map(async device => {
@@ -1191,11 +1191,11 @@ export class ResidentService {
     }
     const message: ApplicationDTO = {
       first: {
-        value: `您的${address.houseNumber}业主身份已被物业撤回，请确认信息后重新申请`,
+        value: `您的${address.houseNumber}业主身份已被物业撤回`,
         color: "#173177"
       },
       keyword1: {
-        value: '业主撤消',
+        value: '业主身份撤消',
         color: "#173177"
       },
       keyword2: {
@@ -1211,7 +1211,7 @@ export class ResidentService {
         color: "#173177"
       },
       remark: {
-        value: '该房屋申请的家人将一并被删除，请核对头像及房屋地址是否准确',
+        value: '该房屋申请的家人将一并被删除，请核对头像及房屋地址是否准确，如是租客请由业主扫码出租',
         color: "#173177"
       },
     }
