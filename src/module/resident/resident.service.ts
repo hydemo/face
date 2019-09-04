@@ -1155,7 +1155,7 @@ export class ResidentService {
       .exec()
   }
 
-  async deleteOwner(id: string, user: string) {
+  async deleteOwner(id: string, user: string, username: string) {
     const data: IResident | null = await this.residentModel.findById(id).lean()
     console.log(data, 'data')
     if (!data || data.isDelete) {
@@ -1169,7 +1169,7 @@ export class ResidentService {
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
-    await this.residentModel.findByIdAndDelete(id)
+    await this.residentModel.findByIdAndUpdate(id, { reviewer: user })
     await this.zoneService.deleteOwner(data.address)
     const residents: IResident[] = await this.residentModel.find({ address: data.address })
     await Promise.all(residents.map(async resi => {
@@ -1180,7 +1180,7 @@ export class ResidentService {
         await Promise.all(faces.map(async face => {
           return await this.faceService.delete(face)
         }))
-        await this.residentModel.findByIdAndDelete(resi._id)
+        await this.residentModel.findByIdAndUpdate(resi._id, { reviewer: user })
       }
     }))
 
@@ -1199,7 +1199,7 @@ export class ResidentService {
         color: "#173177"
       },
       keyword2: {
-        value: '物业',
+        value: username,
         color: "#173177"
       },
       keyword3: {

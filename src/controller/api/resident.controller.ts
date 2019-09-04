@@ -158,7 +158,7 @@ export class ResidentController {
     @Request() req: any,
   ) {
     console.log(id, 22)
-    await this.residentService.deleteOwner(id, req.user._id);
+    await this.residentService.deleteOwner(id, req.user._id, req.user.username);
     return { statusCode: 200, msg: '删除成功' };
   }
 
