@@ -173,15 +173,15 @@ export class CallbackService {
           const time = moment().format('YYYYMMDDHHmmss');
           const zip = await this.zocUtil.genZip()
           const enrecord = await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, owner)
-          if (enrecord) {
-            await this.zocUtil.genImage(zip, time, zone.detail, img)
-            // const data = await this.zocUtil.upload(zip, time)
-            // if (data.success) {
-            //   isZOCPush = true
-            //   zipname = data.zipname
-            //   client.hincrby(this.config.LOG, this.config.LOG_ENRECORD, 1)
-            // }
-          }
+          // if (enrecord) {
+          //   await this.zocUtil.genImage(zip, time, zone.detail, img)
+          // const data = await this.zocUtil.upload(zip, time)
+          // if (data.success) {
+          //   isZOCPush = true
+          //   zipname = data.zipname
+          //   client.hincrby(this.config.LOG, this.config.LOG_ENRECORD, 1)
+          // }
+          // }
 
         }
       }
