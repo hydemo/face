@@ -1175,7 +1175,7 @@ export class ResidentService {
     await Promise.all(residents.map(async resi => {
       if (resi.isDelete || resi.checkResult === 1 || resi.checkResult === 3) {
         await this.residentModel.findByIdAndDelete(resi._id)
-      } else {
+      } else if (resi.type !== 'owner') {
         const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resi._id, isDelete: false })
         await Promise.all(faces.map(async face => {
           return await this.faceService.delete(face)
