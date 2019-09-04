@@ -29,7 +29,7 @@ import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
 
 @ApiUseTags('zones')
 @ApiBearerAuth()
-// @UseGuards(AuthGuard(), UserRolesGuard)
+@UseGuards(AuthGuard(), UserRolesGuard)
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('api/zones')
 export class ZoneController {
