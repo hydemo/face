@@ -1171,11 +1171,56 @@ export class ResidentService {
     }))
     await this.residentModel.findByIdAndDelete(id)
     await this.zoneService.deleteOwner(data.address)
+    const residents: IResident[] = await this.residentModel.find({ address: data.address })
+    await Promise.all(residents.map(async resi => {
+      if (resi.isDelete || resi.checkResult === 1 || resi.checkResult === 3) {
+        await this.residentModel.findByIdAndDelete(resi._id)
+      } else {
+        const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resi._id, isDelete: false })
+        await Promise.all(faces.map(async face => {
+          return await this.faceService.delete(face)
+        }))
+        await this.residentModel.findByIdAndDelete(resi._id)
+      }
+    }))
+
+    const address = await this.zoneService.findById(data.address)
+    const owner = await this.userService.updateById(data.user, {})
+    if (!owner) {
+      return
+    }
+    const message: ApplicationDTO = {
+      first: {
+        value: `您的${address.houseNumber}业主身份已被物业撤回，请确认信息后重新申请`,
+        color: "#173177"
+      },
+      keyword1: {
+        value: '业主撤消',
+        color: "#173177"
+      },
+      keyword2: {
+        value: '物业',
+        color: "#173177"
+      },
+      keyword3: {
+        value: moment().format('YYYY:MM:DD HH:mm:ss'),
+        color: "#173177"
+      },
+      keyword4: {
+        value: '无',
+        color: "#173177"
+      },
+      remark: {
+        value: '该房屋申请的家人将一并被删除，请核对头像及房屋地址是否准确',
+        color: "#173177"
+      },
+    }
+    this.weixinUtil.sendVerifyMessage(owner.openId, message)
     return
   }
 
   async fix() {
-    const residents = await this.residentModel.find({ user: '5d094155fcd648716f6627e9', isDelete: false, checkResult: { $nin: [1, 3] } })
+    // const residents = await this.residentModel.find({ user: '5d094155fcd648716f6627e9', isDelete: false, checkResult: { $nin: [1, 3] } })
     // console.log(residents, 'rsss')
     // await Promise.all(residents.map(async resident => {
     //   let checkResult = 2

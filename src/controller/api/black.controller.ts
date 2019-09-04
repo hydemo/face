@@ -49,6 +49,7 @@ export class BlackController {
     @Query('checkResult') checkResult: number,
     @Request() req: any,
   ) {
+    console.log(req.user, 'req.user')
     return this.blackService.findAll(pagination, Number(checkResult), req.user._id);
   }
 
