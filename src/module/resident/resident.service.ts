@@ -254,7 +254,7 @@ export class ResidentService {
         phone = owner.phone
       }
       const deviceIds = devices.map(device => String(device.deviceId))
-      // this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
+      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
       // this.uploadToSoc(resident, phone, zone.profile.dzbm)
     }
     await Promise.all(devices.map(async device => {
@@ -1155,9 +1155,27 @@ export class ResidentService {
       .exec()
   }
 
+  async deleteOwner(id: string, user: string) {
+    const data: IResident | null = await this.residentModel.findById(id).lean()
+    if (!data || data.isDelete) {
+      return null
+    }
+    const canActive = await this.roleService.checkRoles({ role: 1, isDelete: false, zone: data.zone, user })
+    if (!canActive) {
+      throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: id, isDelete: false })
+    await Promise.all(faces.map(async face => {
+      return await this.faceService.delete(face)
+    }))
+    await this.residentModel.findById(id)
+    await this.zoneService.deleteOwner(data.zone)
+    return
+  }
+
   async fix() {
     const residents = await this.residentModel.find({ user: '5d094155fcd648716f6627e9', isDelete: false, checkResult: { $nin: [1, 3] } })
-    console.log(residents, 'rsss')
+    // console.log(residents, 'rsss')
     // await Promise.all(residents.map(async resident => {
     //   let checkResult = 2
     //   if (resident.checkResult === 4) {

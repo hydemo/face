@@ -11,7 +11,7 @@ import { Pagination } from 'src/common/dto/pagination.dto';
 import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { ResidentService } from 'src/module/resident/resident.service';
 import { CreateResidentDTO, CreateFamilyDTO, AgreeVisitorDTO, AgreeFamilyDTO, CreateFamilyByScanDTO, CreateVisitorByScanDTO, UpdateFamilyDTO, CreateVisitorByOwnerDTO, CreateVisitorByGuardDTO } from 'src/module/resident/dto/resident.dto';
-import { Roles } from 'src/common/decorator/roles.decorator';
+import { Roles, UserRoles } from 'src/common/decorator/roles.decorator';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
 
 
@@ -142,6 +142,20 @@ export class ResidentController {
     @Request() req: any,
   ) {
     await this.residentService.deleteById(id, req.user._id);
+    return { statusCode: 200, msg: '删除成功' };
+  }
+
+  @UserRoles(1)
+  @Delete('/:id/owner')
+  @ApiOkResponse({
+    description: '删除业主',
+  })
+  @ApiOperation({ title: '删除业主/访客', description: '删除业主/访客' })
+  async deleteOwner(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any,
+  ) {
+    await this.residentService.deleteOwner(id, req.user._id);
     return { statusCode: 200, msg: '删除成功' };
   }
 
