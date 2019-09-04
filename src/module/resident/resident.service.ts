@@ -254,7 +254,7 @@ export class ResidentService {
         phone = owner.phone
       }
       const deviceIds = devices.map(device => String(device.deviceId))
-      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
+      // this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
       // this.uploadToSoc(resident, phone, zone.profile.dzbm)
     }
     await Promise.all(devices.map(async device => {
