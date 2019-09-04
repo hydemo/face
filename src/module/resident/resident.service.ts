@@ -254,7 +254,7 @@ export class ResidentService {
         phone = owner.phone
       }
       const deviceIds = devices.map(device => String(device.deviceId))
-      // this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
+      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
       // this.uploadToSoc(resident, phone, zone.profile.dzbm)
     }
     await Promise.all(devices.map(async device => {
@@ -1169,7 +1169,7 @@ export class ResidentService {
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
-    await this.residentModel.findByIdAndUpdate(id, { reviewer: user })
+    await this.residentModel.findByIdAndUpdate(id, { isDelete: true, reviewer: user })
     await this.zoneService.deleteOwner(data.address)
     const residents: IResident[] = await this.residentModel.find({ address: data.address })
     await Promise.all(residents.map(async resi => {
@@ -1180,7 +1180,7 @@ export class ResidentService {
         await Promise.all(faces.map(async face => {
           return await this.faceService.delete(face)
         }))
-        await this.residentModel.findByIdAndUpdate(resi._id, { reviewer: user })
+        await this.residentModel.findByIdAndUpdate(resi._id, { isDelete: true, reviewer: user })
       }
     }))
 
