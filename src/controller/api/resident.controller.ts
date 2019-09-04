@@ -150,7 +150,7 @@ export class ResidentController {
   @ApiOkResponse({
     description: '删除业主',
   })
-  @ApiOperation({ title: '删除业主/访客', description: '删除业主/访客' })
+  @ApiOperation({ title: '删除业主', description: '删除业主' })
   async deleteOwner(
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any,
