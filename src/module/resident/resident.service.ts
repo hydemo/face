@@ -1171,11 +1171,11 @@ export class ResidentService {
     }))
     await this.residentModel.findByIdAndUpdate(id, { isDelete: true, reviewer: user })
     await this.zoneService.deleteOwner(data.address)
-    const residents: IResident[] = await this.residentModel.find({ address: data.address })
+    const residents: IResident[] = await this.residentModel.find({ address: data.address, type: { $ne: 'owner' } })
     await Promise.all(residents.map(async resi => {
       if (resi.isDelete || resi.checkResult === 1 || resi.checkResult === 3) {
         await this.residentModel.findByIdAndDelete(resi._id)
-      } else if (resi.type !== 'owner') {
+      } else {
         const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: resi._id, isDelete: false })
         await Promise.all(faces.map(async face => {
           return await this.faceService.delete(face)
