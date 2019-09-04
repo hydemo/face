@@ -1156,23 +1156,51 @@ export class ResidentService {
   }
 
   async fix() {
-    const client = this.redis.getClient()
-    const keys = await client.hkeys('no_Resident')
-    await Promise.all(keys.map(async key => {
-      const resident = await this.residentModel
-        .findById(key)
-        .populate({ path: 'address', model: 'zone' })
-        .populate({ path: 'user', model: 'user' })
-      if (!resident) {
-        return
-      }
-      await this.addToDevice(resident.address, resident.user, String(resident._id))
-      // if (!faceExist) {
-      //   // await this.fac
-      //   // await client.hset('no_Resident', String(resident._id), 1)
-      //   await this.faceService.addOnePic()
-      // }
-    }))
+    const residents = await this.residentModel.find({ user: '5d094155fcd648716f6627e9', isDelete: false, checkResult: { $nin: [1, 3] } })
+    console.log(residents, 'rsss')
+    // await Promise.all(residents.map(async resident => {
+    //   let checkResult = 2
+    //   if (resident.checkResult === 4) {
+    //     checkResult = 1
+    //   } else if (checkResult === 5) {
+    //     checkResult = 3
+    //   }
+    //   const devices: IDevice[] = await this.deviceService.findByCondition({ position: resident.zone, enable: true })
+    //   await Promise.all(devices.map(async device => {
+    //     const face: CreateFaceDTO = {
+    //       device: device._id,
+    //       user: resident.user,
+    //       mode: 2,
+    //       bondToObjectId: resident._id,
+    //       bondType: 'resident',
+    //       zone: resident.zone,
+    //       checkResult,
+    //       // faceUrl: user.faceUrl,
+    //     }
+    //     if (resident.expireTime) {
+    //       face.expire = resident.expireTime;
+    //     }
+    //     await this.faceService.create(face)
+    //   }))
+
+    // }))
+    // const client = this.redis.getClient()
+    // const keys = await client.hkeys('no_Resident')
+    // await Promise.all(keys.map(async key => {
+    //   const resident = await this.residentModel
+    //     .findById(key)
+    //     .populate({ path: 'address', model: 'zone' })
+    //     .populate({ path: 'user', model: 'user' })
+    //   if (!resident) {
+    //     return
+    //   }
+    //   await this.addToDevice(resident.address, resident.user, String(resident._id))
+    //   // if (!faceExist) {
+    //   //   // await this.fac
+    //   //   // await client.hset('no_Resident', String(resident._id), 1)
+    //   //   await this.faceService.addOnePic()
+    //   // }
+    // }))
     // const residents = await this.residentModel.find({ checkResult: { $nin: [1, 3] }, isDelete: false })
     // await Promise.all(residents.map(async resident => {
     //   const devices = await this.deviceService.findByCondition({ zone: resident.zone, enable: true })
