@@ -33,6 +33,7 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client) {
     const token = client.handshake.query.token;
+    console.log(token, 'token')
     const media: any = await this.mediaService.findByToken(token)
     if (!media) {
       return

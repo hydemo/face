@@ -536,7 +536,7 @@ export class CameraUtil {
     try {
       const client = this.redis.getClient()
       const imgCount = await client.hget('img', url)
-      const imgExist = await client.hget('imgBase64', 'url')
+      const imgExist = await client.hget('imgBase64', url)
       if (imgExist) {
         return imgExist
       }
@@ -552,45 +552,50 @@ export class CameraUtil {
 
   }
 
-  async addToDevice(deviceUUID: string, user: any, Img: string) {
-    const username = 'admin'
-    const password = 'oyxj19891024'
-    // const id = String(_id)
-    const timeStamp: number = this.getTemp()
-    const sign = await this.sign(username, password, deviceUUID, timeStamp)
-    // console.log(version, 'version')
-    // console.log(user.faceUrl, 'facedd')
-    // const Img = await this.getImg(`${user.faceUrl}`);
-    // if (version === '1.0.0') {
-    // const ImgName = user.username;
-    // const ImgNum = user._id;
-    const data = {
-      Name: "personListRequest",
-      TimeStamp: timeStamp,
-      Sign: sign,
-      UUID: deviceUUID,
-      // Session: session,
-      Data: {
-        Action: 'addPerson',
-        PersonType: 2,
-        PersonInfo: {
-          PersonId: user._id,
-          PersonName: user.username,
-          PersonPhoto: Img
+  async addToDevice(deviceUUID: string, user: any) {
+
+    try {
+      const username = 'admin'
+      const password = 'oyxj19891024'
+      // const id = String(_id)
+      const timeStamp: number = this.getTemp()
+      const img = await this.getImg(user.faceUrl)
+      // if (!img) { return 'imgError' }
+      const sign = await this.sign(username, password, deviceUUID, timeStamp)
+      // console.log(version, 'version')
+      // console.log(user.faceUrl, 'facedd')
+      // const Img = await this.getImg(`${user.faceUrl}`);
+      // if (version === '1.0.0') {
+      // const ImgName = user.username;
+      // const ImgNum = user._id;
+      const data = {
+        Name: "personListRequest",
+        TimeStamp: timeStamp,
+        Sign: sign,
+        UUID: deviceUUID,
+        Data: {
+          Action: 'addPerson',
+          PersonType: 2,
+          PersonInfo: {
+            PersonId: String(user._id),
+            PersonName: user.username,
+            PersonPhoto: img
+          }
         }
       }
-    }
-    try {
       const result: any = await axios({
         method: 'post',
         url: this.config.p2pUrl2,
         data,
       })
-      console.log(result.data, 'result')
+      let code;
+      let msg;
       if (result.data.Code === 1) {
         return 'success';
       }
-      let code
+      if (result.data.Code === 1106) {
+        return 'noExist'
+      }
       switch (result.data.Data.Result) {
         case -3: code = 'success'
           break;
@@ -600,24 +605,20 @@ export class CameraUtil {
           break;
         case -13: code = 'imgError'
           break;
-        // case -19: code = 'error'
-        //   break;
-        // case -20: code = 'error'
-        //   break;
-        // default: code = 'final'
-        //   break;
+        case -19: code = 'error'
+          break;
+        case -20: code = 'error'
+          break;
+        default: { code = 'final', msg = JSON.stringify(result.data) }
+          break;
+      }
+      if (code === 'final') {
+        console.log(msg)
       }
       return code
-    } catch (error) {
-      return false
-    }
 
-    // if (result.data.Data.Result === -15 || result.data.ErrorCode === -13 || result.data.Code === -15 || result.data.Code === -13) {
-    //   return 'imgError'
-    // }
-    // if (result.data.ErrorCode === -3) {
-    //   // console.log(user, 'user')
-    //   return 'exist'
-    // }
+    } catch (error) {
+      return 'error'
+    }
   }
 }

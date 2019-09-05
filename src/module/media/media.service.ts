@@ -67,9 +67,9 @@ export class MediaService {
     if (!media) {
       throw new ApiException('广告机不存在', ApiErrorCode.ACCOUNT_INVALID, 406);
     }
-    if (!this.cryptoUtil.checkPassword(password, media.password)) {
-      throw new ApiException('密码有误', ApiErrorCode.PASSWORD_INVALID, 406);
-    }
+    // if (!this.cryptoUtil.checkPassword(password, media.password)) {
+    //   throw new ApiException('密码有误', ApiErrorCode.PASSWORD_INVALID, 406);
+    // }
     const token = await this.jwtService.sign({ id: media._id, type: 'media' })
     await this.mediaModel.findByIdAndUpdate(media._id, { token });
   }

@@ -314,19 +314,9 @@ export class FaceService {
   //   }))
   // }
 
-  async success(user, device, result) {
-    let update: any = { checkResult: 2 }
-
-    if (result.LibIndex) {
-      update = {
-        libIndex: result.LibIndex,
-        flieIndex: result.FlieIndex,
-        pic: result.Pic,
-        checkResult: 2
-      }
-    }
-    await this.faceModel.updateMany({ user, device, checkResult: 1, isDelete: false }, update)
-  }
+  // async updateByCondition(condition, update) {
+  //   await this.faceModel.updateMany(condition, { checkResult: 2 })
+  // }
 
 
   async disableDevice(device: string) {
