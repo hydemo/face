@@ -123,6 +123,7 @@ export class CallbackService {
       return
     }
     img = await this.qiniuUtil.uploadB64(imgBase)
+    console.log(device, 'device')
     if (device.media && Number(mode) !== 2) {
       await this.mediaWs.sendMessage(String(device.media), { type: String(body.WBMode), imgUrl: img })
     }
