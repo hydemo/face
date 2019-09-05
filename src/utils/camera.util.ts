@@ -301,7 +301,6 @@ export class CameraUtil {
   */
   async handleRequest(data, version, faceData) {
     try {
-      console.log(data, 'data')
       const result: any = await axios({
         method: 'post',
         url: version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
@@ -378,7 +377,6 @@ export class CameraUtil {
       return code
     } catch (error) {
       // const client = this.redis.getClient()
-      console.log(error)
       // const errorData = { ...faceData, count: 1 + faceData.count, }
       // const poolExist = await client.hget('p2pError_pool', upData.device)
       // if (!poolExist) {

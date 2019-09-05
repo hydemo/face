@@ -360,7 +360,7 @@ export class ScheduleService {
           return
         }
         if (Number(listenTime) > 0) {
-          client.rpush(`p2p_${pool}`, dataString)
+          client.rpush(`p2pError_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
           return;
         }
