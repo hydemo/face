@@ -303,6 +303,7 @@ export class CameraUtil {
   */
   async handleRequest(data, version, faceData) {
     try {
+      console.log(data, 'data')
       const result: any = await axios({
         method: 'post',
         url: version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
