@@ -491,7 +491,6 @@ export class RoleService {
   async fix() {
     await this.roleModel.updateMany({}, { checkResult: 2 })
     const roles: IRole[] = await this.roleModel.find({ isDelete: false, role: 4 })
-    console.log(roles, 'roles')
     // const rols: IRole[] = await this.roleModel.find({ role: { $in: [1, 2, 3] }, isDelete: false })
     // await Promise.all(roles.map(async role => {
     //   const devices: IDevice[] = await this.deviceService.findByCondition({ position: role.zone, enable: true })

@@ -148,7 +148,6 @@ export class ZoneService {
 
   // 更新业主
   async deleteOwner(id: string) {
-    console.log(id, 'id')
     return await this.zoneModel.findByIdAndUpdate(id, { $unset: { owner: 1 } })
   }
 

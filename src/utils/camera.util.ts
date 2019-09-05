@@ -281,7 +281,6 @@ export class CameraUtil {
         TimeStamp: timeStamp,
         Sign: sign,
         UUID: deviceUUID,
-        Session: session,
         Data: {
           Action: 'addPerson',
           PersonType: Mode,

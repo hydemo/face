@@ -33,7 +33,6 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client) {
     const token = client.handshake.query.token;
-    console.log(token, 'token')
     const media: any = await this.mediaService.findByToken(token)
     if (!media) {
       return
@@ -60,7 +59,6 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('message')
   async sendMessage(id: string, message: IMessage) {
     let client: any = null
-    console.log(id, 'id')
     this.connectedMedias.map(media => {
       if (media.id === id) {
         client = media.client
@@ -69,8 +67,6 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client) {
       return
     }
-    console.log(client, 'client')
-    console.log(message, 'message')
     client.emit('message', message)
   }
 }

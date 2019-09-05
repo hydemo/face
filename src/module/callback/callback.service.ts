@@ -115,9 +115,7 @@ export class CallbackService {
         userId = CompareInfo.PersonInfo.PersonId
       }
     }
-    console.log(deviceUUID, 'uuid')
     const device: IDevice | null = await this.deviceService.findByUUID(deviceUUID)
-    console.log(device, 'device')
     if (!device) {
       return;
     }
@@ -125,7 +123,6 @@ export class CallbackService {
       return
     }
     img = await this.qiniuUtil.uploadB64(imgBase)
-    console.log(device, 'device')
     if (device.media && Number(mode) !== 2) {
       await this.mediaWs.sendMessage(String(device.media), { type: String(mode), imgUrl: img })
     }
@@ -485,7 +482,6 @@ export class CallbackService {
       type: { $ne: 'visitor' },
     })
     const count = residents.length
-    console.log(count)
     const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
     const deviceIds = devices.map(device => String(device.deviceId))
     const zoneDetail: IZone = await this.zoneService.findById(zone)
@@ -513,7 +509,6 @@ export class CallbackService {
     }))
     await this.zocUtil.genResident(zip, time, residentDatas)
     const zocResult = await this.zocUtil.upload(zip, time)
-    console.log(zocResult, 'zocResult')
     if (zocResult.success) {
       await this.residentService.updateMany({ zone, checkResult: 2, isDelete: false }, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
       client.hincrby(this.config.LOG, this.config.LOG_RESIDENT, count)
