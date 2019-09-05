@@ -115,7 +115,9 @@ export class CallbackService {
         userId = CompareInfo.PersonInfo.PersonId
       }
     }
+    console.log(deviceUUID, 'uuid')
     const device: IDevice | null = await this.deviceService.findByUUID(deviceUUID)
+    console.log(device, 'device')
     if (!device) {
       return;
     }
