@@ -158,16 +158,13 @@ export class ScheduleService {
       client.rpush(`p2p_${pool}`, JSON.stringify(newData))
     }
     if (res === 'error') {
-      if (data.count > 8) {
-        result = 'final'
-      } else {
-        const errorData = { ...data, count: data.count + 1 }
-        const poolExist = await client.hget('p2pError_pool', pool)
-        if (!poolExist) {
-          await client.hset('p2pError_pool', pool, 1)
-        }
-        await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
+
+      const errorData = { ...data, count: data.count + 1 }
+      const poolExist = await client.hget('p2pError_pool', pool)
+      if (!poolExist) {
+        await client.hset('p2pError_pool', pool, 1)
       }
+      await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
     }
     if (result === 'imgError') {
       await this.sendP2PError(data.face, client)
