@@ -72,5 +72,6 @@ export class MediaService {
     // }
     const token = await this.jwtService.sign({ id: media._id, type: 'media' })
     await this.mediaModel.findByIdAndUpdate(media._id, { token });
+    return token
   }
 }
