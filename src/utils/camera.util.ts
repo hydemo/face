@@ -174,7 +174,6 @@ export class CameraUtil {
         Name: 'personListRequest',
         TimeStamp: timeStamp,
         Sign: sign,
-        Session: session,
         Action: 'DeleteOnePic',
         UUID: deviceUUID,
         Data: {
@@ -205,7 +204,6 @@ export class CameraUtil {
       TimeStamp: timeStamp,
       Sign: sign,
       UUID: deviceUUID,
-      Session: session,
       Data: {
         Action: 'editPerson',
         PersonType: faceData.mode,
