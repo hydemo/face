@@ -327,7 +327,7 @@ export class FaceService {
 
   async check() {
     const faces = await this.faceModel
-      .find({ checkResult: 1, isDelete: false, zone: { $ne: '5d2588d3a7a2293344401e84' } })
+      .find({ checkResult: 3, isDelete: false })
       .populate({ path: 'device', model: 'device' })
       .populate({ path: 'user', model: 'user' })
     // if (!face) {
