@@ -70,6 +70,7 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return
     }
     console.log(client, 'client')
+    console.log(message, 'message')
     client.emit('message', message)
   }
 }
