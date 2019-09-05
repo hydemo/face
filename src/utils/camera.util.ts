@@ -301,6 +301,15 @@ export class CameraUtil {
   */
   async handleRequest(data, version, faceData) {
     try {
+      if (faceData.count > 8) {
+        const error: P2PErrorDTO = {
+          face: faceData.face,
+          msg: 'networkError',
+          type: faceData.type,
+        }
+        await this.p2pErrorService.create(error)
+        return 'final'
+      }
       const result: any = await axios({
         method: 'post',
         url: version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,

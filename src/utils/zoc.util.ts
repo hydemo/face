@@ -151,7 +151,7 @@ export class ZOCUtil {
     if (result.data.status === 100) {
       const token = result.data.data.token
       const client = this.redis.getClient()
-      client.set('zoc_token', token, 'EX', 60 * 40)
+      client.set('zoc_token', token, 'EX', 60 * 30)
       return token
     } else {
       return ''
