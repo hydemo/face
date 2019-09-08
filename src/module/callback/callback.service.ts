@@ -168,7 +168,7 @@ export class CallbackService {
       if (resident) {
         const owner = await this.userService.updateById(resident.address.owner, {})
 
-        if (owner) {
+        if (owner && this.config.url === 'https://xms.thinkthen.cn') {
           const zone: IZone = await this.zoneService.findById(device.zone)
           const time = moment().format('YYYYMMDDHHmmss');
           const zip = await this.zocUtil.genZip()

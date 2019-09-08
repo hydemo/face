@@ -12,6 +12,7 @@ import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { BlackService } from 'src/module/black/black.service';
 import { BlackDTO, CreateBlackDTO } from 'src/module/black/dto/black.dto';
 import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
+import { UserRoles } from 'src/common/decorator/roles.decorator';
 
 
 @ApiUseTags('blacks')
@@ -23,6 +24,7 @@ export class BlackController {
     @Inject(BlackService) private blackService: BlackService,
   ) { }
 
+  @UserRoles(4)
   @Post('/')
   @ApiOkResponse({
     description: '添加黑名单',
@@ -37,6 +39,7 @@ export class BlackController {
     return { statusCode: 200, msg: '添加成功' };
   }
 
+  @UserRoles(4)
   @ApiOkResponse({
     description: '黑名单申请列表',
     type: BlackDTO,
@@ -52,6 +55,20 @@ export class BlackController {
     return this.blackService.findAll(pagination, Number(checkResult), req.user._id);
   }
 
+  @UserRoles(4)
+  @Delete('/:id')
+  @ApiOkResponse({
+    description: '删除黑名单',
+  })
+  @ApiOperation({ title: '删除黑名单', description: '删除黑名单' })
+  async deleteById(
+    @Param('id', new MongodIdPipe()) id: string,
+  ) {
+    await this.blackService.deleteById(id);
+    return { statusCode: 200, msg: '删除成功' };
+  }
+
+  @UserRoles(4)
   @Put('/:id/agree')
   @ApiOkResponse({
     description: '同意黑名单申请',
@@ -65,6 +82,7 @@ export class BlackController {
     return { statusCode: 200, msg: '申请成功' };
   }
 
+  @UserRoles(4)
   @Put('/:id/reject')
   @ApiOkResponse({
     description: '拒绝黑名单申请',

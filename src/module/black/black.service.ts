@@ -17,6 +17,7 @@ import { UserService } from '../users/user.service';
 import { RedisService } from 'nestjs-redis';
 import { IZone } from '../zone/interfaces/zone.interfaces';
 import { IRole } from '../role/interfaces/role.interfaces';
+import { IFace } from '../face/interfaces/face.interfaces';
 
 @Injectable()
 export class BlackService {
@@ -51,7 +52,6 @@ export class BlackService {
 
   async add(user: string, createBlack: CreateBlackDTO) {
     const role = await this.roleService.findOneByCondition({ isDelete: false, role: 4, user })
-    // console.log(role, 'role')
     if (!role) {
       throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -173,7 +173,7 @@ export class BlackService {
       const face = {
         device: device._id,
         user: black._id,
-        mode: 2,
+        mode: this.config.blackMode,
         bondToObjectId: black._id,
         bondType: 'black',
         zone: black.zone,
@@ -206,5 +206,14 @@ export class BlackService {
   // 根据id修改
   async updateById(id: string, update: any): Promise<IBlack | null> {
     return await this.blackModel.findByIdAndUpdate(id, update)
+  }
+
+  //删除黑名单
+  async deleteById(id: string) {
+    const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: id, isDelete: false })
+    await Promise.all(faces.map(async face => {
+      await this.faceService.delete(face)
+    }))
+    await this.blackModel.findByIdAndUpdate(id, { isDelete: true })
   }
 }

@@ -254,7 +254,9 @@ export class ResidentService {
         phone = owner.phone
       }
       const deviceIds = devices.map(device => String(device.deviceId))
-      this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
+      if (this.config.url === 'https://xms.thinkthen.cn') {
+        this.uploadToZoc(user._id, zone.zoneId, zone.profile, deviceIds, phone, resident)
+      }
       // this.uploadToSoc(resident, phone, zone.profile.dzbm)
     }
     await Promise.all(devices.map(async device => {
@@ -811,7 +813,7 @@ export class ResidentService {
    */
 
   // 业主管理列表
-  async ownerApplications(pagination: Pagination, user: string, checkResult: number) {
+  async ownerApplications(pagination: Pagination, user: string, checkResult: number, address?: string) {
     if (!pagination.zone) {
       return { list: [], total: 0 }
     }
@@ -824,7 +826,10 @@ export class ResidentService {
     if (checkResult === 2) {
       check = { $in: [2, 4, 5] }
     }
-    const condition = { isDelete: false, type: 'owner', zone, checkResult: check, isRent: { $exists: false } }
+    const condition: any = { isDelete: false, type: 'owner', zone, checkResult: check, isRent: { $exists: false } }
+    if (address) {
+      condition.address = address
+    }
     const list: IResident[] = await this.residentModel
       .find(condition)
       .limit(pagination.limit)
