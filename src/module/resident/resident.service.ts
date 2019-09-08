@@ -813,7 +813,7 @@ export class ResidentService {
    */
 
   // 业主管理列表
-  async ownerApplications(pagination: Pagination, user: string, checkResult: number, address?: string) {
+  async ownerApplications(pagination: Pagination, user: string, checkResult: number) {
     if (!pagination.zone) {
       return { list: [], total: 0 }
     }
@@ -827,8 +827,8 @@ export class ResidentService {
       check = { $in: [2, 4, 5] }
     }
     const condition: any = { isDelete: false, type: 'owner', zone, checkResult: check, isRent: { $exists: false } }
-    if (address) {
-      condition.address = address
+    if (pagination.address) {
+      condition.address = pagination.address
     }
     const list: IResident[] = await this.residentModel
       .find(condition)

@@ -36,4 +36,10 @@ export class Pagination {
   @IsOptional()
   @ApiModelPropertyOptional({ description: '区域id' })
   readonly zone?: string;
+
+  @IsMongoId()
+  @Type(() => String)
+  @IsOptional()
+  @ApiModelPropertyOptional({ description: '地址id' })
+  readonly address?: string;
 }

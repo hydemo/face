@@ -127,9 +127,8 @@ export class ResidentController {
     @Query() pagination: Pagination,
     @Query('checkResult') checkResult: number,
     @Request() req: any,
-    @Query('address', new MongodIdPipe()) address?: string,
   ) {
-    return this.residentService.ownerApplications(pagination, req.user._id, Number(checkResult), address);
+    return this.residentService.ownerApplications(pagination, req.user._id, Number(checkResult));
   }
 
 
