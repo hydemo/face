@@ -301,7 +301,7 @@ export class CameraUtil {
   */
   async handleRequest(data, version, faceData) {
     try {
-      if (faceData.count > 8) {
+      if (faceData.count > 18) {
         const error: P2PErrorDTO = {
           face: faceData.face,
           msg: 'networkError',

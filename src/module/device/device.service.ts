@@ -94,6 +94,7 @@ export class DeviceService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ status: 1 })
+      .populate({ path: 'position', model: 'zone' })
       .populate({ path: 'zone', model: 'zone' })
       .lean()
       .exec();
