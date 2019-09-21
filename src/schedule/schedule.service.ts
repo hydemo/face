@@ -102,7 +102,7 @@ export class ScheduleService {
     return ''
   }
 
-  async sendP2PError(faceId: string, client) {
+  async sendImgError(faceId: string, client) {
     const face = await this.faceService.findById(faceId)
     if (!face) {
       return
@@ -167,7 +167,7 @@ export class ScheduleService {
       await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
     }
     if (result === 'imgError') {
-      await this.sendP2PError(data.face, client)
+      // await this.sendImgError(data.face, client)
       await Promise.all(data.faces.map(async id => {
         await this.faceService.updateById(id, { checkResult: 3 })
       }))
@@ -430,15 +430,6 @@ export class ScheduleService {
       })
       )
     });
-
-    // 设备计时
-    // Schedule.scheduleJob('*/3 * * * *', async () => {
-    //   const client = this.redis.getClient()
-    //   const keys = await client.hkeys('device')
-    //   await Promise.all(keys.map(async key => {
-    //     await client.hincrby('device', key, 1)
-    //   }))
-    // });
 
     // 设备异常报警
     Schedule.scheduleJob('*/30 * * * *', async () => {

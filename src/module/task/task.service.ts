@@ -86,7 +86,7 @@ export class TaskService {
 
   // 查询全部数据
   async findByUser(pagination: Pagination, installer: string): Promise<IList<ITask>> {
-    const condition: any = { installer }
+    const condition: any = { installer, isDone: false }
     const list = await this.taskModel
       .find(condition)
       .limit(pagination.limit)

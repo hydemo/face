@@ -324,10 +324,48 @@ export class FaceService {
       isDelete: true
     })
   }
+  async updateFace(face, imgUrl) {
+    const client = this.redis.getClient()
+    if (!face.device.enable) {
+      return
+    }
+    switch (face.bondType) {
+      case 'resident':
+        client.hset('pending_resident', `${face.bondToObjectId}`, 1)
+        break;
+      case 'role':
+        client.hset('pending_role', `${face.bondToObjectId}`, 1)
+        break;
+      case 'school':
+        client.hset('pending_school', `${face.bondToObjectId}`, 1)
+        break;
+      case 'black':
+        client.hset('pending_black', `${face.bondToObjectId}`, 1)
+        break;
+      default:
+        break;
+    }
+    await this.faceModel.findByIdAndUpdate(face._id, { checkResult: 1 })
+    const data = {
+      count: 0,
+      user: String(face.user._id),
+      imgUrl,
+      faces: [String(face._id)],
+      username: face.user.username,
+      mode: face.mode,
+      face: String(face._id),
+      type: 'update',
+    }
+    const poolExist = await client.hget('p2p_pool', String(face.device._id))
+    if (!poolExist) {
+      await client.hset('p2p_pool', String(face.device._id), 1)
+    }
+    await client.lpush(`p2p_${face.device._id}`, JSON.stringify(data))
+  }
 
   async check() {
     const faces = await this.faceModel
-      .find({ checkResult: 3, isDelete: false })
+      .find({ checkResult: 3, isDelete: true })
       .populate({ path: 'device', model: 'device' })
       .populate({ path: 'user', model: 'user' })
     // if (!face) {
@@ -345,6 +383,6 @@ export class FaceService {
     // await this.updatePic(face.user, face.user.faceUrl)
     // }
     // console.log(result, 'result')
-    await Promise.all(faces.map(async face => await this.updatePic(face.user, face.user.faceUrl)))
+    await Promise.all(faces.map(async face => await this.delete(face)))
   }
 }

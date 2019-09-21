@@ -69,11 +69,11 @@ export class ZoneController {
     await this.zoneService.addSameSubZone(code)
   }
 
-  @ApiOkResponse({
-    description: '二维码获取小区详情',
-    type: CreateZoneDTO,
-    isArray: true,
-  })
+  // @ApiOkResponse({
+  //   description: '二维码获取小区详情',
+  //   type: CreateZoneDTO,
+  //   isArray: true,
+  // })
   // @UserRoles(0)
   // @Get('/qrcode')
   // @ApiOperation({ title: '二维码获取小区详情', description: '二维码获取小区详情' })
