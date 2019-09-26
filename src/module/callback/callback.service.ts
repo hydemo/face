@@ -174,7 +174,7 @@ export class CallbackService {
           const zip = await this.zocUtil.genZip()
           const enrecord = await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, owner)
           if (enrecord) {
-            await this.zocUtil.genImage(zip, time, zone.detail, img)
+            await this.zocUtil.genImage(zip, time, zone.detail, imgBase)
             const data = await this.zocUtil.upload(zip, time)
             if (data.success) {
               isZOCPush = true
