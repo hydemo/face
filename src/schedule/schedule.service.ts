@@ -38,6 +38,18 @@ export class ScheduleService {
     @Inject(LogRecordService) private readonly logService: LogRecordService,
   ) { }
 
+  sleep = function (delay) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          resolve(1)
+        } catch (e) {
+          reject(0)
+        }
+      }, delay);
+    })
+  }
+
   async getOpenId(face: IFace) {
     let openId;
     let type;
@@ -262,6 +274,7 @@ export class ScheduleService {
       default:
         break;
     }
+    await client.hset('p2p_listen', pool, 0)
   }
 
   async enableSchedule() {
@@ -295,7 +308,7 @@ export class ScheduleService {
     Schedule.scheduleJob('*/15 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
-      await Promise.all(pools.map(async  pool => {
+      for (let pool of pools) {
         const length = await client.llen(`p2p_${pool}`)
         if (!length) {
           await client.hdel('p2p_pool', pool)
@@ -325,15 +338,15 @@ export class ScheduleService {
         }
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
-        await this.handelP2P(data, device, pool, client)
-        await client.hset('p2p_listen', pool, 0)
-      }))
+        this.handelP2P(data, device, pool, client)
+        await this.sleep(100)
+      }
     });
 
     Schedule.scheduleJob('*/30 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2pError_pool')
-      await Promise.all(pools.map(async  pool => {
+      for (let pool of pools) {
         const length = await client.llen(`p2pError_${pool}`)
         if (!length) {
           await client.hdel('p2pError_pool', pool)
@@ -363,9 +376,9 @@ export class ScheduleService {
         }
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
-        await this.handelP2P(data, device, pool, client)
-        await client.hset('p2p_listen', pool, 0)
-      }))
+        this.handelP2P(data, device, pool, client)
+        await this.sleep(100)
+      }
 
 
     });
