@@ -312,29 +312,29 @@ export class ScheduleService {
         const length = await client.llen(`p2p_${pool}`)
         if (!length) {
           await client.hdel('p2p_pool', pool)
-          return
+          continue
         }
         const device: IDevice = await this.deviceService.findById(pool)
         if (!device || !device.enable) {
           await client.hdel('p2p_pool', pool)
-          return
+          continue
         }
 
         const alive = await client.hget('device', device.deviceUUID)
         if (!alive || Number(alive) > 4) {
           await client.hdel('p2p_pool', pool)
-          return
+          continue
         }
         const dataString: any = await client.rpop(`p2p_${pool}`)
         const listenTime = await client.hget('p2p_listen', pool)
         if (listenTime && Number(listenTime) > 5) {
           await client.hset('p2p_listen', pool, 0)
-          return
+          continue
         }
         if (Number(listenTime) > 0) {
           client.rpush(`p2p_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
-          return;
+          continue;
         }
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
@@ -350,29 +350,29 @@ export class ScheduleService {
         const length = await client.llen(`p2pError_${pool}`)
         if (!length) {
           await client.hdel('p2pError_pool', pool)
-          return
+          continue
         }
         const device: IDevice = await this.deviceService.findById(pool)
         if (!device || !device.enable) {
           await client.hdel('p2pError_pool', pool)
-          return
+          continue
         }
         const alive = await client.hget('device', device.deviceUUID)
         if (!alive || Number(alive) > 4) {
           await client.hdel('p2pError_pool', pool)
-          return
+          continue
         }
         const dataString: any = await client.rpop(`p2pError_${pool}`)
 
         const listenTime = await client.hget('p2p_listen', pool)
         if (listenTime && Number(listenTime) > 5) {
           await client.hset('p2p_listen', pool, 0)
-          return
+          continue
         }
         if (Number(listenTime) > 0) {
           client.rpush(`p2pError_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
-          return;
+          continue;
         }
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
