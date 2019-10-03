@@ -38,6 +38,17 @@ export class DeviceController {
     return this.deviceService.findAll(pagination);
   }
 
+  @Roles('1')
+  @Get('/no-alive')
+  @ApiOkResponse({
+    description: '异常设备列表',
+  })
+  @ApiOperation({ title: '异常设备列表', description: '异常设备列表' })
+  async noAlive() {
+    const data = await this.deviceService.findNoAlive();
+    return { statusCode: 200, msg: '异常设备列表', data };
+  }
+
   @Roles('3')
   @Get('/:id')
   @ApiOkResponse({
@@ -60,6 +71,8 @@ export class DeviceController {
     await this.deviceService.create(creatDeviceDTO);
     return { statusCode: 200, msg: '添加设备成功' };
   }
+
+
 
   // @Roles('1')
   // @Put('/:id')

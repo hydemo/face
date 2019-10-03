@@ -339,7 +339,7 @@ export class ScheduleService {
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
         this.handelP2P(data, device, pool, client)
-        await this.sleep(100)
+        await this.sleep(1000)
       }
     });
 
@@ -377,7 +377,7 @@ export class ScheduleService {
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
         this.handelP2P(data, device, pool, client)
-        await this.sleep(100)
+        await this.sleep(1000)
       }
 
 

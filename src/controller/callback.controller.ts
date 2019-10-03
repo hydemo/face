@@ -190,7 +190,7 @@ export class CallbackController {
     // await this.callbackService.upDeviceToZOC(code)
     // await this.socUtil.check(code)
     // await this.residentService.fix()
-    await this.faceService.check()
+    // await this.faceService.check()
     // await this.socUtil.upload('')
     // const createRole: CreatePoliceRole = {
     //   user: '5d38515b4bda2f535ddea0ed',
@@ -203,7 +203,7 @@ export class CallbackController {
     // await this.callbackService.upDeviceToZOC(code)
     // await this.callbackService.upResidentToZOC(code)
     // await this.camera.getPersionInfo('22', 1, 2)
-    // await this.faceService.fix()
+    await this.faceService.addFace()
     // await this.residentService.fix()
     // const user = await this.userService.findById(code)
     // if (!user) {
@@ -234,11 +234,8 @@ export class CallbackController {
   @ApiOperation({ title: '未在线设备', description: '未在线设备' })
   async noAlive(
   ) {
-    const client = await this.redis.getClient()
-    const keys = await client.hkeys('device')
-    const data = await this.deviceService.findNoAlive({ enable: true, deviceUUID: { $nin: keys } })
+    const data = await this.deviceService.findNoAlive()
     return data
-
   }
 
 }

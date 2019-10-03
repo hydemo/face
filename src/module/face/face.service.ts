@@ -272,6 +272,34 @@ export class FaceService {
   async fix() {
     await this.faceModel.updateMany({}, { checkResult: 2 })
   }
+  async addFace() {
+    const id = '5d85c8c079564a6052c65116'
+    const faces = await this.faceModel
+      .find({ isDelete: false, device: id, checkResult: 1 })
+      .populate({ path: 'user', model: 'user' })
+    // .
+    // console.log(faces, 'faces')
+    const client = this.redis.getClient()
+    await Promise.all(faces.map(async face => {
+      const data = {
+        count: 0,
+        type: 'add',
+        user: face.user._id,
+        imgUrl: face.user.imgUrl,
+        username: face.user.username,
+        face: face._id,
+        mode: face.mode,
+        faces: [String(face._id)]
+      }
+      console.log(data, 'data')
+      const poolExist = await client.hget('p2p_pool', id)
+      if (!poolExist) {
+        await client.hset('p2p_pool', id, 1)
+      }
+      await client.lpush(`p2p_${id}`, JSON.stringify(data))
+    }))
+
+  }
 
   // async fixBount(bound, type) {
   //   const client = this.redis.getClient()

@@ -70,8 +70,14 @@ export class DeviceService {
     return await this.deviceModel.find(condition).lean().exec();
   }
   // 根据条件查询
-  async findNoAlive(condition: any): Promise<IDevice[]> {
-    return await this.deviceModel.find(condition).populate({ path: 'position', model: 'zone', select: 'houseNumber' }).lean().exec();
+  async findNoAlive(): Promise<IDevice[]> {
+    const client = await this.redis.getClient()
+    const keys = await client.hkeys('device')
+    return await this.deviceModel
+      .find({ enable: true, deviceUUID: { $nin: keys } })
+      .populate({ path: 'position', model: 'zone', select: 'houseNumber' })
+      .lean()
+      .exec();
   }
   // 查询全部数据
   async findAll(pagination: Pagination): Promise<IList<IDevice>> {
