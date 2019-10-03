@@ -26,17 +26,17 @@ export class DeviceController {
     private deviceService: DeviceService,
   ) { }
 
-  @ApiOkResponse({
-    description: '设备列表',
-    type: CreateDeviceDTO,
-    isArray: true,
-  })
-  @Roles('3')
-  @Get('/')
-  @ApiOperation({ title: '获取设备列表', description: '获取设备列表' })
-  deviceList(@Query() pagination: Pagination) {
-    return this.deviceService.findAll(pagination);
-  }
+  // @ApiOkResponse({
+  //   description: '设备列表',
+  //   type: CreateDeviceDTO,
+  //   isArray: true,
+  // })
+  // @Roles('3')
+  // @Get('/')
+  // @ApiOperation({ title: '获取设备列表', description: '获取设备列表' })
+  // deviceList(@Query() pagination: Pagination) {
+  //   return this.deviceService.findAll(pagination);
+  // }
 
   @Roles('1')
   @Get('/no-alive')
@@ -49,28 +49,28 @@ export class DeviceController {
     return { statusCode: 200, msg: '异常设备列表', data };
   }
 
-  @Roles('3')
-  @Get('/:id')
-  @ApiOkResponse({
-    description: '获取设备成功',
-  })
-  @ApiCreatedResponse({ description: '获取设备' })
-  @ApiOperation({ title: '根据id获取设备信息', description: '根据id获取设备信息' })
-  async findById(@Param('id', new MongodIdPipe()) id: string) {
-    const data: CreateDeviceDTO = await this.deviceService.findById(id);
-    return { statusCode: 200, msg: '获取设备成功', data };
-  }
+  // @Roles('3')
+  // @Get('/:id')
+  // @ApiOkResponse({
+  //   description: '获取设备成功',
+  // })
+  // @ApiCreatedResponse({ description: '获取设备' })
+  // @ApiOperation({ title: '根据id获取设备信息', description: '根据id获取设备信息' })
+  // async findById(@Param('id', new MongodIdPipe()) id: string) {
+  //   const data: CreateDeviceDTO = await this.deviceService.findById(id);
+  //   return { statusCode: 200, msg: '获取设备成功', data };
+  // }
 
-  @Roles('1')
-  @Post()
-  @ApiOkResponse({
-    description: '添加设备成功',
-  })
-  @ApiOperation({ title: '添加设备', description: '添加设备' })
-  async create(@Body() creatDeviceDTO: CreateDeviceDTO) {
-    await this.deviceService.create(creatDeviceDTO);
-    return { statusCode: 200, msg: '添加设备成功' };
-  }
+  // @Roles('1')
+  // @Post()
+  // @ApiOkResponse({
+  //   description: '添加设备成功',
+  // })
+  // @ApiOperation({ title: '添加设备', description: '添加设备' })
+  // async create(@Body() creatDeviceDTO: CreateDeviceDTO) {
+  //   await this.deviceService.create(creatDeviceDTO);
+  //   return { statusCode: 200, msg: '添加设备成功' };
+  // }
 
 
 
@@ -85,16 +85,16 @@ export class DeviceController {
   //   return { statusCode: 200, msg: '修改设备成功' };
   // }
 
-  @Roles('1')
-  @Delete('/:id')
-  @ApiOkResponse({
-    description: '删除设备成功',
-  })
-  @ApiOperation({ title: '删除设备', description: '删除设备' })
-  async delete(@Param('id', new MongodIdPipe()) id: string) {
-    await this.deviceService.deleteById(id);
-    return { statusCode: 200, msg: '删除设备成功' };
-  }
+  // @Roles('1')
+  // @Delete('/:id')
+  // @ApiOkResponse({
+  //   description: '删除设备成功',
+  // })
+  // @ApiOperation({ title: '删除设备', description: '删除设备' })
+  // async delete(@Param('id', new MongodIdPipe()) id: string) {
+  //   await this.deviceService.deleteById(id);
+  //   return { statusCode: 200, msg: '删除设备成功' };
+  // }
 
 
 }

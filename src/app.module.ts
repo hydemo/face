@@ -62,6 +62,7 @@ import { ContactController } from './controller/api/contact.controller';
 import { SchoolModule } from './module/school/school.module';
 import { SchoolController } from './controller/api/school.controller';
 import { CMSRoleController } from './controller/cms/role.controller';
+import { DeviceController } from './controller/api/device.controller';
 
 @Module({
   imports: [
@@ -134,6 +135,7 @@ import { CMSRoleController } from './controller/cms/role.controller';
     BlackController,
     ContactController,
     SchoolController,
+    DeviceController,
   ]
 })
 export class AppModule { }

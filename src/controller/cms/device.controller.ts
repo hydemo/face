@@ -15,7 +15,7 @@ import { MongodIdPipe } from 'src/common/pipe/mongodId.pipe';
 import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 
 
-@ApiUseTags('devices')
+@ApiUseTags('cms/devices')
 @ApiForbiddenResponse({ description: 'Unauthorized' })
 @Controller('cms/devices')
 export class CMSDeviceController {
