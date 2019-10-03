@@ -34,6 +34,7 @@ import { RoleService } from 'src/module/role/role.service';
 import { FaceService } from 'src/module/face/face.service';
 import { CreatePoliceRole } from 'src/module/role/dto/role.dto';
 import { UserService } from 'src/module/users/user.service';
+import { DeviceService } from 'src/module/device/device.service';
 
 
 @ApiUseTags('callback')
@@ -58,6 +59,7 @@ export class CallbackController {
     private readonly faceService: FaceService,
     private readonly userService: UserService,
     private readonly zoneService: ZoneService,
+    private readonly deviceService: DeviceService,
   ) {
 
   }
@@ -221,6 +223,21 @@ export class CallbackController {
     // console.log(data)
     // await this.zoneService.fix(code, code1)
     return
+
+  }
+
+  @ApiOkResponse({
+    description: '未在线设备',
+  })
+  @Get('/no-alive')
+
+  @ApiOperation({ title: '未在线设备', description: '未在线设备' })
+  async noAlive(
+  ) {
+    const client = await this.redis.getClient()
+    const keys = await client.hkeys('device')
+    const data = await this.deviceService.findNoAlive({ enable: true, deviceUUID: { $nin: keys } })
+    return data
 
   }
 
