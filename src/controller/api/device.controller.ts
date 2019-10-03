@@ -15,11 +15,12 @@ import { MongodIdPipe } from '../../common/pipe/mongodId.pipe';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../../common/guard/roles.guard';
 import { Roles } from '../../common/decorator/roles.decorator';
+import { UserRolesGuard } from 'src/common/guard/userRoles.guard';
 
 @ApiUseTags('devices')
 @ApiBearerAuth()
 @ApiForbiddenResponse({ description: 'Unauthorized' })
-@UseGuards(AuthGuard(), RolesGuard)
+@UseGuards(AuthGuard(), UserRolesGuard)
 @Controller('api/devices')
 export class DeviceController {
   constructor(
