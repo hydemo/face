@@ -106,7 +106,7 @@ export class SchoolService {
         color: "#173177"
       },
     }
-    this.weixinUtil.sendApplicationMessage(openId, message,'SchoolReview')
+    this.weixinUtil.sendApplicationMessage(openId, message, 'SchoolReview')
   }
 
   // 申请重复确认
@@ -160,7 +160,7 @@ export class SchoolService {
         isParent = true
       }
     })
-    if (String(student.owner) !== String(user) || !isParent) {
+    if (String(student.owner) !== String(user) && !isParent) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
     return
@@ -880,11 +880,11 @@ export class SchoolService {
         const address = await this.zoneService.findById(data.address)
         const message: ApplicationDTO = {
           first: {
-            value: `您的${address.houseNumber}家长身份已被班主任撤回`,
+            value: `您的${address.houseNumber}家长身份已被删除`,
             color: "#173177"
           },
           keyword1: {
-            value: '家长身份撤消',
+            value: '家长身份删除',
             color: "#173177"
           },
           keyword2: {
@@ -900,7 +900,7 @@ export class SchoolService {
             color: "#173177"
           },
           remark: {
-            value: '小孩管理功能将被移除，请核对头像及学校信息是否准确',
+            value: '该小孩管理将从小孩管理功能被移除',
             color: "#173177"
           },
         }

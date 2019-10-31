@@ -837,6 +837,7 @@ export class ResidentService {
       .sort({ applicationTime: -1 })
       .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
       .populate({ path: 'user', model: 'user' })
+      .populate({ path: 'reviewer', model: 'user' })
       .lean()
       .exec();
     const total = await this.residentModel.countDocuments(condition);
