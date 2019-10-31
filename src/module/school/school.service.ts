@@ -858,7 +858,7 @@ export class SchoolService {
   // }
 
   // 根据id删除
-  async deleteById(school: string, user: string): Promise<ISchool | null> {
+  async deleteById(school: string, user: IUser): Promise<ISchool | null> {
     const data: ISchool | null = await this.schoolModel.findById(school).lean()
     if (!data || data.isDelete) {
       return null
@@ -866,11 +866,48 @@ export class SchoolService {
     if (data.type === 'owner') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    data.type === 'student' ? await this.isParentOrHeadTeacher(data, String(user)) : await this.isOwner(data.address, user)
+    data.type === 'student' ? await this.isParentOrHeadTeacher(data, String(user._id)) : await this.isOwner(data.address, user._id)
     const faces: IFace[] = await this.faceService.findByCondition({ bondToObjectId: school, isDelete: false })
     await Promise.all(faces.map(async face => {
       return await this.faceService.delete(face)
     }))
+    if (data.type === 'student') {
+      data.parent.map(async pa => {
+        const parent = await this.userService.findById(pa.user)
+        if (!parent) {
+          return
+        }
+        const address = await this.zoneService.findById(data.address)
+        const message: ApplicationDTO = {
+          first: {
+            value: `您的${address.houseNumber}家长身份已被班主任撤回`,
+            color: "#173177"
+          },
+          keyword1: {
+            value: '家长身份撤消',
+            color: "#173177"
+          },
+          keyword2: {
+            value: user.username,
+            color: "#173177"
+          },
+          keyword3: {
+            value: moment().format('YYYY:MM:DD HH:mm:ss'),
+            color: "#173177"
+          },
+          keyword4: {
+            value: '无',
+            color: "#173177"
+          },
+          remark: {
+            value: '小孩管理功能将被移除，请核对头像及学校信息是否准确',
+            color: "#173177"
+          },
+        }
+        this.weixinUtil.sendVerifyMessage(parent.openId, message)
+      })
+
+    }
     const checkResult = await this.faceService.checkResult(school)
     return await this.schoolModel.findByIdAndUpdate(school, { isDelete: true, checkResult })
   }

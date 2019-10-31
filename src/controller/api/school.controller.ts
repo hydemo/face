@@ -181,7 +181,7 @@ export class SchoolController {
     @Param('id', new MongodIdPipe()) id: string,
     @Request() req: any,
   ) {
-    await this.schoolService.deleteById(id, req.user._id);
+    await this.schoolService.deleteById(id, req.user);
     return { statusCode: 200, msg: '删除成功' };
   }
 
