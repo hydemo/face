@@ -148,7 +148,7 @@ export class RoleService {
     // if (role.role === 1) {
     //   throw new ApiException('物业无法删除', ApiErrorCode.NO_PERMISSION, 403);
     // }
-    const exist = await this.roleModel.findOne({ zone: role.zone, user: userId, isDelete: false, role: 1 })
+    const exist = await this.roleModel.findOne({ zone: role.zone, user: userId, isDelete: false, role: { $in: [1, 5] } })
     if (!exist) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
