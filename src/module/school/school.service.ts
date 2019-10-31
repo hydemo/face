@@ -528,6 +528,7 @@ export class SchoolService {
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ applicationTime: -1 })
       .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
+      .populate({ path: 'parent.user', model: 'user', select: 'username' })
       .populate({ path: 'user', model: 'user' })
       .lean()
       .exec();
