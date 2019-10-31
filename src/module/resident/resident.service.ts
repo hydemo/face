@@ -122,7 +122,7 @@ export class ResidentService {
         color: "#173177"
       },
     }
-    this.weixinUtil.sendApplicationMessage(openId, message)
+    this.weixinUtil.sendApplicationMessage(openId, message, 'review')
   }
 
   // 申请重复确认

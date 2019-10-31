@@ -106,7 +106,7 @@ export class SchoolService {
         color: "#173177"
       },
     }
-    this.weixinUtil.sendApplicationMessage(openId, message)
+    this.weixinUtil.sendApplicationMessage(openId, message,'SchoolReview')
   }
 
   // 申请重复确认
