@@ -361,11 +361,11 @@ export class RoleService {
     const cond = { user: userId, isDelete: false }
     let owner = [];
     let guard: IZone[] = [];
-    let management = [];
+    let management: any[] = [];
     let worker = [];
     let rent = [];
     let isAdmin = false;
-    let affairOffice = [];
+    let affairOffice: any = [];
     let houseGuard: IZone[] = [];
     let schoolGuard: IZone[] = [];
     const roles: any = await this.roleModel.aggregate([
@@ -408,11 +408,11 @@ export class RoleService {
           affairOffice = await Promise.all(role.zones.map(async zone => {
             const total = await this.zoneService.countByCondition({
               zoneId: zone._id,
-              zoneLayer: 2
+              zoneLayer: 1
             })
             const ownerCount = await this.zoneService.countByCondition({
               zoneId: zone._id,
-              zoneLayer: 2,
+              zoneLayer: 1,
               owner: { $exists: 1 }
             })
             const workerCount = await this.roleModel.countDocuments({
@@ -436,10 +436,44 @@ export class RoleService {
       )
 
     })
+    if (isAdmin) {
+      management = []
+      affairOffice = []
+      const zones = await this.zoneService.findByCondition({ isDelete: false, zoneLayer: 0 })
+      await Promise.all(zones.map(async (zone, index) => {
+        const total = await this.zoneService.countByCondition({
+          zoneId: zone._id,
+          zoneLayer: 2
+        })
+        const ownerCount = await this.zoneService.countByCondition({
+          zoneId: zone._id,
+          zoneLayer: 2,
+          owner: { $exists: 1 }
+        })
+        const workerCount = await this.roleModel.countDocuments({
+          zone: zone._id,
+          isDelete: false,
+          $and: [{ role: { $lt: 4 } }, { role: { $gt: 0 } }]
+        })
+        if (zone.zoneType === 1) {
+          management[index] = { ...zone, total, ownerCount, workerCount }
+        } else if (zone.zoneType === 2) {
+          affairOffice[index] = { ...zone, total, ownerCount, workerCount }
+        }
+        return
+      }))
+      management = management.filter(v => v)
+      affairOffice = affairOffice.filter(v => v)
+
+    }
     return { houseGuard, schoolGuard, management, worker, isAdmin, affairOffice }
   }
 
   async checkRoles(condition: any) {
+    const isAdmin = await this.roleModel.countDocuments({ role: 0, user: condition.user, isDelete: false })
+    if (isAdmin) {
+      return isAdmin
+    }
     return await this.roleModel.countDocuments(condition);
   }
 

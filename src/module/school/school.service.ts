@@ -142,7 +142,7 @@ export class SchoolService {
 
   // 是否是班主任
   async isTeacher(user: string) {
-    const teacherCount = await this.schoolModel.countDocuments({ user, isDelete: false, type: 'owner' })
+    const teacherCount = await this.schoolModel.countDocuments({ user, isDelete: false, checkResult: { $in: [2, 4, 5] }, type: 'owner' })
     return teacherCount > 0
   }
 
@@ -808,6 +808,7 @@ export class SchoolService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ createdAt: -1 })
+      .populate({ path: 'user', model: 'user', select: 'username _id' })
       .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
       .lean()
       .exec();

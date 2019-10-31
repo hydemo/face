@@ -59,7 +59,7 @@ export class DeviceService {
     creatDevice.area = zone.area
     creatDevice.isZOCPush = false
     await creatDevice.save();
-    if (this.config.url === 'https://xms.thinkthen.cn') {
+    if (this.config.url === 'https://xms.thinkthen.cn' && zone.zoneType === 1) {
       this.uploadToZoc(createDeviceDTO.zone, creatDevice)
     }
     await this.zoneService.incDeviceCount(creatDevice.zone, 1);
@@ -175,7 +175,7 @@ export class DeviceService {
     }
     const client = this.redis.getClient()
     await client.hset('copy', newUUID, 1)
-    const faces: IFace[] = await this.faceService.findByCondition({ device: device._id, isDelete: false })
+    const faces: IFace[] = await this.faceService.findByCondition({ device: device._id, checkResult: 2, isDelete: false })
     await Promise.all(faces.map(async face => {
       await client.hset(`copy_${newUUID}`, face.user, 1)
     }))

@@ -460,66 +460,65 @@ export class ScheduleService {
       }))
     });
 
-    //   Schedule.scheduleJob('*/15 * * * * * ', async () => {
-    //     const client = this.redis.getClient()
-    //     const devices = await client.hkeys('copy')
-    //     console.log(devices, 'devices')
-    //     await Promise.all(devices.map(async device => {
-    //       // const listenTime = await client.hget('p2p_listen', String(device))
-    //       // if (Number(listenTime) > 0) {
-    //       //   return;
+    // Schedule.scheduleJob('*/15 * * * * * ', async () => {
+    //   const client = this.redis.getClient()
+    //   const devices = await client.hkeys('copy')
+    //   console.log(devices, 'devices')
+    //   await Promise.all(devices.map(async device => {
+    //     // const listenTime = await client.hget('p2p_listen', String(device))
+    //     // if (Number(listenTime) > 0) {
+    //     //   return;
+    //     // }
+    //     const newDevice = await this.deviceService.findByUUID(device)
+    //     if (!newDevice) {
+    //       return
+    //     }
+    //     const listenTime = await client.hget('p2p_listen', device)
+    //     if (listenTime && Number(listenTime) > 5) {
+    //       await client.hset('p2p_listen', device, 0)
+    //       return
+    //     }
+    //     if (Number(listenTime) > 0) {
+    //       await client.hincrby('p2p_listen', device, 1)
+    //       return;
+    //     }
+    //     await client.hset('p2p_listen', device, 1)
+    //     const keys = await client.hkeys(`copy_${device}`)
+    //     if (!keys.length) {
+    //       console.log('111')
+    //     }
+    //     if (keys.length) {
+    //       const userId = keys[0]
+    //       // const errorCount = await client.hget(`copy_${device}`, userId)
+    //       // if (Number(errorCount) > 8) {
+    //       //   await client.hset(`copyFinal_${device}`, userId, 1)
+    //       //   await client.hdel(`copyFinal_${device}`, userId)
     //       // }
-    //       const newDevice = await this.deviceService.findByUUID(device)
-    //       if (!newDevice) {
+    //       const user = await this.userService.findById(userId)
+    //       if (!user) {
     //         return
     //       }
-    //       const listenTime = await client.hget('p2p_listen', device)
-    //       if (listenTime && Number(listenTime) > 5) {
-    //         await client.hset('p2p_listen', device, 0)
-    //         return
+    //       const result = await this.camera.addToDevice(device, user)
+    //       console.log(result, 'result')
+    //       if (result === 'imgError') {
+    //         await client.hset(`copyImgError_${device}`, user._id, user.faceUrl)
+    //         await this.faceService.updateByCondition({ user: userId, device: newDevice._id, isDelete: false }, { checkResult: 3 })
+    //         await client.hdel(`copy_${device}`, userId)
     //       }
-    //       if (Number(listenTime) > 0) {
-    //         await client.hincrby('p2p_listen', device, 1)
-    //         return;
+    //       if (result === 'success') {
+    //         // await this.faceService.updateByCondition({ user: userId, device: newDevice._id, isDelete: false }, { checkResult: 2 })
+    //         await client.hdel(`copy_${device}`, userId)
     //       }
-    //       await client.hset('p2p_listen', device, 1)
-    //       const keys = await client.hkeys(`copyImgError_${device}`)
-    //       if (!keys.length) {
-    //         console.log('111')
+    //       if (result === 'error') {
+    //         await client.hincrby(`copy_${device}`, userId, 1)
     //       }
-    //       if (keys.length) {
-    //         const userId = keys[0]
-    //         // const errorCount = await client.hget(`copyImgError_${device}`, userId)
-    //         // if (Number(errorCount) > 8) {
-    //         //   await client.hset(`copyFinal_${device}`, userId, 1)
-    //         //   await client.hdel(`copyFinal_${device}`, userId)
-    //         // }
-    //         const user = await this.userService.findById(userId)
-    //         if (!user) {
-    //           console.log('!user')
-    //           return
-    //         }
-    //         const result = await this.camera.addToDevice(device, user)
-    //         console.log(result, 'result')
-    //         if (result === 'imgError') {
-    //           await client.hset(`copyImgError1_${device}`, user._id, user.faceUrl)
-    //           await this.faceService.updateByCondition({ user: userId, device: newDevice._id, isDelete: false }, { checkResult: 3 })
-    //           await client.hdel(`copyImgError_${device}`, userId)
-    //         }
-    //         if (result === 'success') {
-    //           await this.faceService.updateByCondition({ user: userId, device: newDevice._id, isDelete: false }, { checkResult: 2 })
-    //           await client.hdel(`copyImgError_${device}`, userId)
-    //         }
-    //         if (result === 'error') {
-    //           await client.hincrby(`copyImgError_${device}`, userId, 1)
-    //         }
-    //         if (result === 'final') {
-    //           await client.hset(`copyFinal_${device}`, userId, 1)
-    //           await client.hdel(`copyImgError_${device}`, userId)
-    //         }
-    //         await client.hset('p2p_listen', device, 0)
+    //       if (result === 'final') {
+    //         await client.hset(`copyFinal_${device}`, userId, 1)
+    //         await client.hdel(`copy_${device}`, userId)
     //       }
-    //     }))
-    //   });
+    //       await client.hset('p2p_listen', device, 0)
+    //     }
+    //   }))
+    // });
   }
 }

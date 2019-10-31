@@ -185,10 +185,12 @@ export class CallbackController {
     @Query('code') code: string,
     @Query('code1') code1: string,
   ) {
-
+    const today = moment().startOf('d').format('YYYY-MM-DD HH:mm:ss')
+    console.log(today, 'today')
     // await this.callbackService.upResidentToSOC(code)
     // await this.callbackService.upDeviceToZOC(code)
-    // await this.socUtil.check(code)
+    // const data = await this.socUtil.qrcodeAddress(code)
+    // console.log(data)
     // await this.residentService.fix()
     // await this.faceService.check()
     // await this.socUtil.upload('')
@@ -203,7 +205,8 @@ export class CallbackController {
     // await this.callbackService.upDeviceToZOC(code)
     // await this.callbackService.upResidentToZOC(code)
     // await this.camera.getPersionInfo('22', 1, 2)
-    await this.faceService.addFace()
+    // await this.faceService.addFace()
+    // await this.deviceService.copy(code, code1)
     // await this.residentService.fix()
     // const user = await this.userService.findById(code)
     // if (!user) {

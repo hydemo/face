@@ -6,11 +6,14 @@ import { ApiException } from 'src/common/expection/api.exception';
 import { Pagination } from 'src/common/dto/pagination.dto';
 import { IList } from 'src/common/interface/list.interface';
 import { CreateStrangerDTO } from './dto/stranger.dto';
+import { RoleService } from '../role/role.service';
+import moment from 'moment'
 
 @Injectable()
 export class StrangerService {
   constructor(
     @Inject('StrangerModelToken') private readonly strangerModel: Model<IStranger>,
+    @Inject(RoleService) private readonly roleService: RoleService,
   ) { }
 
   // 创建数据
@@ -48,5 +51,28 @@ export class StrangerService {
       .exec();
     const total = await this.strangerModel.countDocuments(condition);
     return { list, total };
+  }
+
+  // 黑名单列表
+  async findByZone(pagination: Pagination, zone: string, user: string) {
+    const canActive = await this.roleService.checkRoles({ isDelete: false, role: { $in: [1, 5] }, user, zone })
+    if (!canActive) {
+      throw new ApiException('无权限', ApiErrorCode.NO_PERMISSION, 403);
+    }
+    const today = moment().startOf('d').format('YYYY-MM-DD HH:mm:ss')
+    const todayCount = await this.strangerModel.countDocuments({ isDelete: false, zone, passTime: { $gte: today } })
+    const total = await this.strangerModel.countDocuments({ isDelete: false, zone })
+
+    const list = await this.strangerModel
+      .find({ isDelete: false, zone })
+      .limit(pagination.limit)
+      .skip((pagination.offset - 1) * pagination.limit)
+      .sort({ checkResult: 1 })
+      .populate({ path: 'device', model: 'device' })
+      .populate({ path: 'zone', model: 'zone' })
+      .populate({ path: 'position', model: 'zone' })
+      .lean()
+      .exec();
+    return { list, total, todayCount };
   }
 }

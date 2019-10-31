@@ -8,8 +8,6 @@ import { RedisService } from 'nestjs-redis';
 import { ConfigService } from 'src/config/config.service';
 import { IDevice } from 'src/module/device/interfaces/device.interfaces';
 import { IFace } from 'src/module/face/interfaces/face.interfaces';
-import { IUser } from 'src/module/users/interfaces/user.interfaces';
-import { IPic } from 'src/common/interface/pic.interface';
 import { PhoneUtil } from './phone.util';
 import { P2PErrorService } from 'src/module/p2pError/p2pError.service';
 import { P2PErrorDTO } from 'src/module/p2pError/dto/p2pError.dto';
@@ -596,6 +594,7 @@ export class CameraUtil {
       })
       let code;
       let msg;
+      console.log(result.data)
       if (result.data.Code === 1) {
         return 'success';
       }
@@ -624,6 +623,7 @@ export class CameraUtil {
       return code
 
     } catch (error) {
+      console.log(error, 'error')
       return 'error'
     }
   }

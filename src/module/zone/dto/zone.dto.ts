@@ -63,6 +63,7 @@ export class CreateZoneByScanDTO {
   readonly contact: string;
 
   @IsMobilePhone('zh-CN')
+  @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '负责人电话' })
   readonly contactPhone: string;
@@ -79,20 +80,20 @@ export class CreateZoneByScanDTO {
 }
 
 export class CreateSubZoneByScanDTO {
-  @IsString()
-  @Type(() => String)
-  @ApiModelProperty({ description: '区域名称' })
-  readonly name: string;
+  // @IsString()
+  // @Type(() => String)
+  // @ApiModelProperty({ description: '区域名称' })
+  // readonly name: string;
 
   @IsString()
   @Type(() => String)
   @ApiModelProperty({ description: '二维码' })
   readonly code: string;
 
-  @IsNumber()
-  @Type(() => Number)
-  @ApiModelProperty({ description: '物业地址' })
-  readonly layer: number;
+  // @IsNumber()
+  // @Type(() => Number)
+  // @ApiModelProperty({ description: '物业地址' })
+  // readonly layer: number;
 }
 
 export class ZoneDTO {

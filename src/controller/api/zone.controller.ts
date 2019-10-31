@@ -25,6 +25,7 @@ import { IResident } from 'src/module/resident/interfaces/resident.interfaces';
 import { RoleService } from 'src/module/role/role.service';
 import { ApiException } from 'src/common/expection/api.exception';
 import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
+import { StrangerService } from 'src/module/stranger/stranger.service';
 
 
 @ApiUseTags('zones')
@@ -37,7 +38,7 @@ export class ZoneController {
     @Inject(ZoneService) private zoneService: ZoneService,
     @Inject(BlackService) private blackService: BlackService,
     @Inject(RentService) private rentService: RentService,
-    // @Inject(ResidentService) private residentService: ResidentService,
+    @Inject(StrangerService) private strangerService: StrangerService,
     @Inject(RoleService) private roleService: RoleService,
 
   ) { }
@@ -241,6 +242,20 @@ export class ZoneController {
     @Request() req: any
   ) {
     return await this.blackService.findByZone(pagination, id, req.user._id);
+  }
+
+  @Get('/:id/strangers')
+  @ApiOkResponse({
+    description: '小区陌生人列表',
+  })
+  @ApiCreatedResponse({ description: '小区陌生人列表' })
+  @ApiOperation({ title: '小区陌生人列表', description: '小区陌生人列表' })
+  async strangers(
+    @Query() pagination: Pagination,
+    @Param('id', new MongodIdPipe()) id: string,
+    @Request() req: any
+  ) {
+    return await this.strangerService.findByZone(pagination, id, req.user._id);
   }
 
   @Get('/:id/blacks/tail')
