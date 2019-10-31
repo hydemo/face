@@ -353,7 +353,7 @@ export class RoleService {
   // 查询全部数据
   async getPoliceArea(user: string): Promise<IRole | null> {
     return await this.roleModel
-      .findOne({ user, isDelete: false, role: 4 })
+      .findOne({ user, isDelete: false, checkResult: { $in: [2, 4, 5] }, role: 4 })
       .populate({ path: 'area', model: 'area' })
   }
   // 查询全部数据

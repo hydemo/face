@@ -148,7 +148,7 @@ export class SchoolService {
 
   // 是否是家长
   async isParent(user: string) {
-    const teacherCount = await this.schoolModel.countDocuments({ type: 'student', isDelete: false, 'parent.user': user })
+    const teacherCount = await this.schoolModel.countDocuments({ type: 'student', checkResult: { $in: [2, 4, 5] }, isDelete: false, 'parent.user': user })
     return teacherCount > 0
   }
 
