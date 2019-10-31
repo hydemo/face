@@ -384,11 +384,11 @@ export class RoleService {
           management = await Promise.all(role.zones.map(async zone => {
             const total = await this.zoneService.countByCondition({
               zoneId: zone._id,
-              zoneLayer: 2
+              buildingType: '60',
             })
             const ownerCount = await this.zoneService.countByCondition({
               zoneId: zone._id,
-              zoneLayer: 2,
+              buildingType: '60',
               owner: { $exists: 1 }
             })
             const workerCount = await this.roleModel.countDocuments({
@@ -408,11 +408,11 @@ export class RoleService {
           affairOffice = await Promise.all(role.zones.map(async zone => {
             const total = await this.zoneService.countByCondition({
               zoneId: zone._id,
-              zoneLayer: 1
+              buildingType: '60'
             })
             const ownerCount = await this.zoneService.countByCondition({
               zoneId: zone._id,
-              zoneLayer: 1,
+              buildingType: '60',
               owner: { $exists: 1 }
             })
             const workerCount = await this.roleModel.countDocuments({
@@ -443,11 +443,11 @@ export class RoleService {
       await Promise.all(zones.map(async (zone, index) => {
         const total = await this.zoneService.countByCondition({
           zoneId: zone._id,
-          zoneLayer: 2
+          buildingType: '60',
         })
         const ownerCount = await this.zoneService.countByCondition({
           zoneId: zone._id,
-          zoneLayer: 2,
+          buildingType: '60',
           owner: { $exists: 1 }
         })
         const workerCount = await this.roleModel.countDocuments({
@@ -464,7 +464,6 @@ export class RoleService {
       }))
       management = management.filter(v => v)
       affairOffice = affairOffice.filter(v => v)
-
     }
     return { houseGuard, schoolGuard, management, worker, isAdmin, affairOffice }
   }
