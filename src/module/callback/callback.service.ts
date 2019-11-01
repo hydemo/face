@@ -165,7 +165,7 @@ export class CallbackService {
       let isZOCPush = false
       let zipname = ''
       const resident = await this.residentService.findOneByCondition({ user: userId, isDelete: false })
-      if (resident) {
+      if (resident && device.position.zoneType === 1) {
         const owner = await this.userService.updateById(resident.address.owner, {})
 
         if (owner && this.config.url === 'https://xms.thinkthen.cn') {
