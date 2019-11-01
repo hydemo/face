@@ -80,20 +80,20 @@ export class CreateZoneByScanDTO {
 }
 
 export class CreateSubZoneByScanDTO {
-  // @IsString()
-  // @Type(() => String)
-  // @ApiModelProperty({ description: '区域名称' })
-  // readonly name: string;
-
   @IsString()
   @Type(() => String)
-  @ApiModelProperty({ description: '二维码' })
-  readonly code: string;
+  @ApiModelProperty({ description: '区域名称' })
+  readonly name: string;
 
-  // @IsNumber()
-  // @Type(() => Number)
-  // @ApiModelProperty({ description: '物业地址' })
-  // readonly layer: number;
+  // @IsString()
+  // @Type(() => String)
+  // @ApiModelProperty({ description: '二维码' })
+  // readonly code: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  @ApiModelProperty({ description: '物业地址' })
+  readonly layer: number;
 }
 
 export class ZoneDTO {

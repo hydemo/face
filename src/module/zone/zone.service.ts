@@ -252,33 +252,71 @@ export class ZoneService {
   }
 
   async addSubZoneByQrCode(id: string, subZone: CreateSubZoneByScanDTO) {
-    const zone = await this.zoneModel.findById(id).lean().exec()
-    const list = await this.socUtil.qrcodeAddress(subZone.code)
-    let parentProfile;
-    let children: string[] = []
-    list.map(profile => {
-      if (profile.dzbm === subZone.code) {
-        parentProfile = profile
-      }
-    })
-    const parent = await this.createSubZone(parentProfile, zone)
-    await Promise.all(list.map(async child => {
-      if (child.dzbm === parent.profile.dzbm) {
-        return;
-      }
-
-      const subZone: IZone = await this.createSubZone(child, parent)
-      children.push(String(subZone._id))
-      subZone.children = [];
-      subZone.hasChildren = false
-      subZone.hasPartition = false
-      await subZone.save()
-    }))
-    parent.children = children
-    parent.hasChildren = children.length > 0
-    parent.hasPartition = false
-    await parent.save()
+    const root = await this.zoneModel.findById(id).lean().exec()
+    const createParent = {
+      name: subZone.name,
+      nameLength: subZone.name.length,
+      location: root.location,
+      zoneLayer: root.zoneLayer + 1,
+      zoneType: root.zoneType,
+      parent: id,
+      hasChildren: false,
+      children: [],
+      houseNumber: `${root.name}-${subZone.name}`,
+      buildingType: '50',
+      area: root.area,
+      zoneId: root.zoneId,
+      ancestor: [...root.ancestor, id],
+    }
+    const parent = await this.zoneModel.create(createParent)
     await this.zoneModel.findByIdAndUpdate(id, { hasChildren: true, $push: { children: parent._id } })
+    const count = Number(subZone.layer)
+    for (let i = 1; i <= count; i++) {
+      const name = `${i}班`
+      const zone: any = {
+        name,
+        nameLength: name.length,
+        location: parent.location,
+        zoneLayer: parent.zoneLayer + 1,
+        zoneType: parent.zoneType,
+        parent: parent._id,
+        hasChildren: false,
+        children: [],
+        houseNumber: `${parent.houseNumber}-${name}`,
+        buildingType: '60',
+        area: parent.area,
+        zoneId: parent.zoneId,
+        ancestor: [...parent.ancestor, parent._id],
+      }
+      const newSubZone: IZone = await this.zoneModel.create(zone);
+      await this.zoneModel.findByIdAndUpdate(parent._id, { hasChildren: true, $push: { children: newSubZone._id } })
+    }
+    // const list = await this.socUtil.qrcodeAddress(subZone.code)
+    // let parentProfile;
+    // let children: string[] = []
+    // list.map(profile => {
+    //   if (profile.dzbm === subZone.code) {
+    //     parentProfile = profile
+    //   }
+    // })
+    // const parent = await this.createSubZone(parentProfile, zone)
+    // await Promise.all(list.map(async child => {
+    //   if (child.dzbm === parent.profile.dzbm) {
+    //     return;
+    //   }
+
+    //   const subZone: IZone = await this.createSubZone(child, parent)
+    //   children.push(String(subZone._id))
+    //   subZone.children = [];
+    //   subZone.hasChildren = false
+    //   subZone.hasPartition = false
+    //   await subZone.save()
+    // }))
+    // parent.children = children
+    // parent.hasChildren = children.length > 0
+    // parent.hasPartition = false
+    // await parent.save()
+
     return
     // delete zone._id
     // zone.zoneLayer = zone.zoneLayer + 1
@@ -347,55 +385,54 @@ export class ZoneService {
 
   // 二维码添加小区
   async addByNoQrcode(createZone: CreateZoneByScanDTO) {
-    const list = await this.socUtil.qrcodeAddress(createZone.code)
-    const detail: IDetail = await this.socUtil.address(createZone.code)
-    // console.log(detail, 'detail')
+    // const list = await this.socUtil.qrcodeAddress(createZone.code)
+    // const detail: IDetail = await this.socUtil.address(createZone.code)
+    // // console.log(detail, 'detail')
 
-    let parentProfile;
-    list.map(profile => {
-      if (profile.dzbm === createZone.code) {
-        parentProfile = profile
-      }
-    })
+    // let parentProfile;
+    // list.map(profile => {
+    //   if (profile.dzbm === createZone.code) {
+    //     parentProfile = profile
+    //   }
+    // })
 
-    const parent: ZoneDTO = {
+    const parent: any = {
       name: createZone.name,
       nameLength: createZone.name.length,
-      location: `${detail.QU}${detail.SQJCWHMC}`,
+      // location: `${detail.QU}${detail.SQJCWHMC}`,
       zoneLayer: 0,
       zoneType: createZone.zoneType,
       parent: null,
       ancestor: [],
       hasChildren: true,
-      profile: parentProfile,
+      // profile: parentProfile,
       houseNumber: createZone.name,
-      buildingType: '60',
+      buildingType: '50',
       area: createZone.area,
-      detail,
-      propertyCo: {
-        name: createZone.propertyCoName,
-        contact: createZone.contact,
-        contactPhone: createZone.contactPhone,
-        creditCode: createZone.creditCode,
-        address: createZone.address,
-      }
+      // detail,
+      // propertyCo: {
+      //   name: createZone.propertyCoName,
+      //   contact: createZone.contact,
+      //   contactPhone: createZone.contactPhone,
+      //   creditCode: createZone.creditCode,
+      //   address: createZone.address,
+      // }
     }
-    console.log(parent, 'parent')
     const createParent: IZone = await new this.zoneModel(parent);
     createParent.zoneId = createParent._id;
     await createParent.save()
     // 上报物业信息
-    if (this.config.url === 'https://xms.thinkthen.cn') {
-      const time = moment().format('YYYYMMDDHHmmss');
-      const zip = await this.zocUtil.genZip()
-      await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
-      const zocResult: any = await this.zocUtil.upload(zip, time)
-      if (zocResult.success) {
-        await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
-        const client = this.redis.getClient()
-        await client.hincrby(this.config.LOG, this.config.LOG_PROPERTYCO, 1)
-      }
-    }
+    // if (this.config.url === 'https://xms.thinkthen.cn') {
+    //   const time = moment().format('YYYYMMDDHHmmss');
+    //   const zip = await this.zocUtil.genZip()
+    //   await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
+    //   const zocResult: any = await this.zocUtil.upload(zip, time)
+    //   if (zocResult.success) {
+    //     await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
+    //     const client = this.redis.getClient()
+    //     await client.hincrby(this.config.LOG, this.config.LOG_PROPERTYCO, 1)
+    //   }
+    // }
 
 
   }
