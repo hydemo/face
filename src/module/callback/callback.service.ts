@@ -150,7 +150,7 @@ export class CallbackService {
     if (profile.compareResult < 0.8) {
       mode = 0
     }
-
+    console.log(mode, 'mode')
     if (Number(mode) === 0) {
       await this.strangerService.create(stranger);
     } else if (Number(mode) === 2) {
