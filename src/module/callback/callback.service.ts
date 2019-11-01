@@ -119,6 +119,10 @@ export class CallbackService {
     if (!device) {
       return;
     }
+    if (device.position.zoneType === 2) {
+      console.log(body, 'req.body')
+    }
+
     if (!imgBase) {
       return
     }
