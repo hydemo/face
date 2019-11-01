@@ -119,9 +119,7 @@ export class CallbackService {
     if (!device) {
       return;
     }
-    if (device.position.zoneType === 2) {
-      console.log(body, 'req.body')
-    }
+
 
     if (!imgBase) {
       return
@@ -154,7 +152,6 @@ export class CallbackService {
     if (profile.compareResult < 0.8) {
       mode = 0
     }
-    console.log(mode, userId, 'mode')
     if (Number(mode) === 0) {
       await this.strangerService.create(stranger);
     } else if (Number(mode) === 2) {
@@ -190,7 +187,6 @@ export class CallbackService {
       }
 
       const orbit: CreateOrbitDTO = { user: user._id, mode, isZOCPush, ZOCZip: zipname, ...stranger, upTime: Date.now() }
-      console.log(orbit, 'orbit')
       const createOrbit: IOrbit = await this.orbitService.create(orbit);
       await this.sendMessage(createOrbit, user, device)
     } else if (Number(mode) === 1) {
