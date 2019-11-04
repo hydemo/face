@@ -49,7 +49,7 @@ export class RoleController {
     isArray: true,
   })
   @Get('/affairOffice')
-  @UserRoles(1)
+  @UserRoles(5)
   @ApiOperation({ title: '学校人员管理', description: '学校人员管理' })
   async affairOffice(
     @Query() pagination: Pagination,
