@@ -107,7 +107,7 @@ export class CMSDeviceController {
     return { statusCode: 200, msg: '禁用设备' };
   }
 
-  @Put('/:_id/disable')
+  @Put('/:_id/enable')
   @ApiOkResponse({
     description: '启用设备',
   })

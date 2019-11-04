@@ -343,7 +343,7 @@ export class ScheduleService {
       }
     });
 
-    Schedule.scheduleJob('*/30 * * * * *', async () => {
+    Schedule.scheduleJob('*/23 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2pError_pool')
       for (let pool of pools) {
