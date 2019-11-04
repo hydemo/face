@@ -298,6 +298,7 @@ export class CameraUtil {
   
   */
   async handleRequest(data, version, faceData) {
+    console.log(1)
     try {
       if (faceData.count > 18) {
         const error: P2PErrorDTO = {
@@ -391,6 +392,7 @@ export class CameraUtil {
       //   await client.hset('p2pError_pool', upData.device, 1)
       // }
       // await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
+      console.log(error, 'error')
       return 'error'
     }
   }
