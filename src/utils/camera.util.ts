@@ -287,6 +287,7 @@ export class CameraUtil {
           }
         }
       }
+      console.log(data, 'data')
     }
     return await this.handleRequest(data, version, faceData)
   }
@@ -298,7 +299,7 @@ export class CameraUtil {
   
   */
   async handleRequest(data, version, faceData) {
-    console.log(1)
+    console.log(1, 'data')
     try {
       if (faceData.count > 18) {
         const error: P2PErrorDTO = {
