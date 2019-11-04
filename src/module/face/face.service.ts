@@ -185,11 +185,10 @@ export class FaceService {
   }
 
   // 根据条件更新
-  async addOnePic(face: CreateFaceDTO | IFace, device: IDevice, user: IPic, mode: number, imgUrl) {
+  async addOnePic(createFace: IFace, device: IDevice, user: IPic, mode: number, imgUrl) {
     if (!device.enable) {
       return
     }
-    const createFace = await this.faceModel.create(face)
     const data = {
       count: 0,
       type: 'add',

@@ -132,7 +132,8 @@ export class RoleService {
           zone: device.zone,
           // faceUrl: user.faceUrl
         }
-        return await this.faceService.addOnePic(face, device, user, this.config.whiteMode, user.faceUrl)
+        const createFace = await this.faceService.create(face)
+        return await this.faceService.addOnePic(createFace, device, user, this.config.whiteMode, user.faceUrl)
       }
     }))
     const checkResult = await this.faceService.checkResult(bondToObjectId)

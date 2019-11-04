@@ -180,7 +180,8 @@ export class BlackService {
         checkResult: 1,
         faceUrl: black.faceUrl
       }
-      return await this.faceService.addOnePic(face, device, black, this.config.blackMode, black.faceUrl)
+      const createFace = await this.faceService.create(face)
+      return await this.faceService.addOnePic(createFace, device, black, this.config.blackMode, black.faceUrl)
     })
     const checkResult = await this.faceService.checkResult(id)
     await this.blackModel.findByIdAndUpdate(id, {

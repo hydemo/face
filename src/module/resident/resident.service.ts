@@ -279,7 +279,8 @@ export class ResidentService {
         if (expire) {
           face.expire = expire;
         }
-        return await this.faceService.addOnePic(face, device, user, this.config.whiteMode, user.faceUrl)
+        const createFace = await this.faceService.create(face)
+        return await this.faceService.addOnePic(createFace, device, user, this.config.whiteMode, user.faceUrl)
       }
       const face: CreateFaceDTO = {
         device: device._id,
