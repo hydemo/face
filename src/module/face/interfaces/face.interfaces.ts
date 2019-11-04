@@ -4,7 +4,7 @@ import { IUser } from 'src/module/users/interfaces/user.interfaces';
 
 export interface IFace extends Document {
   // 设备
-  readonly device: IDevice;
+  readonly device: any;
   // 用户
   readonly user: any;
   // 类型

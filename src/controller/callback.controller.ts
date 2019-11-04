@@ -35,6 +35,7 @@ import { FaceService } from 'src/module/face/face.service';
 import { CreatePoliceRole } from 'src/module/role/dto/role.dto';
 import { UserService } from 'src/module/users/user.service';
 import { DeviceService } from 'src/module/device/device.service';
+import { SchoolService } from 'src/module/school/school.service';
 
 
 @ApiUseTags('callback')
@@ -60,6 +61,7 @@ export class CallbackController {
     private readonly userService: UserService,
     private readonly zoneService: ZoneService,
     private readonly deviceService: DeviceService,
+    private readonly schoolService: SchoolService,
   ) {
 
   }
@@ -185,9 +187,10 @@ export class CallbackController {
     @Query('code') code: string,
     @Query('code1') code1: string,
   ) {
-    const device = await this.deviceService.findById(code)
-    const data = await this.camera.getDeviceInfo(device)
-    console.log(data, 'ata')
+    await this.schoolService.fix()
+    // const device = await this.deviceService.findById(code)
+    // const data = await this.camera.getDeviceInfo(device)
+    // console.log(data, 'ata')
     // const today = moment().startOf('d').format('YYYY-MM-DD HH:mm:ss')
     // console.log(today, 'today')
     // await this.callbackService.upResidentToSOC(code)

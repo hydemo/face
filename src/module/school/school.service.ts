@@ -1012,6 +1012,20 @@ export class SchoolService {
     return await this.schoolModel.findByIdAndUpdate(id, update)
   }
 
+  async fix() {
+    const schools = await this.schoolModel.find({ checkResult: 4 })
+    schools.map(async school => {
+      const faces = await this.faceService.findByCondition({ bondToObjectId: school._id, checkResult: 1, isDelete: false })
+      faces.map(async face => {
+        const device = await this.deviceService.findById(face.device)
+        const user = await this.userService.findById(face.user)
+        if (!user) {
+          return
+        }
+        return await this.faceService.addOnePic(face, device, user, this.config.whiteMode, user.faceUrl)
+      })
+    })
+  }
   // async getSchoolByAddress(address: string): Promise<ISchool[]> {
   //   return this.schoolModel
   //     .find({ address, isDelete: false })

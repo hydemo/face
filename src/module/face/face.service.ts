@@ -185,7 +185,7 @@ export class FaceService {
   }
 
   // 根据条件更新
-  async addOnePic(face: CreateFaceDTO, device: IDevice, user: IPic, mode: number, imgUrl) {
+  async addOnePic(face: CreateFaceDTO | IFace, device: IDevice, user: IPic, mode: number, imgUrl) {
     if (!device.enable) {
       return
     }
