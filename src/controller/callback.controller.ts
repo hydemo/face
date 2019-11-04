@@ -185,8 +185,11 @@ export class CallbackController {
     @Query('code') code: string,
     @Query('code1') code1: string,
   ) {
-    const today = moment().startOf('d').format('YYYY-MM-DD HH:mm:ss')
-    console.log(today, 'today')
+    const device = await this.deviceService.findById(code)
+    const data = await this.camera.getDeviceInfo(device)
+    console.log(data, 'ata')
+    // const today = moment().startOf('d').format('YYYY-MM-DD HH:mm:ss')
+    // console.log(today, 'today')
     // await this.callbackService.upResidentToSOC(code)
     // await this.callbackService.upDeviceToZOC(code)
     // const data = await this.socUtil.qrcodeAddress(code)

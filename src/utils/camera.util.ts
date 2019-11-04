@@ -227,15 +227,17 @@ export class CameraUtil {
     const { username, password, deviceUUID } = device
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
+    const data = {
+      Name: 'DeviceInfoREQ',
+      TimeStamp: timeStamp,
+      Sign: sign,
+      UUID: deviceUUID,
+    }
+    console.log(data, 'data')
     const result = await axios({
       method: 'post',
       url: this.config.p2pUrl,
-      data: {
-        Name: 'DeviceInfoREQ',
-        TimeStamp: timeStamp,
-        Sign: sign,
-        UUID: deviceUUID,
-      }
+      data,
     });
     return result.data
   }
