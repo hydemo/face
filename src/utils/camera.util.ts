@@ -38,6 +38,7 @@ export class CameraUtil {
    * @param timeStamp 时间戳
    */
   sign(username: string, password: string, uuid: string, timeStamp: number): string {
+    console.log(`${uuid}:${username}:${password}:${timeStamp}`, 'ddd')
     return md5(`${uuid}:${username}:${password}:${timeStamp}`)
   }
 
@@ -191,12 +192,13 @@ export class CameraUtil {
    */
   async updateOnePic(faceData: any, device: IDevice) {
     const { username, password, deviceUUID, version, session } = device
-    const timeStamp: number = this.getTemp()
-    const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const Img = await this.getImg(faceData.imgUrl)
     if (!Img) {
       return 'imgError'
     }
+    const timeStamp: number = this.getTemp()
+    const sign = await this.sign(username, password, deviceUUID, timeStamp)
+
     const data = {
       Name: "personListRequest",
       TimeStamp: timeStamp,
@@ -247,16 +249,17 @@ export class CameraUtil {
   */
   async addOnePic(faceData: any, device: IDevice) {
     const { username, password, deviceUUID, version, session } = device
+    const Img = await this.getImg(faceData.imgUrl)
+    if (!Img) {
+      return 'imgError'
+    }
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     let data: any
     const ImgName = faceData.username;
     const ImgNum = faceData.user;
     const Mode = faceData.mode;
-    const Img = await this.getImg(faceData.imgUrl)
-    if (!Img) {
-      return 'imgError'
-    }
+
     if (version === '1.0.0') {
       data = {
         Name: 'WBListInfoREQ',
@@ -287,7 +290,7 @@ export class CameraUtil {
           }
         }
       }
-      console.log(data, 'data')
+      // console.log(data, 'data')
     }
     return await this.handleRequest(data, version, faceData)
   }
