@@ -307,9 +307,13 @@ export class ScheduleService {
     });
 
     Schedule.scheduleJob('*/15 * * * * *', async () => {
+
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
       for (let pool of pools) {
+        console.log('startPool::::::::::::::::::', pool)
+        await this.sleep(2000)
+        console.log('endPool::::::::::::::', pool)
         const length = await client.llen(`p2p_${pool}`)
         if (!length) {
           await client.hdel('p2p_pool', pool)
