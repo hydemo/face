@@ -345,8 +345,6 @@ export class ScheduleService {
           continue;
         }
         const data = JSON.parse(dataString)
-        console.log('startSleep::::::::::::::::::', pool)
-        await this.sleep(2000)
         await client.hset('p2p_listen', pool, 1)
         console.log('start::::::::::::::', pool)
         this.handelP2P(data, device, pool, client)
