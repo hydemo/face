@@ -810,7 +810,8 @@ export class SchoolService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ createdAt: -1 })
-      .populate({ path: 'user', model: 'user', select: 'username _id' })
+      .populate({ path: 'user', model: 'user', select: 'username _id faceUrl' })
+      .populate({ path: 'parent.user', model: 'user', select: 'username _id faceUrl' })
       .populate({ path: 'address', model: 'zone', populate: { path: 'zoneId', model: 'zone' } })
       .lean()
       .exec();
