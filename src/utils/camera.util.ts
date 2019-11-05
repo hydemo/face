@@ -38,7 +38,6 @@ export class CameraUtil {
    * @param timeStamp 时间戳
    */
   sign(username: string, password: string, uuid: string, timeStamp: number): string {
-    console.log(`${uuid}:${username}:${password}:${timeStamp}`, 'ddd')
     return md5(`${uuid}:${username}:${password}:${timeStamp}`)
   }
 
@@ -95,7 +94,6 @@ export class CameraUtil {
         }
       }
     });
-    console.log(result.data, 'result')
     if (result.data.Result === 'ok') {
       return true
     }
@@ -130,8 +128,6 @@ export class CameraUtil {
       url: this.config.p2pUrl2,
       data
     });
-    console.log(result.data, 'result')
-    // console.log(result.data, 'data')
     if (result.data.Code === 1106) {
       return false
     } else if (result.data.Code === 1) {
@@ -233,7 +229,6 @@ export class CameraUtil {
       Sign: sign,
       UUID: deviceUUID,
     }
-    console.log(data, 'data')
     const result = await axios({
       method: 'post',
       url: this.config.p2pUrl,
@@ -304,7 +299,6 @@ export class CameraUtil {
   
   */
   async handleRequest(data, version, faceData) {
-    console.log(1, 'data')
     try {
       if (faceData.count > 18) {
         const error: P2PErrorDTO = {
@@ -320,7 +314,6 @@ export class CameraUtil {
         url: version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
         data,
       })
-      console.log(result.data, 'result')
       let code;
       let msg;
       if (version === '1.0.0') {
@@ -398,7 +391,6 @@ export class CameraUtil {
       //   await client.hset('p2pError_pool', upData.device, 1)
       // }
       // await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
-      console.log(error, 'error')
       return 'error'
     }
   }
@@ -602,7 +594,6 @@ export class CameraUtil {
       })
       let code;
       let msg;
-      console.log(result.data)
       if (result.data.Code === 1) {
         return 'success';
       }
@@ -631,7 +622,6 @@ export class CameraUtil {
       return code
 
     } catch (error) {
-      console.log(error, 'error')
       return 'error'
     }
   }

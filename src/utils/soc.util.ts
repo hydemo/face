@@ -69,7 +69,6 @@ export class SOCUtil {
       return JSON.parse(decodeURIComponent(result.data))
 
     } catch (error) {
-      console.log(error, 'error')
       return false
     }
 
@@ -177,7 +176,6 @@ export class SOCUtil {
     */
   async upload(datas: any[]): Promise<any> {
     const order = this.getOrder()
-    console.log(order, 'xms20190831023646031828153957013', 'xms20190831023724013193156361568')
     const data = {
       datas
     }
@@ -207,7 +205,6 @@ export class SOCUtil {
     // }
     try {
       const result = await this.socRequest(data, 'shhcj_xxba_jndj')
-      console.log(result, 'result')
       if (result && result.sta.code === '0000') {
         return true
       } else {
@@ -237,6 +234,5 @@ export class SOCUtil {
       ]
     }
     const result = await this.socRequest(data, 'shhcj_feedback_cx')
-    console.log(result, 'result')
   }
 }

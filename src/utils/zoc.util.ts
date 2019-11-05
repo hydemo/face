@@ -394,7 +394,6 @@ export class ZOCUtil {
       },
       data,
     });
-    console.log(result.data, 'propertyCo')
 
     const json = JSON.stringify([data])
     const filename = `PropertyCo-${time}.json`
@@ -429,7 +428,6 @@ export class ZOCUtil {
       FWFGSL: '0',
       FWFGDZBM: []
     }
-    console.log(data, 'data')
     // 参数校验
     const result = await axios({
       method: 'post',
@@ -440,7 +438,6 @@ export class ZOCUtil {
       },
       data,
     });
-    console.log(result.data, 'device')
 
     const json = JSON.stringify([data])
     const filename = `Device-${time}.json`
@@ -496,7 +493,6 @@ export class ZOCUtil {
       },
       data,
     });
-    console.log(result.data, 'record')
     if (result.data.status === 100) {
       const json = JSON.stringify([data])
       const filename = `EnRecord-${time}.json`

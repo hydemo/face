@@ -159,6 +159,10 @@ export class ScheduleService {
     }
   }
   async handResult(res, data, pool, client) {
+    if (pool === '5dbbef6c1535b40d9724b85e') {
+      console.log('result!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    }
+    await client.hset('p2p_listen', pool, 0)
     let result = res
     const { imgUrl } = data
     if (res === 'noExist') {
@@ -274,7 +278,6 @@ export class ScheduleService {
       default:
         break;
     }
-    await client.hset('p2p_listen', pool, 0)
   }
 
   async enableSchedule() {
