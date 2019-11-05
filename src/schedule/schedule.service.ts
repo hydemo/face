@@ -327,7 +327,7 @@ export class ScheduleService {
         }
         const dataString: any = await client.rpop(`p2p_${pool}`)
         if (!dataString) {
-          return
+          continue
         }
         const listenTime = await client.hget('p2p_listen', pool)
         if (listenTime && Number(listenTime) > 5) {
@@ -367,7 +367,7 @@ export class ScheduleService {
         }
         const dataString: any = await client.rpop(`p2pError_${pool}`)
         if (!dataString) {
-          return
+          continue
         }
         const listenTime = await client.hget('p2p_listen', pool)
         if (listenTime && Number(listenTime) > 5) {
