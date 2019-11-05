@@ -340,7 +340,7 @@ export class ScheduleService {
           continue
         }
         if (listenTime && Number(listenTime) > 0) {
-          client.rpush(`p2p_${pool}`, dataString)
+          await client.rpush(`p2p_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
           continue;
         }
@@ -380,7 +380,7 @@ export class ScheduleService {
           continue
         }
         if (listenTime && Number(listenTime) > 0) {
-          client.rpush(`p2pError_${pool}`, dataString)
+          await client.rpush(`p2pError_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
           continue;
         }
