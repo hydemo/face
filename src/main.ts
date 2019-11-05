@@ -61,7 +61,7 @@ async function bootstrap() {
     .build();
 
   initService.init();
-  // scheduleService.enableSchedule()
+  scheduleService.enableSchedule()
 
   const ApiDocument = SwaggerModule.createDocument(app, ApiOptions, {
     include: [

@@ -159,9 +159,7 @@ export class ScheduleService {
     }
   }
   async handResult(res, data, pool, client) {
-    if (pool === '5dbbef6c1535b40d9724b85e') {
-      console.log('result!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-    }
+    console.log('result!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', pool, res)
     await client.hset('p2p_listen', pool, 0)
     let result = res
     const { imgUrl } = data
@@ -337,7 +335,7 @@ export class ScheduleService {
           await client.hset('p2p_listen', pool, 0)
           continue
         }
-        if (Number(listenTime) > 0) {
+        if (listenTime && Number(listenTime) > 0) {
           client.rpush(`p2p_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
           continue;
@@ -377,7 +375,7 @@ export class ScheduleService {
           await client.hset('p2p_listen', pool, 0)
           continue
         }
-        if (Number(listenTime) > 0) {
+        if (listenTime && Number(listenTime) > 0) {
           client.rpush(`p2pError_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
           continue;
@@ -385,6 +383,7 @@ export class ScheduleService {
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
         await this.sleep(2000)
+        console.log('start::::::::::::::', pool)
         this.handelP2P(data, device, pool, client)
       }
 
