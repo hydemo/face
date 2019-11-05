@@ -341,9 +341,9 @@ export class ScheduleService {
           continue;
         }
         const data = JSON.parse(dataString)
-        await client.hset('p2p_listen', pool, 1)
         console.log('startSleep::::::::::::::::::', pool)
         await this.sleep(2000)
+        await client.hset('p2p_listen', pool, 1)
         console.log('start::::::::::::::', pool)
         this.handelP2P(data, device, pool, client)
       }
@@ -383,8 +383,8 @@ export class ScheduleService {
           continue;
         }
         const data = JSON.parse(dataString)
-        await client.hset('p2p_listen', pool, 1)
         await this.sleep(2000)
+        await client.hset('p2p_listen', pool, 1)
         console.log('start error::::::::::::::', pool)
         this.handelP2P(data, device, pool, client)
       }
