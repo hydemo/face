@@ -348,6 +348,8 @@ export class CameraUtil {
           return 'noExist'
         }
         switch (result.data.Data.Result) {
+          case -1: code = 'error'
+          case -5: code = 'error'
           case -3: code = 'success'
             break;
           case -21: code = 'success'
