@@ -347,9 +347,12 @@ export class CameraUtil {
         if (result.data.Code === 1106) {
           return 'noExist'
         }
+        console.log(result.data.Data.Result)
         switch (result.data.Data.Result) {
           case -1: code = 'error'
+            break
           case -5: code = 'error'
+            break
           case -3: code = 'success'
             break;
           case -21: code = 'success'
