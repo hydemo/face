@@ -314,6 +314,7 @@ export class CameraUtil {
         url: version === '1.0.0' ? this.config.p2pUrl : this.config.p2pUrl2,
         data,
       })
+      console.log(result, 'result')
       let code;
       let msg;
       if (version === '1.0.0') {
