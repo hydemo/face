@@ -159,7 +159,7 @@ export class ScheduleService {
     }
   }
   async handResult(res, data, pool, client) {
-    console.log('result!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', pool, res)
+    console.log('result!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', pool, data, res)
     await client.hset('p2p_listen', pool, 0)
     let result = res
     const { imgUrl } = data
@@ -187,6 +187,7 @@ export class ScheduleService {
       }))
       await client.hincrby('img', imgUrl, -1)
     } else if (result === 'success') {
+      console.log(data.faces, 'aaa')
       await Promise.all(data.faces.map(async id => {
         await this.faceService.updateById(id, { checkResult: 2 })
       }))
@@ -332,6 +333,10 @@ export class ScheduleService {
           continue
         }
         const listenTime = await client.hget('p2p_listen', pool)
+        if (listenTime && Number(listenTime) > 4) {
+          await client.hset('p2p_listen', pool, 0)
+          continue
+        }
         if (listenTime && Number(listenTime) > 0) {
           await client.rpush(`p2p_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
