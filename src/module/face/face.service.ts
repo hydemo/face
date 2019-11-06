@@ -269,6 +269,7 @@ export class FaceService {
     await this.faceModel.remove({ bondToObjectId })
   }
   async fix() {
+    const client = this.redis.getClient()
     const faces = await this.faceModel
       .find({ bondType: 'resident', checkResult: 1, isDelete: false })
       .populate({ path: 'device', model: 'device' })
@@ -276,6 +277,10 @@ export class FaceService {
       .lean()
       .exec()
     await Promise.all(faces.map(async face => {
+      const alive = await client.hget('device', face.device.deviceUUID)
+      if (!alive || Number(alive) > 4) {
+        return
+      }
       await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
     }))
   }
