@@ -316,7 +316,6 @@ export class ScheduleService {
 
       for (let i = 0; i <= len; i++) {
         const pool = pools[i]
-        await this.sleep(1000)
         const length = await client.llen(`p2p_${pool}`)
         if (!length) {
           await client.hdel('p2p_pool', pool)
@@ -351,6 +350,7 @@ export class ScheduleService {
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
         console.log('start::::::::::::::', pool)
+        await this.sleep(1000)
         this.handelP2P(data, device, pool, client)
       }
     });
@@ -364,7 +364,6 @@ export class ScheduleService {
       }
       for (let i = 0; i <= len; i++) {
         const pool = pools[i]
-        await this.sleep(1000)
         const length = await client.llen(`p2pError_${pool}`)
         if (!length) {
           await client.hdel('p2pError_pool', pool)
@@ -397,6 +396,7 @@ export class ScheduleService {
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
         console.log('start error::::::::::::::', pool)
+        await this.sleep(1000)
         this.handelP2P(data, device, pool, client)
       }
 
