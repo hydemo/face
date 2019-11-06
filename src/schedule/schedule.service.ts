@@ -170,8 +170,7 @@ export class ScheduleService {
         await client.hset('p2p_pool', pool, 1)
       }
       client.rpush(`p2p_${pool}`, JSON.stringify(newData))
-    }
-    if (res === 'error') {
+    } else if (res === 'error') {
 
       const errorData = { ...data, count: data.count + 1 }
       const poolExist = await client.hget('p2pError_pool', pool)
@@ -179,8 +178,7 @@ export class ScheduleService {
         await client.hset('p2pError_pool', pool, 1)
       }
       await client.rpush(`p2pError_${pool}`, JSON.stringify(errorData))
-    }
-    if (result === 'imgError') {
+    } else if (result === 'imgError') {
       // await this.sendImgError(data.face, client)
       await Promise.all(data.faces.map(async id => {
         await this.faceService.updateById(id, { checkResult: 3 })
@@ -188,7 +186,7 @@ export class ScheduleService {
       await client.hincrby('img', imgUrl, -1)
     } else if (result === 'success') {
       await Promise.all(data.faces.map(async id => {
-        await this.faceService.updateById(id, { checkResult: 3 })
+        await this.faceService.updateById(id, { checkResult: 2 })
       }))
       await client.hincrby('img', imgUrl, -1)
     } else if (result && result.Pic) {
