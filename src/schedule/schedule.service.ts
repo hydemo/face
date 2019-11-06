@@ -404,7 +404,7 @@ export class ScheduleService {
     });
 
     // 状态确认
-    Schedule.scheduleJob('*/5 * * * * *', async () => {
+    Schedule.scheduleJob('*/1 * * * *', async () => {
       const client = this.redis.getClient()
       const pendingResidents = await client.hkeys('pending_resident')
       const pendingRoles = await client.hkeys('pending_role')
