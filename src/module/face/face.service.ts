@@ -12,12 +12,14 @@ import { IDevice } from '../device/interfaces/device.interfaces';
 import { ResidentService } from '../resident/resident.service';
 import { RedisService } from 'nestjs-redis';
 import { IPic } from 'src/common/interface/pic.interface';
+import { P2PErrorService } from '../p2pError/p2pError.service';
 
 @Injectable()
 export class FaceService {
   constructor(
     @Inject('FaceModelToken') private readonly faceModel: Model<IFace>,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
+    @Inject(P2PErrorService) private readonly p2pErrorService: P2PErrorService,
     private readonly redis: RedisService,
   ) { }
 
@@ -271,6 +273,11 @@ export class FaceService {
     await this.faceModel.remove({ bondToObjectId })
   }
   async fix() {
+    const p2pErrors = await this.p2pErrorService.find({})
+    await Promise.all(p2pErrors.map(async p2pError => {
+      await this.faceModel.findByIdAndUpdate(p2pError.face, { checkResult: 1 })
+      await this.p2pErrorService.remove(p2pError._id)
+    }))
     const client = this.redis.getClient()
     const faces = await this.faceModel
       .find({ checkResult: 1, isDelete: true })

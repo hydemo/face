@@ -13,4 +13,14 @@ export class P2PErrorService {
   async create(data: P2PErrorDTO): Promise<IP2PError> {
     return await this.p2pErrorModel.create(data);
   }
+
+  // 创建数据
+  async find(condition: any): Promise<IP2PError[]> {
+    return await this.p2pErrorModel.find(condition).lean().exec();
+  }
+
+  // 创建数据
+  async remove(id: string): Promise<IP2PError> {
+    return await this.p2pErrorModel.findByIdAndDelete(id).lean().exec();
+  }
 }
