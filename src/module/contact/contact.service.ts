@@ -68,6 +68,24 @@ export class ContactService {
     return await this.contactModel.create(createContactDTO)
   }
 
+  // 新增入库
+  async updateContact(id: string, update: VerifyUserDTO) {
+    const contact = await this.contactModel.findById(id)
+    if (!contact) {
+      return
+    }
+    const user = await this.userService.findById(contact.user)
+    if (!user) {
+      return
+    }
+
+    if (user.isPhoneVerify) {
+      throw new ApiException('联系人已手机注册，无法修改，请联系本人修改', ApiErrorCode.NO_PERMISSION, 403)
+    }
+    await this.userService.updateById(contact.user, update)
+    return
+  }
+
   // 创建数据
   async list(pagination: Pagination, user: string): Promise<IList<IContact>> {
     const condition = { user }

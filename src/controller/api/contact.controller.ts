@@ -63,6 +63,19 @@ export class ContactController {
     return { statusCode: 200, msg: '添加联系人成功' };
   }
 
+  @Post('/:id')
+  @ApiOkResponse({
+    description: '修改联系人',
+  })
+  @ApiOperation({ title: '修改联系人', description: '修改联系人' })
+  async updateContact(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Body() contact: VerifyUserDTO,
+  ) {
+    await this.contactService.updateContact(id, contact);
+    return { statusCode: 200, msg: '添加联系人成功' };
+  }
+
 
   @Delete('/:id')
   @ApiOkResponse({
