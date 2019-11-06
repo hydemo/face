@@ -310,8 +310,8 @@ export class ScheduleService {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
       let len = pools.length
-      if (len > 6) {
-        len = 6
+      if (len > 12) {
+        len = 12
       }
 
       for (let i = 0; i <= len; i++) {
@@ -359,8 +359,8 @@ export class ScheduleService {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2pError_pool')
       let len = pools.length
-      if (len > 6) {
-        len = 6
+      if (len > 12) {
+        len = 12
       }
       for (let i = 0; i <= len; i++) {
         const pool = pools[i]
