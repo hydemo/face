@@ -269,7 +269,15 @@ export class FaceService {
     await this.faceModel.remove({ bondToObjectId })
   }
   async fix() {
-    await this.faceModel.updateMany({}, { checkResult: 2 })
+    const faces = await this.faceModel
+      .find({ bondType: 'resident', checkResult: 1, isDelete: false })
+      .populate({ path: 'device', model: 'device' })
+      .populate({ paht: 'user', model: 'user' })
+      .lean()
+      .exec()
+    await Promise.all(faces.map(async face => {
+      await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
+    }))
   }
   async addFace() {
     const id = '5d85c8c079564a6052c65116'
