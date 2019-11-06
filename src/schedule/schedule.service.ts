@@ -309,7 +309,13 @@ export class ScheduleService {
     Schedule.scheduleJob('*/20 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
-      for (let pool of pools) {
+      let len = pools.length
+      if (len > 6) {
+        len = 6
+      }
+
+      for (let i = 0; i <= len; i++) {
+        const pool = pools[i]
         await this.sleep(1000)
         const length = await client.llen(`p2p_${pool}`)
         if (!length) {
@@ -352,7 +358,13 @@ export class ScheduleService {
     Schedule.scheduleJob('*/37 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2pError_pool')
-      for (let pool of pools) {
+      let len = pools.length
+      if (len > 6) {
+        len = 6
+      }
+      for (let i = 0; i <= len; i++) {
+        const pool = pools[i]
+        await this.sleep(1000)
         const length = await client.llen(`p2pError_${pool}`)
         if (!length) {
           await client.hdel('p2pError_pool', pool)
@@ -383,7 +395,6 @@ export class ScheduleService {
         }
 
         const data = JSON.parse(dataString)
-        await this.sleep(2000)
         await client.hset('p2p_listen', pool, 1)
         console.log('start error::::::::::::::', pool)
         this.handelP2P(data, device, pool, client)
