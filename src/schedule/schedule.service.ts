@@ -328,20 +328,21 @@ export class ScheduleService {
           await client.hdel('p2p_pool', pool)
           continue
         }
-        const dataString: any = await client.rpop(`p2p_${pool}`)
-        if (!dataString) {
-          continue
-        }
+
         const listenTime = await client.hget('p2p_listen', pool)
         if (listenTime && Number(listenTime) > 4) {
           await client.hset('p2p_listen', pool, 0)
           continue
         }
         if (listenTime && Number(listenTime) > 0) {
-          await client.rpush(`p2p_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
           continue;
         }
+        const dataString: any = await client.rpop(`p2p_${pool}`)
+        if (!dataString) {
+          continue
+        }
+
         const data = JSON.parse(dataString)
         await client.hset('p2p_listen', pool, 1)
         console.log('start::::::::::::::', pool)
@@ -368,20 +369,20 @@ export class ScheduleService {
           await client.hdel('p2pError_pool', pool)
           continue
         }
-        const dataString: any = await client.rpop(`p2pError_${pool}`)
-        if (!dataString) {
-          continue
-        }
         const listenTime = await client.hget('p2p_listen', pool)
         if (listenTime && Number(listenTime) > 5) {
           await client.hset('p2p_listen', pool, 0)
           continue
         }
         if (listenTime && Number(listenTime) > 0) {
-          await client.rpush(`p2pError_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
           continue;
         }
+        const dataString: any = await client.rpop(`p2pError_${pool}`)
+        if (!dataString) {
+          continue
+        }
+
         const data = JSON.parse(dataString)
         await this.sleep(2000)
         await client.hset('p2p_listen', pool, 1)
