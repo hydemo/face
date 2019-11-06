@@ -74,7 +74,7 @@ export class ContactService {
     if (!contact) {
       return
     }
-    const user = await this.userService.findById(contact.user)
+    const user = await this.userService.findById(contact.contact)
     if (!user) {
       return
     }
