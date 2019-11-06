@@ -213,6 +213,19 @@ export class SchoolController {
     return { statusCode: 200, msg: '修改成功' };
   }
 
+  @Delete('/:id/parent/:parentId')
+  @ApiOkResponse({
+    description: '删除家长',
+  })
+  @ApiOperation({ title: '删除家长', description: '删除家长' })
+  async deleteParent(
+    @Param('id', new MongodIdPipe()) id: string,
+    @Param('parentId', new MongodIdPipe()) parentId: string,
+  ) {
+    await this.schoolService.deleteParent(id, parentId);
+    return { statusCode: 200, msg: '删除成功' };
+  }
+
   @Get('/students')
   @ApiOkResponse({
     description: '学生列表',

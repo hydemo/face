@@ -819,6 +819,17 @@ export class SchoolService {
     return { list, total };
   }
 
+  async deleteParent(id: string, parent: string) {
+    const school = await this.schoolModel.findById(id)
+    if (!school) {
+      throw new ApiException('不存在', ApiErrorCode.NO_EXIST, 404)
+    }
+    if (school.parent.length < 2) {
+      throw new ApiException('最后一个家长不能删除', ApiErrorCode.INPUT_ERROR, 406)
+    }
+    await this.schoolModel.findByIdAndUpdate(id, { $pull: { parent: { user: parent } } })
+  }
+
 
 
   // /**
