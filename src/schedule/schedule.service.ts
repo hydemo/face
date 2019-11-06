@@ -332,10 +332,6 @@ export class ScheduleService {
           continue
         }
         const listenTime = await client.hget('p2p_listen', pool)
-        if (listenTime && Number(listenTime) > 4) {
-          await client.hset('p2p_listen', pool, 0)
-          continue
-        }
         if (listenTime && Number(listenTime) > 0) {
           await client.rpush(`p2p_${pool}`, dataString)
           await client.hincrby('p2p_listen', pool, 1)
