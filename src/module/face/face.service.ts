@@ -273,7 +273,7 @@ export class FaceService {
     const faces = await this.faceModel
       .find({ bondType: 'resident', checkResult: 1, isDelete: false })
       .populate({ path: 'device', model: 'device' })
-      .populate({ paht: 'user', model: 'user' })
+      .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
     await Promise.all(faces.map(async face => {
