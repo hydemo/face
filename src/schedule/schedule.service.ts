@@ -187,9 +187,9 @@ export class ScheduleService {
       }))
       await client.hincrby('img', imgUrl, -1)
     } else if (result === 'success') {
-      for (let face of data.faces) {
-        await this.faceService.updateById(face, { checkResult: 2 })
-      }
+      await Promise.all(data.faces.map(async id => {
+        await this.faceService.updateById(id, { checkResult: 3 })
+      }))
       await client.hincrby('img', imgUrl, -1)
     } else if (result && result.Pic) {
       const update = {
@@ -355,7 +355,7 @@ export class ScheduleService {
       }
     });
 
-    Schedule.scheduleJob('*/20 * * * * *', async () => {
+    Schedule.scheduleJob('*/15 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2pError_pool')
       let len = pools.length

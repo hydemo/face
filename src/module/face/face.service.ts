@@ -262,10 +262,7 @@ export class FaceService {
     return await this.faceModel.updateMany(condition, update)
   }
   async updateById(id: string, update: any) {
-    console.log(id, update, 'updata')
-    const result = await this.faceModel.findByIdAndUpdate(id, update)
-    console.log('success::::', result)
-    return
+    return await this.faceModel.findByIdAndUpdate(id, update)
   }
 
   async remove(bondToObjectId) {
