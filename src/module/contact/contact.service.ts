@@ -82,7 +82,7 @@ export class ContactService {
     if (user.isPhoneVerify) {
       throw new ApiException('联系人已手机注册，无法修改，请联系本人修改', ApiErrorCode.NO_PERMISSION, 403)
     }
-    await this.userService.updateById(contact.user, update)
+    await this.userService.updateById(contact.contact, update)
     return
   }
 
