@@ -178,7 +178,7 @@ export class ScheduleService {
       if (!poolExist) {
         await client.hset('p2pError_pool', pool, 1)
       }
-      await client.lpush(`p2pError_${pool}`, JSON.stringify(errorData))
+      await client.rpush(`p2pError_${pool}`, JSON.stringify(errorData))
     }
     if (result === 'imgError') {
       // await this.sendImgError(data.face, client)
