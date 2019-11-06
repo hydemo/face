@@ -187,9 +187,9 @@ export class ScheduleService {
       }))
       await client.hincrby('img', imgUrl, -1)
     } else if (result === 'success') {
-      await Promise.all(data.faces.map(async id => {
-        await this.faceService.updateById(id, { checkResult: 2 })
-      }))
+      for (let face of data.faces) {
+        await this.faceService.updateById(face, { checkResult: 2 })
+      }
       await client.hincrby('img', imgUrl, -1)
     } else if (result && result.Pic) {
       const update = {
