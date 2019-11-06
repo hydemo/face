@@ -173,11 +173,11 @@ export class ScheduleService {
     } else if (res === 'error') {
 
       const errorData = { ...data, count: data.count + 1 }
-      const poolExist = await client.hget('p2pError_pool', pool)
+      const poolExist = await client.hget('p2p_pool', pool)
       if (!poolExist) {
-        await client.hset('p2pError_pool', pool, 1)
+        await client.hset('p2p_pool', pool, 1)
       }
-      await client.rpush(`p2pError_${pool}`, JSON.stringify(errorData))
+      await client.rpush(`p2p_${pool}`, JSON.stringify(errorData))
     } else if (result === 'imgError') {
       // await this.sendImgError(data.face, client)
       await Promise.all(data.faces.map(async id => {
