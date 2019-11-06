@@ -406,7 +406,7 @@ export class ScheduleService {
     });
 
     // 状态确认
-    Schedule.scheduleJob('*/10 * * * *', async () => {
+    Schedule.scheduleJob('*/5 * * * *', async () => {
       const client = this.redis.getClient()
       const pendingResidents = await client.hkeys('pending_resident')
       const pendingRoles = await client.hkeys('pending_role')
@@ -440,10 +440,10 @@ export class ScheduleService {
         await client.hdel('pending_black', id)
       }))
 
-      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: { $in: [4, 5] } })
-      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: { $in: [4, 5] } })
-      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: { $in: [4, 5] } })
-      const schools: ISchool[] = await this.schoolService.findByCondition({ checkResult: { $in: [4, 5] } })
+      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
+      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
+      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
+      const schools: ISchool[] = await this.schoolService.findByCondition({ checkResult: 4 })
       await Promise.all(residents.map(async resident => {
         const checkResult = await this.faceService.checkResult(resident._id)
         return await this.residentService.updateById(resident._id, { checkResult });

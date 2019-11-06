@@ -142,7 +142,7 @@ export class CameraUtil {
    * @param face 名单信息
    */
   async deleteOnePic(faceData: any, device: IDevice) {
-    const { username, password, deviceUUID, version, session } = device
+    const { username, password, deviceUUID, version } = device
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     let data: any;
@@ -551,7 +551,7 @@ export class CameraUtil {
       if (imgExist) {
         return imgExist
       }
-      const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/650x/gravity/Center/crop/650x950/format/jpg/blur/1x0/quality/90|imageslim`, { responseType: 'arraybuffer' })
+      const result: any = await axios.get(`${this.config.qiniuLink}/${url}?imageMogr2/auto-orient/thumbnail/700x/gravity/Center/crop/700x950/format/jpg/blur/1x0/quality/90|imageslim`, { responseType: 'arraybuffer' })
       const img = new Buffer(result.data, 'binary').toString('base64')
       if (imgCount && Number(imgCount) > 0) {
         await client.hset('imgBase64', url, img)

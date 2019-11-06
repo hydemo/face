@@ -213,8 +213,10 @@ export class FaceService {
   async delete(face: IFace) {
     let checkResult = 2
     const faceCount: number = await this.count({ isDelete: false, device: face.device, user: face.user })
-    const faceToDelete: any = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
-    if (faceCount === 1 && faceToDelete) {
+    if (faceCount === 1) {
+      const faceToDelete: any = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
+      if (!faceToDelete) { return }
+
       // const exist = await this.cameraUtil.getPersionInfo(faceToDelete.user, faceToDelete.device, faceToDelete.mode)
       // if (exist) {
       const { _id, enable } = faceToDelete.device
@@ -249,11 +251,11 @@ export class FaceService {
   async checkResult(bondToObjectId: string): Promise<number> {
     const isFail = await this.faceModel.findOne({ bondToObjectId, checkResult: 3, isDelete: false })
     const isPending = await this.faceModel.findOne({ bondToObjectId, checkResult: 1, isDelete: false })
-    if (isFail) {
-      return 5
-    }
     if (isPending) {
       return 4
+    }
+    if (isFail) {
+      return 5
     }
     return 2
   }
@@ -271,7 +273,7 @@ export class FaceService {
   async fix() {
     const client = this.redis.getClient()
     const faces = await this.faceModel
-      .find({ checkResult: 1, isDelete: false })
+      .find({ checkResult: 1, isDelete: true })
       .populate({ path: 'device', model: 'device' })
       .populate({ path: 'user', model: 'user' })
       .lean()
@@ -282,6 +284,16 @@ export class FaceService {
         return
       }
       await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
+    }))
+  }
+
+  async fixDelete() {
+    const faces = await this.faceModel
+      .find({ checkResult: 1, isDelete: true })
+      .lean()
+      .exec()
+    await Promise.all(faces.map(async face => {
+      await this.delete(face)
     }))
   }
   async addFace() {
