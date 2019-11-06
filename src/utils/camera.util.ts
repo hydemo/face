@@ -349,7 +349,7 @@ export class CameraUtil {
         }
         console.log(result.data.Data.Result)
         switch (result.data.Data.Result) {
-          case -1: code = 'error'
+          case -1: { console.log(data, 'data'); code = 'error' }
             break
           case -5: code = 'error'
             break
