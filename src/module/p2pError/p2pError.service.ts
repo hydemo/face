@@ -16,7 +16,7 @@ export class P2PErrorService {
 
   // 创建数据
   async find(condition: any): Promise<IP2PError[]> {
-    return await this.p2pErrorModel.find(condition).lean().exec();
+    return await this.p2pErrorModel.find(condition).sort({ createdAt: 1 }).lean().exec();
   }
 
   // 创建数据
