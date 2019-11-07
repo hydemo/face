@@ -204,7 +204,9 @@ export class ScheduleService {
       await Promise.all(data.faces.map(async id => {
         await this.faceService.updateById(id, { checkResult: 3 })
       }))
-      await client.hincrby('img', imgUrl, -1)
+      if (imgUrl) {
+        await client.hincrby('img', imgUrl, -1)
+      }
     }
   }
 
@@ -296,7 +298,7 @@ export class ScheduleService {
       await this.logService.genLog()
     });
 
-    Schedule.scheduleJob('*/5 * * * *', async () => {
+    Schedule.scheduleJob('*/4 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
@@ -304,7 +306,7 @@ export class ScheduleService {
       }))
     });
 
-    Schedule.scheduleJob('*/15 * * * * *', async () => {
+    Schedule.scheduleJob('*/30 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
       let len = pools.length
@@ -353,7 +355,7 @@ export class ScheduleService {
       }
     });
 
-    Schedule.scheduleJob('*/15 * * * * *', async () => {
+    Schedule.scheduleJob('*/30 * * * * *', async () => {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2pError_pool')
       let len = pools.length
