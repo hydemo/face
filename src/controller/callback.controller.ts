@@ -189,6 +189,7 @@ export class CallbackController {
   ) {
     // await this.schoolService.fix()
     await this.faceService.fix()
+    await this.faceService.fixDelete()
     // const device = await this.deviceService.findById(code)
     // const data = await this.camera.getDeviceInfo(device)
     // console.log(data, 'ata')
