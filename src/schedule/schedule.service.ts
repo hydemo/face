@@ -310,8 +310,8 @@ export class ScheduleService {
       const client = this.redis.getClient()
       const pools = await client.hkeys('p2p_pool')
       let len = pools.length
-      if (len > 12) {
-        len = 12
+      if (len > 8) {
+        len = 8
       }
 
       for (let i = 0; i <= len; i++) {
