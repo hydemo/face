@@ -328,7 +328,7 @@ export class ScheduleService {
         }
 
         const alive = await client.hget('device', device.deviceUUID)
-        if (!alive || Number(alive) > 4) {
+        if (!alive || Number(alive) > 2) {
           await client.hdel('p2p_pool', pool)
           continue
         }
@@ -379,7 +379,7 @@ export class ScheduleService {
           continue
         }
         const alive = await client.hget('device', device.deviceUUID)
-        if (!alive || Number(alive) > 4) {
+        if (!alive || Number(alive) > 2) {
           await client.hdel('p2pError_pool', pool)
           continue
         }
@@ -442,10 +442,10 @@ export class ScheduleService {
         await client.hdel('pending_black', id)
       }))
 
-      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: 4 })
-      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: 4 })
-      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: 4 })
-      const schools: ISchool[] = await this.schoolService.findByCondition({ checkResult: 4 })
+      const residents: IResident[] = await this.residentService.findByCondition({ checkResult: { $in: [4, 5] } })
+      const roles: IRole[] = await this.roleService.findByCondition({ checkResult: { $in: [4, 5] } })
+      const blacks: IBlack[] = await this.blackService.findByCondition({ checkResult: { $in: [4, 5] } })
+      const schools: ISchool[] = await this.schoolService.findByCondition({ checkResult: { $in: [4, 5] } })
       await Promise.all(residents.map(async resident => {
         const checkResult = await this.faceService.checkResult(resident._id)
         return await this.residentService.updateById(resident._id, { checkResult });
