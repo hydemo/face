@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
+import * as cmd from 'node-cmd';
 import * as md5 from 'md5';
 import axios from 'axios';
 import * as fs from 'fs';
@@ -300,6 +301,9 @@ export class CameraUtil {
   */
   async handleRequest(data, version, faceData) {
     try {
+      if (faceData.count > 5) {
+        cmd.run('pm2 reload 19')
+      }
       if (faceData.count > 18) {
         const error: P2PErrorDTO = {
           face: faceData.face,
@@ -347,7 +351,9 @@ export class CameraUtil {
         if (result.data.Code === 1106) {
           return 'noExist'
         }
-        console.log(result.data.Data.Result)
+        if (result.data.Code === 1005) {
+          cmd.run('pm2 reload 19')
+        }
         switch (result.data.Data.Result) {
           case -1: { console.log(data, 'data'); code = 'error' }
             break
