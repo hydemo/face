@@ -160,6 +160,7 @@ export class SchoolService {
         isParent = true
       }
     })
+    console.log(student)
     if (String(student.owner) !== String(user) && !isParent) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -463,7 +464,6 @@ export class SchoolService {
   async updateStudentById(id: string, update: UpdateStudentDTO, user: string) {
     const student: ISchool | null = await this.schoolModel
       .findById(id)
-      .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
     if (!student) {
@@ -476,7 +476,7 @@ export class SchoolService {
     if (student.type !== 'student') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    const newUser: IUser | null = await this.userService.updateById(student.user._id, { ...update })
+    const newUser: IUser | null = await this.userService.updateById(student.user, { ...update })
     if (!newUser) {
       throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
     }
@@ -490,7 +490,6 @@ export class SchoolService {
     }
     const student: ISchool | null = await this.schoolModel
       .findById(id)
-      .populate({ path: 'user', model: 'user' })
       .lean()
       .exec()
     if (!student) {
