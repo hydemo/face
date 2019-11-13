@@ -642,9 +642,6 @@ export class ResidentService {
       if (!user) {
         throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
       }
-      if (update.user.faceUrl) {
-        await this.faceService.updatePic(user, update.user.faceUrl)
-      }
     }
     return await this.residentModel.findByIdAndUpdate(id, { isMonitor: update.isMonitor, isPush: update.isPush })
   }

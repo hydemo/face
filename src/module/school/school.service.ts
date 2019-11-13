@@ -480,9 +480,6 @@ export class SchoolService {
       if (!user) {
         throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
       }
-      if (update.faceUrl) {
-        await this.faceService.updatePic(user, update.faceUrl)
-      }
     }
   }
 

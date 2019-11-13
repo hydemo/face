@@ -116,9 +116,18 @@ export class UserService {
         throw new ApiException('手机已存在', ApiErrorCode.PHONE_EXIST, 406);
       }
     }
+
     const newUser = await this.userModel.findByIdAndUpdate(_id, user, { new: true }).exec();
+    if (!newUser) {
+      return null
+    }
+    if (user.faceUrl) {
+      await this.faceService.updatePic(newUser, user.faceUrl)
+    }
     return newUser
   }
+
+
   // 根据id删除
   async blockById(_id: string) {
     return await this.userModel.findByIdAndUpdate(_id, { isBlock: true }).exec();
@@ -273,7 +282,6 @@ export class UserService {
   }
 
   async login(userDto: LoginUserDTO, ip: string): Promise<IUser> {
-
     const user: IUser | null = await this.userModel
       .findOne({ phone: userDto.phone })
       .lean()
