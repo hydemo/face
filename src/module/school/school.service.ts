@@ -471,15 +471,13 @@ export class SchoolService {
     }
 
     await this.isParentOrHeadTeacher(student, String(user))
-
+    console.log(student, 'student')
     if (student.type !== 'student') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
-    if (!student.user.isPhoneVerify) {
-      const user: IUser | null = await this.userService.updateById(student.user._id, { ...update })
-      if (!user) {
-        throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
-      }
+    const newUser: IUser | null = await this.userService.updateById(student.user._id, { ...update })
+    if (!newUser) {
+      throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
     }
   }
 
