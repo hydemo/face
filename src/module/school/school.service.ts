@@ -160,7 +160,6 @@ export class SchoolService {
         isParent = true
       }
     })
-    console.log(student, user, isParent, 'aa')
     if (String(student.owner) !== String(user) && !isParent) {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
@@ -469,10 +468,8 @@ export class SchoolService {
     if (!student) {
       throw new ApiException('访问资源不存在', ApiErrorCode.DEVICE_EXIST, 404);
     }
-    console.log(student, 'studengt1')
 
     await this.isParentOrHeadTeacher(student, String(user))
-    console.log(student, 'student')
     if (student.type !== 'student') {
       throw new ApiException('无权限操作', ApiErrorCode.NO_PERMISSION, 403);
     }
