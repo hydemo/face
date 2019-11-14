@@ -249,6 +249,45 @@ export class FaceService {
     return true
   }
 
+
+  // 根据id删除
+  async deleteByFix(face: IFace) {
+    let checkResult = 2
+    const faceCount: number = await this.count({ isDelete: false, device: face.device, user: face.user })
+    if (faceCount === 0) {
+      const faceToDelete: any = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
+      if (!faceToDelete) { return }
+
+      // const exist = await this.cameraUtil.getPersionInfo(faceToDelete.user, faceToDelete.device, faceToDelete.mode)
+      // if (exist) {
+      const { _id, enable } = faceToDelete.device
+      if (!enable) {
+        return
+      }
+      const data = {
+        count: 0,
+        user: String(faceToDelete.user),
+        type: 'delete',
+        face: faceToDelete._id,
+        LibIndex: faceToDelete.libIndex,
+        FlieIndex: faceToDelete.flieIndex,
+        Pic: faceToDelete.pic,
+        mode: faceToDelete.mode,
+        faces: [String(faceToDelete._id)]
+      }
+      const client = this.redis.getClient()
+      const poolExist = await client.hget('p2p_pool', String(_id))
+      if (!poolExist) {
+        await client.hset('p2p_pool', String(_id), 1)
+      }
+      await client.lpush(`p2p_${_id}`, JSON.stringify(data))
+      checkResult = 1
+      // }
+    }
+    await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true, checkResult })
+    return true
+  }
+
   // 根据id删除
   async checkResult(bondToObjectId: string): Promise<number> {
     const isFail = await this.faceModel.findOne({ bondToObjectId, checkResult: 3, isDelete: false })
@@ -335,7 +374,7 @@ export class FaceService {
       .lean()
       .exec()
     await Promise.all(faces.map(async face => {
-      await this.delete(face)
+      await this.deleteByFix(face)
     }))
   }
 
@@ -479,5 +518,23 @@ export class FaceService {
     // }
     // console.log(result, 'result')
     await Promise.all(faces.map(async face => await this.delete(face)))
+  }
+
+  async addErrorDelete() {
+    const faces = await this.faceModel
+      .find({ isDelete: true })
+      .lean()
+      .exec()
+    await Promise.all(faces.map(async face => {
+      const faceCount = await this.faceModel
+        .findOne({ isDelete: false, device: face.device, user: face.user })
+        .populate({ path: 'device', model: 'device' })
+        .populate({ path: 'user', model: 'user' })
+        .lean()
+        .exec()
+      if (faceCount > 0) {
+        await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
+      }
+    }))
   }
 }
