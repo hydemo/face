@@ -308,6 +308,15 @@ export class FaceService {
     return await this.faceModel.findByIdAndUpdate(id, update)
   }
 
+  async confirm(id: string, checkResult: number) {
+    const face = await this.faceModel.findById(id)
+    if (!face) {
+      return
+    }
+    await this.faceModel.updateMany({ user: face.user, device: face.device }, { checkResult })
+    // return await this.faceModel.findByIdAndUpdate(id, update)
+  }
+
   async remove(bondToObjectId) {
     await this.faceModel.remove({ bondToObjectId })
   }
@@ -532,8 +541,9 @@ export class FaceService {
         .populate({ path: 'user', model: 'user' })
         .lean()
         .exec()
-      if (faceCount > 0) {
-        await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
+      if (faceCount) {
+        await this.faceModel.updateMany({ user: face.user, device: face.device }, { checkResult: 1 })
+        await this.addOnePic(faceCount, faceCount.device, faceCount.user, faceCount.mode, faceCount.user.faceUrl)
       }
     }))
   }
