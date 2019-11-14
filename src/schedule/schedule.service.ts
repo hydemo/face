@@ -212,17 +212,13 @@ export class ScheduleService {
     switch (data.type) {
       case 'add': {
         const faceExist = await this.faceService.findOne({
-          user: data.face.user,
-          device: data.face.device,
+          user: data.user,
+          device: device._id,
           isDelete: false,
           checkResult: 2,
         })
         if (faceExist) {
-          result = {
-            LibIndex: faceExist.libIndex,
-            FlieIndex: faceExist.flieIndex,
-            Pic: faceExist.pic,
-          }
+          result = 'success'
         } else {
           result = await this.camera.addOnePic(data, device)
         }
@@ -231,7 +227,7 @@ export class ScheduleService {
         break;
       case 'delete': {
         let deleteData = data
-        const faceExist: IFace | null = await this.faceService.findById(data.face._id)
+        const faceExist: IFace | null = await this.faceService.findById(data.face)
         if (faceExist && device.version === '1.0.0') {
           if (!data.Pic || !data.LibIndex || !data.FlieIndex) {
             deleteData = {
