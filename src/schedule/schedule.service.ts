@@ -180,12 +180,10 @@ export class ScheduleService {
       await client.rpush(`p2p_${pool}`, JSON.stringify(errorData))
     } else if (result === 'imgError') {
       // await this.sendImgError(data.face, client)
-      await Promise.all(data.faces.map(async id => {
-        await this.faceService.updateById(id, { checkResult: 3 })
-      }))
+      await this.faceService.confirm(data.face, 3, data.type)
       await client.hincrby('img', imgUrl, -1)
     } else if (result === 'success') {
-      await this.faceService.updateById(data.face, 2)
+      await this.faceService.confirm(data.face, 2, data.type)
       await client.hincrby('img', imgUrl, -1)
     } else if (result && result.Pic) {
       const update = {
@@ -199,7 +197,7 @@ export class ScheduleService {
       }))
       await client.hincrby('img', imgUrl, -1)
     } else if (result === 'final') {
-      await this.faceService.updateById(data.face, 2)
+      await this.faceService.confirm(data.face, 3, data.type)
       if (imgUrl) {
         await client.hincrby('img', imgUrl, -1)
       }

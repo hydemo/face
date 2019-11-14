@@ -308,12 +308,16 @@ export class FaceService {
     return await this.faceModel.findByIdAndUpdate(id, update)
   }
 
-  async confirm(id: string, checkResult: number) {
+  async confirm(id: string, checkResult: number, type: string) {
+    let isDelete = false;
+    if (type === 'delete') {
+      isDelete = true
+    }
     const face = await this.faceModel.findById(id)
     if (!face) {
       return
     }
-    await this.faceModel.updateMany({ user: face.user, device: face.device }, { checkResult })
+    await this.faceModel.updateMany({ user: face.user, device: face.device, isDelete }, { checkResult })
     // return await this.faceModel.findByIdAndUpdate(id, update)
   }
 
@@ -542,7 +546,7 @@ export class FaceService {
         .lean()
         .exec()
       if (faceCount) {
-        await this.faceModel.updateMany({ user: face.user, device: face.device }, { checkResult: 1 })
+        await this.faceModel.updateMany({ user: face.user, device: face.device, isDelete: false }, { checkResult: 1 })
         await this.addOnePic(faceCount, faceCount.device, faceCount.user, faceCount.mode, faceCount.user.faceUrl)
       }
     }))
