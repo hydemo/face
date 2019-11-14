@@ -220,22 +220,30 @@ export class CameraUtil {
    * 
    * @param face 名单信息
    */
-  async getDeviceInfo(device: IDevice): Promise<any> {
-    const { username, password, deviceUUID } = device
+  async getDeviceInfo(deviceUUID: string): Promise<any> {
+    const username = 'admin'
+    const password = 'oyxj19891024'
+    // const { username, password, deviceUUID } = device
     const timeStamp: number = this.getTemp()
     const sign = await this.sign(username, password, deviceUUID, timeStamp)
     const data = {
-      Name: 'DeviceInfoREQ',
+      Name: 'deviceInfoRequest',
       TimeStamp: timeStamp,
       Sign: sign,
       UUID: deviceUUID,
     }
-    const result = await axios({
-      method: 'post',
-      url: this.config.p2pUrl,
-      data,
-    });
-    return result.data
+    try {
+      const result = await axios({
+        method: 'post',
+        url: this.config.p2pUrl2,
+        data,
+      });
+      console.log(result.data, 'data')
+      return result.data
+    } catch (e) {
+      console.log(e)
+    }
+
   }
 
   /**
@@ -302,7 +310,7 @@ export class CameraUtil {
   async handleRequest(data, version, faceData) {
     try {
       if (faceData.count > 5) {
-        cmd.run('pm2 reload 19')
+        cmd.run('pm2 reload 22')
       }
       if (faceData.count > 18) {
         const error: P2PErrorDTO = {
@@ -352,7 +360,7 @@ export class CameraUtil {
           return 'noExist'
         }
         if (result.data.Code === 1005) {
-          cmd.run('pm2 reload 19')
+          cmd.run('pm2 reload 22')
         }
         switch (result.data.Data.Result) {
           case -1: { console.log(data, 'data'); code = 'error' }

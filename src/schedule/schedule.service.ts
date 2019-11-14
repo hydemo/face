@@ -298,7 +298,7 @@ export class ScheduleService {
       await this.logService.genLog()
     });
 
-    Schedule.scheduleJob('*/4 * * * *', async () => {
+    Schedule.scheduleJob('*/5 * * * *', async () => {
       const client = this.redis.getClient()
       const keys = await client.hkeys('device')
       await Promise.all(keys.map(async key => {
@@ -328,7 +328,7 @@ export class ScheduleService {
         }
 
         const alive = await client.hget('device', device.deviceUUID)
-        if (!alive || Number(alive) > 2) {
+        if (!alive || Number(alive) > 3) {
           await client.hdel('p2p_pool', pool)
           continue
         }
@@ -379,7 +379,7 @@ export class ScheduleService {
           continue
         }
         const alive = await client.hget('device', device.deviceUUID)
-        if (!alive || Number(alive) > 2) {
+        if (!alive || Number(alive) > 3) {
           await client.hdel('p2pError_pool', pool)
           continue
         }
