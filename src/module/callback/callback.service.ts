@@ -259,7 +259,25 @@ export class CallbackService {
           color: "#173177"
         },
       }
-      this.weixinUtil.sendPassMessage(receiverUser.openId, application, 'user')
+      if (receiver.type === 'student') {
+        const client = this.redis.getClient()
+        const exist = await client.get(`student_${receiverUser.openId}`)
+        if (exist) {
+          return
+        }
+        const middle = moment().startOf('d').add(12, 'hour')
+        const now = moment()
+        if (middle > now && device.passType === 2) {
+          return
+        }
+        if (middle < now && device.passType === 1) {
+          return
+        }
+        await client.set(`student_${receiverUser.openId}`, 1, 'EX', 60 * 30)
+        this.weixinUtil.sendPassMessage(receiverUser.openId, application, 'user')
+      } else {
+        this.weixinUtil.sendPassMessage(receiverUser.openId, application, 'user')
+      }
     }))
   }
 

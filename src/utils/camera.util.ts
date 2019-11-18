@@ -363,7 +363,7 @@ export class CameraUtil {
           cmd.run('pm2 reload 22')
         }
         switch (result.data.Data.Result) {
-          case -1: { console.log(data, 'data'); code = 'error' }
+          case -1: { code = 'error' }
             break
           case -5: code = 'error'
             break

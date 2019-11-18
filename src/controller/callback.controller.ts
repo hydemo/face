@@ -188,9 +188,9 @@ export class CallbackController {
     @Query('code1') code1: string,
   ) {
     // await this.schoolService.fix()
-    await this.faceService.fixError()
+    // await this.faceService.fixError()
     await this.faceService.fix()
-    await this.faceService.fixDelete()
+    // await this.faceService.fixDelete()
     // await this.faceService.addErrorDelete()
     // const device = await this.deviceService.findById(code)
     // const data = await this.camera.getDeviceInfo(device)

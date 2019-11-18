@@ -20,7 +20,6 @@ export class InitService {
   ) { }
 
   async init() {
-    // const a = moment('2019-08-09T07:34:09.171Z').format('YYYY-MM-DD HH:mm:ss')
     await this.logService.initData()
     const adminExist = await this.adminService.countByCondition({ role: 0 })
     if (!adminExist) {
