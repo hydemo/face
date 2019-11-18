@@ -265,15 +265,15 @@ export class CallbackService {
         if (exist) {
           return
         }
-        const middle = moment().startOf('d').add(12, 'hour')
-        const now = moment()
-        if (middle > now && device.passType === 2) {
-          return
-        }
-        if (middle < now && device.passType === 1) {
-          return
-        }
-        await client.set(`student_${receiverUser.openId}`, 1, 'EX', 60 * 30)
+        // const middle = moment().startOf('d').add(12, 'hour')
+        // const now = moment()
+        // if (middle > now && device.passType === 2) {
+        //   return
+        // }
+        // if (middle < now && device.passType === 1) {
+        //   return
+        // }
+        await client.set(`student_${receiverUser.openId}`, 1, 'EX', 60 * 40)
         this.weixinUtil.sendPassMessage(receiverUser.openId, application, 'user')
       } else {
         this.weixinUtil.sendPassMessage(receiverUser.openId, application, 'user')
