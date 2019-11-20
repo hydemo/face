@@ -364,6 +364,22 @@ export class FaceService {
     // await this.updateFace(face, face.device, face.user, face.mode, face.user.faceUrl)
     // }))
   }
+  async fixDevice(device) {
+    const client = this.redis.getClient()
+    const faces = await this.faceModel
+      .find({ checkResult: 1, isDelete: false, device })
+      .populate({ path: 'device', model: 'device' })
+      .populate({ path: 'user', model: 'user' })
+      .lean()
+      .exec()
+    await Promise.all(faces.map(async face => {
+      const alive = await client.hget('device', face.device.deviceUUID)
+      if (!alive || Number(alive) > 4) {
+        return
+      }
+      await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
+    }))
+  }
 
   async fix() {
     const client = this.redis.getClient()

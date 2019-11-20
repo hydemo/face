@@ -189,7 +189,7 @@ export class CallbackController {
   ) {
     // await this.schoolService.fix()
     // await this.faceService.fixError()
-    await this.faceService.fix()
+    await this.faceService.fixDevice(code)
     // await this.faceService.fixDelete()
     // await this.faceService.addErrorDelete()
     // const device = await this.deviceService.findById(code)
