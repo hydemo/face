@@ -377,7 +377,9 @@ export class FaceService {
       if (!alive || Number(alive) > 4) {
         return
       }
-      await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
+      if (face.user) {
+        await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
+      }
     }))
   }
 
