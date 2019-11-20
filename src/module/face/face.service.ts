@@ -367,7 +367,7 @@ export class FaceService {
   async fixDevice(device) {
     const client = this.redis.getClient()
     const faces = await this.faceModel
-      .find({ checkResult: 1, isDelete: false, device })
+      .find({ isDelete: false, device })
       .populate({ path: 'device', model: 'device' })
       .populate({ path: 'user', model: 'user' })
       .lean()
