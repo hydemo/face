@@ -202,6 +202,9 @@ export class ResidentService {
 
   // 上报常住人至智能感知平台
   async uploadToZoc(userId: string, zoneId: string, profile: IZoneProfile, deviceIds: string[], phone: string, resident: string) {
+    if (String(zoneId) === '5dd762b15a793eb1c0d62a33') {
+      return
+    }
     const userToZOC: IUser | null = await this.userService.updateById(userId, {})
     if (!userToZOC) {
       return

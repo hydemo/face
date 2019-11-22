@@ -170,17 +170,19 @@ export class CallbackService {
         const owner = await this.userService.updateById(resident.address.owner, {})
 
         if (owner && this.config.url === 'https://xms.thinkthen.cn') {
-          const zone: IZone = await this.zoneService.findById(device.zone)
-          const time = moment().format('YYYYMMDDHHmmss');
-          const zip = await this.zocUtil.genZip()
-          const enrecord = await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, owner)
-          if (enrecord) {
-            await this.zocUtil.genImage(zip, time, zone.detail, imgBase)
-            const data = await this.zocUtil.upload(zip, time)
-            if (data.success) {
-              isZOCPush = true
-              zipname = data.zipname
-              client.hincrby(this.config.LOG, this.config.LOG_ENRECORD, 1)
+          if (String(device.zone) !== '5dd762b15a793eb1c0d62a33') {
+            const zone: IZone = await this.zoneService.findById(device.zone)
+            const time = moment().format('YYYYMMDDHHmmss');
+            const zip = await this.zocUtil.genZip()
+            const enrecord = await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, owner)
+            if (enrecord) {
+              await this.zocUtil.genImage(zip, time, zone.detail, imgBase)
+              const data = await this.zocUtil.upload(zip, time)
+              if (data.success) {
+                isZOCPush = true
+                zipname = data.zipname
+                client.hincrby(this.config.LOG, this.config.LOG_ENRECORD, 1)
+              }
             }
           }
         }
@@ -468,107 +470,107 @@ export class CallbackService {
   }
 
   // 上报设备
-  async upDeviceToZOC(code: string) {
-    const devices: IDevice[] = await this.deviceService.findByZoneId(code)
-    const zone = await this.zoneService.findById(code)
-    const { detail, propertyCo } = zone
-    await Promise.all(devices.map(async device => {
-      const time = moment().format('YYYYMMDDHHmmss');
-      const zip = await this.zocUtil.genZip()
-      // await this.zocUtil.genResident(zip, time, residents)
-      await this.zocUtil.genBasicAddr(zip, time, detail)
-      await this.zocUtil.genManufacturer(zip, time)
-      await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
-      await this.zocUtil.genDevice(zip, time, detail, device)
-      const result = await this.zocUtil.upload(zip, time)
-      if (result.success) {
-        await this.deviceService.updateById(device._id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
-        const client = this.redis.getClient()
-        await client.hincrby(this.config.LOG, this.config.LOG_DEVICE, 1)
-      }
-    }))
-  }
+  // async upDeviceToZOC(code: string) {
+  //   const devices: IDevice[] = await this.deviceService.findByZoneId(code)
+  //   const zone = await this.zoneService.findById(code)
+  //   const { detail, propertyCo } = zone
+  //   await Promise.all(devices.map(async device => {
+  //     const time = moment().format('YYYYMMDDHHmmss');
+  //     const zip = await this.zocUtil.genZip()
+  //     // await this.zocUtil.genResident(zip, time, residents)
+  //     await this.zocUtil.genBasicAddr(zip, time, detail)
+  //     await this.zocUtil.genManufacturer(zip, time)
+  //     await this.zocUtil.genPropertyCo(zip, time, propertyCo, detail)
+  //     await this.zocUtil.genDevice(zip, time, detail, device)
+  //     const result = await this.zocUtil.upload(zip, time)
+  //     if (result.success) {
+  //       await this.deviceService.updateById(device._id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
+  //       const client = this.redis.getClient()
+  //       await client.hincrby(this.config.LOG, this.config.LOG_DEVICE, 1)
+  //     }
+  //   }))
+  // }
 
   // 上报人口zoc
-  async upResidentToZOC(zone: string) {
-    const client = this.redis.getClient()
-    const time = moment().format('YYYYMMDDHHmmss');
-    const zip = await this.zocUtil.genZip()
-    const residents: IResident[] = await this.residentService.findByCondition({
-      zone,
-      isZOCPush: null,
-      checkResult: { $nin: [1, 3] },
-      type: { $ne: 'visitor' },
-    })
-    const count = residents.length
-    const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
-    const deviceIds = devices.map(device => String(device.deviceId))
-    const zoneDetail: IZone = await this.zoneService.findById(zone)
-    const { detail } = zoneDetail
-    const residentDatas: any = []
+  // async upResidentToZOC(zone: string) {
+  //   const client = this.redis.getClient()
+  //   const time = moment().format('YYYYMMDDHHmmss');
+  //   const zip = await this.zocUtil.genZip()
+  //   const residents: IResident[] = await this.residentService.findByCondition({
+  //     zone,
+  //     isZOCPush: null,
+  //     checkResult: { $nin: [1, 3] },
+  //     type: { $ne: 'visitor' },
+  //   })
+  //   const count = residents.length
+  //   const devices: IDevice[] = await this.deviceService.findByCondition({ zone })
+  //   const deviceIds = devices.map(device => String(device.deviceId))
+  //   const zoneDetail: IZone = await this.zoneService.findById(zone)
+  //   const { detail } = zoneDetail
+  //   const residentDatas: any = []
 
-    await Promise.all(residents.map(async resident => {
-      const user: IUser | null = await this.userService.updateById(resident.user, {})
-      const address: IZone = await this.zoneService.findById(resident.address)
+  //   await Promise.all(residents.map(async resident => {
+  //     const user: IUser | null = await this.userService.updateById(resident.user, {})
+  //     const address: IZone = await this.zoneService.findById(resident.address)
 
-      if (!user) {
-        return
-      }
-      let phone = user.phone
-      if (!phone) {
-        const owner: IUser | null = await this.userService.findById(resident.reviewer)
-        if (!owner) {
-          return
-        }
-        phone = owner.phone
-      }
-      const zocData = await this.zocUtil.genResidentData(address.profile, detail, user, deviceIds, phone)
-      residentDatas.push(zocData)
+  //     if (!user) {
+  //       return
+  //     }
+  //     let phone = user.phone
+  //     if (!phone) {
+  //       const owner: IUser | null = await this.userService.findById(resident.reviewer)
+  //       if (!owner) {
+  //         return
+  //       }
+  //       phone = owner.phone
+  //     }
+  //     const zocData = await this.zocUtil.genResidentData(address.profile, detail, user, deviceIds, phone)
+  //     residentDatas.push(zocData)
 
-    }))
-    await this.zocUtil.genResident(zip, time, residentDatas)
-    const zocResult = await this.zocUtil.upload(zip, time)
-    if (zocResult.success) {
-      await this.residentService.updateMany({ zone, checkResult: 2, isDelete: false }, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
-      client.hincrby(this.config.LOG, this.config.LOG_RESIDENT, count)
-    }
+  //   }))
+  //   await this.zocUtil.genResident(zip, time, residentDatas)
+  //   const zocResult = await this.zocUtil.upload(zip, time)
+  //   if (zocResult.success) {
+  //     await this.residentService.updateMany({ zone, checkResult: 2, isDelete: false }, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
+  //     client.hincrby(this.config.LOG, this.config.LOG_RESIDENT, count)
+  //   }
 
-    // return data
-  }
+  // return data
+  // }
   // 上报人口soc
-  async upResidentToSOC(zone: string) {
-    const client = this.redis.getClient()
-    const residents: IResident[] = await this.residentService.findByCondition({ zone, checkResult: { $in: [2, 4, 5] }, isDelete: false })
-    const count = residents.length
-    const socDatas: any = []
-    await Promise.all(residents.map(async resident => {
-      const user: IUser | null = await this.userService.updateById(resident.user, {})
-      const address: IZone = await this.zoneService.findById(resident.address)
-      const reviewer: IUser | null = await this.userService.updateById(resident.reviewer, {})
-      const zone: IZone = await this.zoneService.findById(resident.zone)
-      if (!user || !reviewer || !user.cardNumber) {
-        return
-      }
-      let phone = user.phone
-      if (!phone) {
-        const owner: IUser | null = await this.userService.findById(resident.reviewer)
-        if (!owner) {
-          return
-        }
-        phone = owner.phone
-      }
+  // async upResidentToSOC(zone: string) {
+  //   const client = this.redis.getClient()
+  //   const residents: IResident[] = await this.residentService.findByCondition({ zone, checkResult: { $in: [2, 4, 5] }, isDelete: false })
+  //   const count = residents.length
+  //   const socDatas: any = []
+  //   await Promise.all(residents.map(async resident => {
+  //     const user: IUser | null = await this.userService.updateById(resident.user, {})
+  //     const address: IZone = await this.zoneService.findById(resident.address)
+  //     const reviewer: IUser | null = await this.userService.updateById(resident.reviewer, {})
+  //     const zone: IZone = await this.zoneService.findById(resident.zone)
+  //     if (!user || !reviewer || !user.cardNumber) {
+  //       return
+  //     }
+  //     let phone = user.phone
+  //     if (!phone) {
+  //       const owner: IUser | null = await this.userService.findById(resident.reviewer)
+  //       if (!owner) {
+  //         return
+  //       }
+  //       phone = owner.phone
+  //     }
 
-      const socData = await this.socUtil.genResidentData(address.profile.dzbm, user, phone, reviewer, zone.detail)
-      await this.residentService.updateById(resident._id, { SOCOrder: socData.lv_sbxxlsh })
-      socDatas.push(socData)
+  //     const socData = await this.socUtil.genResidentData(address.profile.dzbm, user, phone, reviewer, zone.detail)
+  //     await this.residentService.updateById(resident._id, { SOCOrder: socData.lv_sbxxlsh })
+  //     socDatas.push(socData)
 
-    }))
-    const socResult = await this.socUtil.upload(socDatas)
-    if (socResult) {
-      await this.residentService.updateMany({ zone, checkResult: 2, isDelete: false }, { isSOCPush: true })
-      client.hincrby(this.config.LOG, this.config.LOG_SOC, count)
-    }
-  }
+  //   }))
+  //   const socResult = await this.socUtil.upload(socDatas)
+  //   if (socResult) {
+  //     await this.residentService.updateMany({ zone, checkResult: 2, isDelete: false }, { isSOCPush: true })
+  //     client.hincrby(this.config.LOG, this.config.LOG_SOC, count)
+  //   }
+  // }
 
   async test(id) {
     const orbit: IOrbit | null = await this.orbitService.findById(id)

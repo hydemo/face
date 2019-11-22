@@ -85,10 +85,10 @@ export class CreateSubZoneByScanDTO {
   @ApiModelProperty({ description: '区域名称' })
   readonly name: string;
 
-  // @IsString()
-  // @Type(() => String)
-  // @ApiModelProperty({ description: '二维码' })
-  // readonly code: string;
+  @IsString()
+  @Type(() => String)
+  @ApiModelProperty({ description: '二维码' })
+  readonly code: string;
 
   @IsNumber()
   @Type(() => Number)

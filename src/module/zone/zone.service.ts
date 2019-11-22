@@ -252,71 +252,72 @@ export class ZoneService {
   }
 
   async addSubZoneByQrCode(id: string, subZone: CreateSubZoneByScanDTO) {
-    const root = await this.zoneModel.findById(id).lean().exec()
-    const createParent = {
-      name: subZone.name,
-      nameLength: subZone.name.length,
-      location: root.location,
-      zoneLayer: root.zoneLayer + 1,
-      zoneType: root.zoneType,
-      parent: id,
-      hasChildren: false,
-      children: [],
-      houseNumber: `${root.name}-${subZone.name}`,
-      buildingType: '50',
-      area: root.area,
-      zoneId: root.zoneId,
-      ancestor: [...root.ancestor, id],
-    }
-    const parent = await this.zoneModel.create(createParent)
-    await this.zoneModel.findByIdAndUpdate(id, { hasChildren: true, $push: { children: parent._id } })
-    const count = Number(subZone.layer)
-    for (let i = 1; i <= count; i++) {
-      const name = `${i}班`
-      const zone: any = {
-        name,
-        nameLength: name.length,
-        location: parent.location,
-        zoneLayer: parent.zoneLayer + 1,
-        zoneType: parent.zoneType,
-        parent: parent._id,
-        hasChildren: false,
-        children: [],
-        houseNumber: `${parent.houseNumber}-${name}`,
-        buildingType: '60',
-        area: parent.area,
-        zoneId: parent.zoneId,
-        ancestor: [...parent.ancestor, parent._id],
+    // const root = await this.zoneModel.findById(id).lean().exec()
+    // const createParent = {
+    //   name: subZone.name,
+    //   nameLength: subZone.name.length,
+    //   location: root.location,
+    //   zoneLayer: root.zoneLayer + 1,
+    //   zoneType: root.zoneType,
+    //   parent: id,
+    //   hasChildren: false,
+    //   children: [],
+    //   houseNumber: `${root.name}-${subZone.name}`,
+    //   buildingType: '50',
+    //   area: root.area,
+    //   zoneId: root.zoneId,
+    //   ancestor: [...root.ancestor, id],
+    // }
+    // const parent = await this.zoneModel.create(createParent)
+    // await this.zoneModel.findByIdAndUpdate(id, { hasChildren: true, $push: { children: parent._id } })
+    // const count = Number(subZone.layer)
+    // for (let i = 1; i <= count; i++) {
+    //   const name = `${i}班`
+    //   const zone: any = {
+    //     name,
+    //     nameLength: name.length,
+    //     location: parent.location,
+    //     zoneLayer: parent.zoneLayer + 1,
+    //     zoneType: parent.zoneType,
+    //     parent: parent._id,
+    //     hasChildren: false,
+    //     children: [],
+    //     houseNumber: `${parent.houseNumber}-${name}`,
+    //     buildingType: '60',
+    //     area: parent.area,
+    //     zoneId: parent.zoneId,
+    //     ancestor: [...parent.ancestor, parent._id],
+    //   }
+    //   const newSubZone: IZone = await this.zoneModel.create(zone);
+    //   await this.zoneModel.findByIdAndUpdate(parent._id, { hasChildren: true, $push: { children: newSubZone._id } })
+    // }
+    const zone = await this.zoneModel.findById(id).lean().exec()
+    const list = await this.socUtil.qrcodeAddress(subZone.code)
+    let parentProfile;
+    let children: string[] = []
+    list.map(profile => {
+      if (profile.dzbm === subZone.code) {
+        parentProfile = profile
       }
-      const newSubZone: IZone = await this.zoneModel.create(zone);
-      await this.zoneModel.findByIdAndUpdate(parent._id, { hasChildren: true, $push: { children: newSubZone._id } })
-    }
-    // const list = await this.socUtil.qrcodeAddress(subZone.code)
-    // let parentProfile;
-    // let children: string[] = []
-    // list.map(profile => {
-    //   if (profile.dzbm === subZone.code) {
-    //     parentProfile = profile
-    //   }
-    // })
-    // const parent = await this.createSubZone(parentProfile, zone)
-    // await Promise.all(list.map(async child => {
-    //   if (child.dzbm === parent.profile.dzbm) {
-    //     return;
-    //   }
+    })
+    const parent = await this.createSubZone(parentProfile, zone)
+    await Promise.all(list.map(async child => {
+      if (child.dzbm === parent.profile.dzbm) {
+        return;
+      }
 
-    //   const subZone: IZone = await this.createSubZone(child, parent)
-    //   children.push(String(subZone._id))
-    //   subZone.children = [];
-    //   subZone.hasChildren = false
-    //   subZone.hasPartition = false
-    //   await subZone.save()
-    // }))
-    // parent.children = children
-    // parent.hasChildren = children.length > 0
-    // parent.hasPartition = false
-    // await parent.save()
-
+      const subZone: IZone = await this.createSubZone(child, parent)
+      children.push(String(subZone._id))
+      subZone.children = [];
+      subZone.hasChildren = false
+      subZone.hasPartition = false
+      await subZone.save()
+    }))
+    parent.children = children
+    parent.hasChildren = children.length > 0
+    parent.hasPartition = false
+    await parent.save()
+    await this.zoneModel.findByIdAndUpdate(id, { hasChildren: true, $push: { children: parent._id } })
     return
     // delete zone._id
     // zone.zoneLayer = zone.zoneLayer + 1
@@ -364,12 +365,12 @@ export class ZoneService {
     const createParent: IZone = await new this.zoneModel(parent);
     createParent.zoneId = createParent._id;
     await createParent.save()
-    const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, createZone.code, createZone.layer)
-    console.log(children, 'children')
-    createParent.children = children.children
-    createParent.hasChildren = children.children.length > 0
-    createParent.hasPartition = children.hasPartition
-    await this.zoneModel.findByIdAndUpdate(createParent._id, { children: children.children, hasPartition: children.hasPartition })
+    // const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, createZone.code, createZone.layer)
+    // console.log(children, 'children')
+    // createParent.children = children.children
+    // createParent.hasChildren = children.children.length > 0
+    // createParent.hasPartition = children.hasPartition
+    // await this.zoneModel.findByIdAndUpdate(createParent._id, { children: children.children, hasPartition: children.hasPartition })
     // 上报物业信息
     // const time = moment().format('YYYYMMDDHHmmss');
     // const zip = await this.zocUtil.genZip()

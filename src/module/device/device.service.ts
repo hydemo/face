@@ -36,6 +36,9 @@ export class DeviceService {
   }
   // 上报设备至智能感知平台
   async uploadToZoc(zoneId: string, device: IDevice) {
+    if (String(zoneId) === '5dd762b15a793eb1c0d62a33') {
+      return
+    }
     const zone = await this.zoneService.findById(zoneId)
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
