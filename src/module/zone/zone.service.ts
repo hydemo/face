@@ -190,9 +190,9 @@ export class ZoneService {
 
   // 创建区域对象
   async createSubZone(profile: ZoneProfileDTO, parent: IZone, buildName?: string): Promise<IZone> {
-    const name = buildName ? buildName : profile.dzqc.replace(parent.profile.dzqc, '')
-    // let name = buildName ? buildName : profile.dzqc.replace(parent.profile.dzqc, '')
-    // name = name.replace('陶然金溪', '')
+    // const name = buildName ? buildName : profile.dzqc.replace(parent.profile.dzqc, '')
+    let name = buildName ? buildName : profile.dzqc.replace(parent.profile.dzqc, '')
+    name = name.replace('西华豪庭(天元未来城)', '')
 
     const houseNumber = `${parent.houseNumber}-${name}`
     const create: ZoneDTO = {
@@ -214,7 +214,6 @@ export class ZoneService {
   // 获取子集
   async getChildren(children: IChildren, parent: IZone, code: string, layer: number): Promise<IChildren> {
     const list = await this.socUtil.qrcodeAddress(code)
-    console.log(list, 'list')
     await Promise.all(list.map(async child => {
       if (child.dzbm === parent.profile.dzbm) {
         return;
@@ -365,17 +364,18 @@ export class ZoneService {
     const createParent: IZone = await new this.zoneModel(parent);
     createParent.zoneId = createParent._id;
     await createParent.save()
-    // const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, createZone.code, createZone.layer)
+    const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, createZone.code, createZone.layer)
     // console.log(children, 'children')
-    // createParent.children = children.children
-    // createParent.hasChildren = children.children.length > 0
-    // createParent.hasPartition = children.hasPartition
-    // await this.zoneModel.findByIdAndUpdate(createParent._id, { children: children.children, hasPartition: children.hasPartition })
+    createParent.children = children.children
+    createParent.hasChildren = children.children.length > 0
+    createParent.hasPartition = children.hasPartition
+    await this.zoneModel.findByIdAndUpdate(createParent._id, { children: children.children, hasPartition: children.hasPartition })
     // 上报物业信息
     // const time = moment().format('YYYYMMDDHHmmss');
     // const zip = await this.zocUtil.genZip()
     // await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
     // const zocResult: any = await this.zocUtil.upload(zip, time)
+    // console.log(zocResult, 'aa')
     // if (zocResult.success) {
     //   await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
     //   const client = this.redis.getClient()
