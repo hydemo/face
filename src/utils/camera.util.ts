@@ -309,8 +309,8 @@ export class CameraUtil {
   */
   async handleRequest(data, version, faceData) {
     try {
-      if (faceData.count > 5) {
-        cmd.run('pm2 reload 22')
+      if (faceData.count === 5) {
+        cmd.run('pm2 reload 26')
       }
       if (faceData.count > 18) {
         const error: P2PErrorDTO = {
@@ -360,7 +360,7 @@ export class CameraUtil {
           return 'noExist'
         }
         if (result.data.Code === 1005) {
-          cmd.run('pm2 reload 22')
+          cmd.run('pm2 reload 26')
         }
         switch (result.data.Data.Result) {
           case -1: { code = 'error' }
