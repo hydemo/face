@@ -243,6 +243,7 @@ export class ZOCUtil {
         const zipname = `03-${this.config.companyCreditCode}-1.7.4-${time}-${random}.zip`
         fs.writeFileSync(`./upload/${zipname}`, content)
         const data = await this.uploadZip(zipname)
+        console.log(data, 'updata')
         if (data.status === 100) {
           return { success: true, zipname }
         }
