@@ -209,8 +209,7 @@ export class ResidentService {
     if (!userToZOC) {
       return
     }
-    const zoneToZOC = await this.zoneService.findById(zoneId)
-    const data = await this.zocUtil.genResidentData(profile, zoneToZOC.detail, userToZOC, deviceIds, phone)
+    const data = await this.zocUtil.genResidentData(profile, userToZOC, deviceIds, phone)
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
     await this.zocUtil.genResident(zip, time, [data])

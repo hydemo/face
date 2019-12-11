@@ -31,6 +31,7 @@ import { RoleService } from '../role/role.service';
 import { ISchool } from '../school/interfaces/school.interfaces';
 import { SchoolService } from '../school/school.service';
 import { SOCUtil } from 'src/utils/soc.util';
+import { CameraUtil } from 'src/utils/camera.util';
 
 interface IReceiver {
   id: string;
@@ -54,6 +55,7 @@ export class CallbackService {
     @Inject(ZoneService) private readonly zoneService: ZoneService,
     @Inject(BlackService) private readonly blackService: BlackService,
     @Inject(RoleService) private readonly roleService: RoleService,
+    readonly cameraUtil: CameraUtil,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
     private readonly mediaWs: MediaGateway,
@@ -171,12 +173,12 @@ export class CallbackService {
 
         if (owner && this.config.url === 'https://xms.thinkthen.cn') {
           if (String(device.zone) !== '5dd762b15a793eb1c0d62a33') {
-            const zone: IZone = await this.zoneService.findById(device.zone)
+            const zone: IZone = await this.zoneService.findById(resident.address)
             const time = moment().format('YYYYMMDDHHmmss');
             const zip = await this.zocUtil.genZip()
-            const enrecord = await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, owner)
+            const type = resident.type === 'visitor' ? 2 : 1
+            const enrecord = await this.zocUtil.genEnRecord(zip, time, zone.profile, user, device, owner, imgBase, type)
             if (enrecord) {
-              await this.zocUtil.genImage(zip, time, zone.detail, imgBase)
               const data = await this.zocUtil.upload(zip, time)
               if (data.success) {
                 isZOCPush = true
@@ -572,7 +574,7 @@ export class CallbackService {
   //   }
   // }
 
-  async test(id) {
+  async testEnrecord(id) {
     const orbit: IOrbit | null = await this.orbitService.findById(id)
     if (!orbit) {
       return
@@ -582,16 +584,68 @@ export class CallbackService {
     if (!user) {
       return
     }
+    const imgBase = await this.cameraUtil.getImg(orbit.imgUrl)
     const resident = await this.residentService.findOneByCondition({ user: user._id, isDelete: false })
     if (resident) {
       const owner = await this.userService.updateById(resident.address.owner, {})
 
       if (owner) {
-        const zone: IZone = await this.zoneService.findById(device.zone)
+        const zone: IZone = await this.zoneService.findById(resident.address)
         const time = moment().format('YYYYMMDDHHmmss');
         const zip = await this.zocUtil.genZip()
-        await this.zocUtil.genEnRecord(zip, time, zone.detail, user, device, owner)
+        const type = resident.type === 'visitor' ? 2 : 1
+        await this.zocUtil.genEnRecord(zip, time, zone.profile, user, device, owner, imgBase, type)
+        const result = await this.zocUtil.upload(zip, time)
+        console.log(result, 'upResult')
       }
     }
+  }
+
+  async testDevice(id) {
+    const device = await this.deviceService.findById(id)
+    const position: IZone = await this.zoneService.findById(device.position)
+    const zone: IZone = await this.zoneService.findById(device.zone)
+    const zones: string[] = await this.deviceService.getZones(position)
+    const time = moment().format('YYYYMMDDHHmmss');
+    const zip = await this.zocUtil.genZip()
+    await this.zocUtil.genManufacturer(zip, time)
+    await this.zocUtil.genDevice(zip, time, position, zone.detail, device, zones)
+    const result = await this.zocUtil.upload(zip, time)
+    console.log(result, 'upResult')
+  }
+
+  async testResident(id) {
+    const resident = await this.residentService.findById(id)
+    const zone = await this.zoneService.findById(resident.address)
+    const user = await this.userService.updateById(resident.user, {})
+    if (!user) {
+      return
+    }
+    const zoneIds = [...zone.ancestor, zone._id]
+    const devices: IDevice[] = await this.deviceService.findByCondition({ position: { $in: zoneIds }, enable: true })
+    let phone = user.phone
+    if (!phone) {
+      const owner = await this.userService.findById(zone.owner)
+      if (!owner) {
+        return
+      }
+      phone = owner.phone
+    }
+    const deviceIds = devices.map(device => String(device.deviceId))
+    const data = await this.zocUtil.genResidentData(zone.profile, user, deviceIds, phone)
+    const time = moment().format('YYYYMMDDHHmmss');
+    const zip = await this.zocUtil.genZip()
+    await this.zocUtil.genResident(zip, time, [data])
+    const result = await this.zocUtil.upload(zip, time)
+    console.log(result, 'upResult')
+  }
+
+  async testProCo(id) {
+    const zone = await this.zoneService.findById(id)
+    const time = moment().format('YYYYMMDDHHmmss');
+    const zip = await this.zocUtil.genZip()
+    await this.zocUtil.genPropertyCo(zip, time, zone.propertyCo, zone.detail)
+    const result: any = await this.zocUtil.upload(zip, time)
+    console.log(result, 'upResult')
   }
 }

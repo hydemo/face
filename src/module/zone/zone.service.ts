@@ -192,7 +192,7 @@ export class ZoneService {
   async createSubZone(profile: ZoneProfileDTO, parent: IZone, buildName?: string): Promise<IZone> {
     // const name = buildName ? buildName : profile.dzqc.replace(parent.profile.dzqc, '')
     let name = buildName ? buildName : profile.dzqc.replace(parent.profile.dzqc, '')
-    name = name.replace('西华豪庭(天元未来城)', '')
+    // name = name.replace('西华豪庭(天元未来城)', '')
 
     const houseNumber = `${parent.houseNumber}-${name}`
     const create: ZoneDTO = {
@@ -423,17 +423,17 @@ export class ZoneService {
     createParent.zoneId = createParent._id;
     await createParent.save()
     // 上报物业信息
-    // if (this.config.url === 'https://xms.thinkthen.cn') {
-    //   const time = moment().format('YYYYMMDDHHmmss');
-    //   const zip = await this.zocUtil.genZip()
-    //   await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
-    //   const zocResult: any = await this.zocUtil.upload(zip, time)
-    //   if (zocResult.success) {
-    //     await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
-    //     const client = this.redis.getClient()
-    //     await client.hincrby(this.config.LOG, this.config.LOG_PROPERTYCO, 1)
-    //   }
-    // }
+    if (this.config.url === 'https://xms.thinkthen.cn') {
+      const time = moment().format('YYYYMMDDHHmmss');
+      const zip = await this.zocUtil.genZip()
+      await this.zocUtil.genPropertyCo(zip, time, createParent.propertyCo, createParent.detail)
+      const zocResult: any = await this.zocUtil.upload(zip, time)
+      if (zocResult.success) {
+        await this.zoneModel.findByIdAndUpdate(createParent._id, { isZOCPush: true, ZOCZip: zocResult.zipname, upTime: Date.now() })
+        const client = this.redis.getClient()
+        await client.hincrby(this.config.LOG, this.config.LOG_PROPERTYCO, 1)
+      }
+    }
 
 
   }

@@ -195,7 +195,7 @@ export class ZOCUtil {
    * 上传数据报
    */
   async uploadZip(zipname: string) {
-    const url = `${this.config.zocUrl}/api/upload/mj`;
+    const url = `${this.config.zocUrl}/api/uptest/mj`;
     const token = await this.getToken()
     const buf = fs.readFileSync(`./upload/${zipname}`)
     const ts = Date.now()
@@ -218,6 +218,7 @@ export class ZOCUtil {
         sign,
       },
     });
+    return result.data
   }
   /**
    * 生成zip对象
@@ -239,60 +240,49 @@ export class ZOCUtil {
     })
       .then(async content => {
         const random = this.getRandom(6)
-        const zipname = `03-${this.config.companyCreditCode}-1.7.1-${time}-${random}.zip`
+        const zipname = `03-${this.config.companyCreditCode}-1.7.4-${time}-${random}.zip`
         fs.writeFileSync(`./upload/${zipname}`, content)
-        await this.uploadZip(zipname)
-        return { success: true, zipname }
+        const data = await this.uploadZip(zipname)
+        if (data.status === 100) {
+          return { success: true, zipname }
+        }
+        if (data.status === -1) {
+          await this.refreshToken()
+          return await this.upload(zip, time)
+        }
+        return { success: false }
       });
   }
   /**
    * 生成住户信息数据
    */
-  async genResidentData(profile: IZoneProfile, detail: IDetail, user: IUser, deviceIds: string[], phone) {
+  async genResidentData(profile: IZoneProfile, user: IUser, deviceIds: string[], phone) {
     // const url = `${this.config.zocUrl}/api/check/gate/resident`;
     // const token = await this.getToken()
     const order = await this.getOrder()
     const data = {
       SBXXLSH: order,
       SYSTEMID: profile.dzbm,
-      DSBM: detail.DSBM,
-      DZMC: profile.dzqc,
-      QU_ID: detail.QU_ID,
-      QU: detail.QU,
-      DMDM: detail.DMDM,
-      DMMC: detail.DMMC,
-      XZJDDM: detail.XZJDDM,
-      XZJDMC: detail.XZJDMC,
-      SQJCWHDM: detail.SQJCWHDM,
-      SQJCWHMC: detail.SQJCWHMC,
-      DZYSLX: profile.dzsx,
-      MAPX: profile.lng,
-      MAPY: profile.lat,
-      GAJGJGDM: detail.GAJGJGDM,
-      GAJGNBDM: detail.GAJGJGDM,
-      GAJGJGMC: detail.GAJGJGMC,
-      JWWGDM: detail.JWWGDM,
-      JWWGMC: detail.JWWGMC,
       ZHXM: user.username,
       ZHSJHM: phone,
+      ZHZJLX: '1',
       ZHSFZ: user.cardNumber,
       ZHLX: '03',
-      CJSJ: this.getTemp(),
-      DJSJ: moment().format('YYYYMMDDHHmmss'),
-      XTLY: this.config.companyAppName,
-      SJCS: this.config.companyCreditCode,
-      GLMJSB: deviceIds,
       ZHXB: '',
       ZHMZ: '',
-      ZHJG: '',
-      ZHSFZDZ: '',
+      CJSJ: this.getTemp(),
       ICMJKKH: '',
       ICMJKZT: '',
       ICMJKLX: '',
-      ZHZT: '',
-      MJZH: '',
-      MJMM: '',
+      ZHZT: '1',
+      DJSJ: moment().format('YYYYMMDDHHmmss'),
+      LKSJ: '',
+      XTLY: this.config.companyAppName,
+      SJCS: this.config.companyCreditCode,
+      GLMJSB: deviceIds,
+      ZP: '',
     }
+    // console.log(data, 'data')
     // 参数校验
     // const result = await axios({
     //   method: 'post',
@@ -371,8 +361,8 @@ export class ZOCUtil {
   * 生成小区物业信息
   */
   async genPropertyCo(zip: any, time: String, propertyCo: IPropertyCo, detail: IDetail): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/property`;
-    const token = await this.getToken()
+    // const url = `${this.config.zocUrl}/api/check/gate/property`;
+    // const token = await this.getToken()
     const data = {
       WYGS: propertyCo.name,
       JGDM: propertyCo.creditCode,
@@ -385,16 +375,16 @@ export class ZOCUtil {
       QU_ID: detail.QU_ID,
     }
     // 参数校验
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'co')
     const json = JSON.stringify([data])
     const filename = `PropertyCo-${time}.json`
     const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
@@ -405,40 +395,41 @@ export class ZOCUtil {
   /**
  * 生成门禁设备信息
  */
-  async genDevice(zip: any, time: String, address: IDetail, device: IDevice): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/device`;
-    const token = await this.getToken()
+  async genDevice(zip: any, time: String, position: IZone, zone: IDetail, device: IDevice, FWFGDZBM: string[]): Promise<boolean> {
+    // const url = `${this.config.zocUrl}/api/check/gate/device`;
+    // const token = await this.getToken()
     const data = {
       MJCS: this.config.companyName,
-      SBXQDZBM: address.SYSTEMID,
-      SBDZBM: address.SYSTEMID,
-      SBDZMC: address.DZMC,
+      SBXQDZBM: zone.SYSTEMID,
+      SBDZBM: position.profile.dzbm,
+      SBDZMC: position.profile.dzqc,
       AZDWMS: device.description,
-      AZDWLX: '小区',
-      MAPX: address.MAPX,
-      MAPY: address.MAPY,
+      AZDWLX: '3',
+      MAPX: zone.MAPX,
+      MAPY: zone.MAPY,
       MJCSDM: this.config.companyCreditCode,
-      MJJLX: '03',
+      MJJLX: '04',
       MJJBH: String(device.deviceId),
       MJJZT: 'Y',
       CJSJ: this.getTemp(),
       TYSJ: '',
-      GAJGJGDM: address.GAJGJGDM,
-      TJRQ: '2019-07-01',
-      FWFGSL: '0',
-      FWFGDZBM: []
+      GAJGJGDM: zone.GAJGJGDM,
+      TJRQ: moment().format('YYYY-MM-DD'),
+      FWFGSL: String(FWFGDZBM.length),
+      FWFGDZBM,
     }
+    // console.log(data, 'data')
     // 参数校验
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'device')
     const json = JSON.stringify([data])
     const filename = `Device-${time}.json`
     const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
@@ -447,32 +438,48 @@ export class ZOCUtil {
     return true
   }
 
+  getSecretName(name: string) {
+    const length = name.length
+    if (length === 2) {
+      return `${name[0]}*`
+    } else {
+      const ext = '*'.repeat(length - 2)
+      return `${name[0]}${ext}${name[length - 1]}`
+    }
+  }
+
+  getSecretCard(card: string) {
+    const length = card.length
+    const ext = '*'.repeat(length - 7)
+    const front = card.slice(0, 3)
+    const end = card.slice(-4)
+    return `${front}${ext}${end}`
+  }
+
   /**
 * 生成刷卡记录
 */
-  async genEnRecord(zip: any, time: String, detail: IDetail, user: any, device: IDevice, owner: IUser): Promise<boolean> {
-    const url = `${this.config.zocUrl}/api/check/gate/record`;
-    const token = await this.getToken()
+  async genEnRecord(zip: any, time: String, detail: IZoneProfile, user: any, device: IDevice, owner: IUser, ZP: string | null, type: number): Promise<boolean> {
+    // const url = `${this.config.zocUrl}/api/check/gate/record`;
+    // const token = await this.getToken()
     if (!user.cardNumber || !owner.phone) {
       return false
     }
     const data = {
-      DSBM: detail.SYSTEMID,
-      DZMC: detail.DZMC,
-      GAJGJGDM: detail.GAJGJGDM,
+      CASE_ID: this.getOrder(),
       KMSJ: this.getTemp(),
       ICMJKKH: '',
       ICMJKLX: '',
-      ZHXM: user.username,
+      ZHXM: this.getSecretName(user.username),
       ZHSJHM: user.phone ? user.phone : owner.phone,
-      ZHSFZ: user.cardNumber,
+      ZHSFZ: this.getSecretCard(user.cardNumber),
+      ZHDZBM: detail.dzbm,
       ZHXB: '',
       ZHMZ: '',
-      ZHJG: '',
-      ZHSFZDZ: '',
-      HZXM: owner.username,
+      HZXM: this.getSecretName(owner.username),
       HZSJHM: owner.phone,
-      HZSFZ: owner.cardNumber,
+      HZSFZ: this.getSecretCard(owner.cardNumber),
+      HZDZBM: detail.dzbm,
       MJCSDM: this.config.companyCreditCode,
       MJJLX: '04',
       MJJBH: String(device.deviceId),
@@ -480,29 +487,31 @@ export class ZOCUtil {
       KMZT: 'Y',
       CZLX: '04',
       HJFJH: '',
-      JCLX: 1,
-      CRLX: 1,
+      JCLX: device.passType,
+      CRLX: type,
+      ZP: ZP || '',
     }
     // 参数校验
-    const result = await axios({
-      method: 'post',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data,
-    });
-    if (result.data.status === 100) {
-      const json = JSON.stringify([data])
-      const filename = `EnRecord-${time}.json`
-      const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
-      const folder = zip.folder('EnRecord')
-      folder.file(filename, desData)
-      return true
-    } else {
-      return false
-    }
+    // const result = await axios({
+    //   method: 'post',
+    //   url,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: token,
+    //   },
+    //   data,
+    // });
+    // console.log(result.data, 'enrecord')
+    // if (result.data.status === 100) {
+    const json = JSON.stringify([data])
+    const filename = `EnRecord-${time}.json`
+    const desData = await this.cryptoUtil.desText(json, this.config.zocUpSecret)
+    const folder = zip.folder('EnRecord')
+    folder.file(filename, desData)
+    return true
+    // } else {
+    //   return false
+    // }
 
   }
 

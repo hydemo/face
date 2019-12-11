@@ -15,6 +15,7 @@ import { RedisService } from 'nestjs-redis';
 import { ConfigService } from 'src/config/config.service';
 import { FaceService } from '../face/face.service';
 import { IFace } from '../face/interfaces/face.interfaces';
+import { IZone } from '../zone/interfaces/zone.interfaces';
 
 @Injectable()
 export class DeviceService {
@@ -34,18 +35,32 @@ export class DeviceService {
     }
     return deviceExist[0].deviceId + 1
   }
+
+  async getZones(position: IZone): Promise<string[]> {
+    if (position.zoneLayer === 0) {
+      return []
+    }
+    if (position.zoneLayer === 2) {
+      return [position.profile.dzbm]
+    }
+    const children = await this.zoneService.findByCondition({ parent: position._id })
+    const zones = children.map(child => child.profile.dzbm)
+    return zones.filter(v => v)
+  }
   // 上报设备至智能感知平台
   async uploadToZoc(zoneId: string, device: IDevice) {
     if (String(zoneId) === '5dd762b15a793eb1c0d62a33') {
       return
     }
     const zone = await this.zoneService.findById(zoneId)
+    const position = await this.zoneService.findById(device.position)
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
-    await this.zocUtil.genBasicAddr(zip, time, zone.detail)
+    // await this.zocUtil.genBasicAddr(zip, time, zone.detail)
     await this.zocUtil.genManufacturer(zip, time)
-    await this.zocUtil.genPropertyCo(zip, time, zone.propertyCo, zone.detail)
-    await this.zocUtil.genDevice(zip, time, zone.detail, device)
+    // await this.zocUtil.genPropertyCo(zip, time, zone.propertyCo, zone.detail)
+    const zones = await this.getZones(position)
+    await this.zocUtil.genDevice(zip, time, position, zone.detail, device, zones)
     const result = await this.zocUtil.upload(zip, time)
     if (result.success) {
       await this.deviceModel.findByIdAndUpdate(device._id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
