@@ -601,17 +601,26 @@ export class CallbackService {
     }
   }
 
-  async testDevice(id) {
-    const device = await this.deviceService.findById(id)
-    const position: IZone = await this.zoneService.findById(device.position)
-    const zone: IZone = await this.zoneService.findById(device.zone)
-    const zones: string[] = await this.deviceService.getZones(position)
-    const time = moment().format('YYYYMMDDHHmmss');
-    const zip = await this.zocUtil.genZip()
-    await this.zocUtil.genManufacturer(zip, time)
-    await this.zocUtil.genDevice(zip, time, position, zone.detail, device, zones)
-    const result = await this.zocUtil.upload(zip, time)
-    console.log(result, 'upResult')
+  async testDevice() {
+    const devices = await this.deviceService.findByCondition({})
+    await Promise.all(devices.map(async device => {
+      const position: IZone = await this.zoneService.findById(device.position)
+      const zone: IZone = await this.zoneService.findById(device.zone)
+      if (zone.zoneType === 2) {
+        return
+      }
+      const zones: string[] = await this.deviceService.getZones(position)
+      const time = moment().format('YYYYMMDDHHmmss');
+      const zip = await this.zocUtil.genZip()
+      await this.zocUtil.genManufacturer(zip, time)
+      await this.zocUtil.genDevice(zip, time, position, zone.detail, device, zones)
+      const result = await this.zocUtil.upload(zip, time)
+      if (result.success) {
+        await this.deviceService.updateById(device._id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
+      }
+      console.log(result, 'upResult')
+    }))
+
   }
 
   async testResident(id) {

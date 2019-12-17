@@ -20,6 +20,9 @@ export class Pagination {
   readonly search?: string;
 
   @IsString()
+  readonly filter?: any;
+
+  @IsString()
   @Type(() => String)
   @IsOptional()
   @ApiModelPropertyOptional({ description: '搜索参数' })

@@ -42,6 +42,8 @@ export class OrbitService {
       const sea = JSON.parse(pagination.search);
       for (const key in sea) {
         if (key === 'base' && sea[key]) {
+        } else if (key === 'rangePicker') {
+          continue
         } else if (sea[key] === 0 || sea[key]) {
           condition[key] = sea[key];
         }
@@ -50,6 +52,24 @@ export class OrbitService {
         condition.$or = search;
       }
     }
+    const { filter } = pagination
+    if (filter) {
+      const filterParse = JSON.parse(filter)
+      for (const key in filterParse) {
+        if (key === 'rangePicker') {
+          if (filterParse[key].length === 2) {
+            condition['passTime'] = {
+              $gte: filterParse[key][0],
+              $lte: filterParse[key][1]
+            }
+          }
+        } else if (filterParse[key] || filterParse[key] === 0 || filterParse[key] === false) {
+          condition[key] = filterParse[key];
+
+        }
+      }
+    }
+    console.log(condition, 'aa')
     const list = await this.orbitModel
       .find(condition)
       .limit(pagination.limit)
