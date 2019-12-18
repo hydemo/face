@@ -196,7 +196,7 @@ export class UserService {
     // const accessToken = token.data.access_token;
     if (openId) {
       // 根据openid查找用户是否已经注册
-      let user: IUser | null = await this.userModel.findOne({ openId }).lean().exec();
+      let user: IUser | null = await this.userModel.findOne({ openId, isBlock: false }).lean().exec();
       if (!user) {
         // 注册
         user = await this.userModel.create({
@@ -322,6 +322,9 @@ export class UserService {
       if (cardNumberExisting && cardNumberExisting.isPhoneVerify) {
         throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
       }
+      if (cardNumberExisting && user.isPhoneVerify) {
+        throw new ApiException('身份证已被注册', ApiErrorCode.PHONE_EXIST, 406);
+      }
       if (cardNumberExisting) {
         const update = {
           ...verify,
@@ -334,7 +337,7 @@ export class UserService {
           .select({ password: 0, openId: 0 })
           .lean()
           .exec()
-        await this.userModel.findByIdAndRemove(user._id)
+        await this.userModel.findByIdAndUpdate(user._id, { isBlock: true })
         newUser.accessToken = await this.jwtService.sign({ id: cardNumberExisting._id, type: 'user' });
         returnUser = newUser;
         faceUser = newUser
