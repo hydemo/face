@@ -257,9 +257,10 @@ export class ZOCUtil {
   /**
    * 生成住户信息数据
    */
-  async genResidentData(profile: IZoneProfile, user: IUser, deviceIds: string[], phone) {
+  async genResidentData(profile: IZoneProfile, user: IUser, deviceIds: string[], phone, imgUrl: string) {
     // const url = `${this.config.zocUrl}/api/check/gate/resident`;
     // const token = await this.getToken()
+    const ZP = await this.cameraUtil.getImg(imgUrl)
     const order = await this.getOrder()
     const data = {
       SBXXLSH: order,
@@ -281,7 +282,7 @@ export class ZOCUtil {
       XTLY: this.config.companyAppName,
       SJCS: this.config.companyCreditCode,
       GLMJSB: deviceIds,
-      ZP: '',
+      ZP: ZP ? ZP : '',
     }
     // console.log(data, 'data')
     // 参数校验

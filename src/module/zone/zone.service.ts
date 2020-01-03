@@ -212,8 +212,7 @@ export class ZoneService {
     return await this.zoneModel.create(create);
   }
   // 获取子集
-  async getChildren(children: IChildren, parent: IZone, code: string, layer: number): Promise<IChildren> {
-    const list = await this.socUtil.qrcodeAddress(code)
+  async getChildren(children: IChildren, parent: IZone, code: string, layer: number, list: any[]): Promise<IChildren> {
     await Promise.all(list.map(async child => {
       if (child.dzbm === parent.profile.dzbm) {
         return;
@@ -224,8 +223,9 @@ export class ZoneService {
       const subZone: IZone = await this.createSubZone(child, parent)
       children.children.push(String(subZone._id))
       let subChildren: IChildren = { children: [], hasPartition: false }
-      if (parent.zoneLayer < 1) {
-        subChildren = await this.getChildren(subChildren, subZone, child.dzbm, layer)
+      if (parent.zoneLayer < 0) {
+        const subList = await this.socUtil.qrcodeAddress(child.dzbm)
+        subChildren = await this.getChildren(subChildren, subZone, child.dzbm, layer, subList)
       }
       if (subChildren.hasPartition) {
         await this.partition(subZone._id)
@@ -332,7 +332,7 @@ export class ZoneService {
   async addByQrcode(createZone: CreateZoneByScanDTO) {
     const list = await this.socUtil.qrcodeAddress(createZone.code)
     const detail: IDetail = await this.socUtil.address(createZone.code)
-
+    console.log(detail, 'detail')
     let parentProfile;
     list.map(profile => {
       if (profile.dzbm === createZone.code) {
@@ -364,7 +364,7 @@ export class ZoneService {
     const createParent: IZone = await new this.zoneModel(parent);
     createParent.zoneId = createParent._id;
     await createParent.save()
-    const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, createZone.code, createZone.layer)
+    const children: IChildren = await this.getChildren({ children: [], hasPartition: false }, createParent, createZone.code, createZone.layer, list)
     // console.log(children, 'children')
     createParent.children = children.children
     createParent.hasChildren = children.children.length > 0

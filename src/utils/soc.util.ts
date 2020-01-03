@@ -85,6 +85,7 @@ export class SOCUtil {
 
     const result = await this.qrcodeAddressByNo(code, '1')
     let list: IZoneProfile[] = result.list
+
     const page = result.page
     const totalPage = page.tsize
     let pno = 1
@@ -118,6 +119,7 @@ export class SOCUtil {
       ]
     }
     const result = await this.socRequest(data, 'dzfwpt_qrcode')
+    console.log(result, 'result')
     if (!result) {
       return this.qrcodeAddressByNo(code, pno)
     }

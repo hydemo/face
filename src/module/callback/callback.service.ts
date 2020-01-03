@@ -623,11 +623,34 @@ export class CallbackService {
 
   }
 
-  async testResident(id) {
+  sleep = function (delay) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          resolve(1)
+        } catch (e) {
+          reject(0)
+        }
+      }, delay);
+    })
+  }
+
+  async reUpdateResident() {
+    const residents = await this.residentService.findByCondition({ isDelete: false, type: { $ne: 'visitor' } })
+    let i = 0
+    for (let resident of residents) {
+      await this.sleep(500)
+      console.log('start.......:', i)
+      await this.testResident(resident._id, i)
+      i += 1
+    }
+  }
+
+  async testResident(id: string, count: number) {
     const resident = await this.residentService.findById(id)
     const zone = await this.zoneService.findById(resident.address)
     const user = await this.userService.updateById(resident.user, {})
-    if (!user) {
+    if (!user || !user.cardNumber) {
       return
     }
     const zoneIds = [...zone.ancestor, zone._id]
@@ -641,12 +664,18 @@ export class CallbackService {
       phone = owner.phone
     }
     const deviceIds = devices.map(device => String(device.deviceId))
-    const data = await this.zocUtil.genResidentData(zone.profile, user, deviceIds, phone)
+    const data = await this.zocUtil.genResidentData(zone.profile, user, deviceIds, phone, user.faceUrl)
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
     await this.zocUtil.genResident(zip, time, [data])
     const result = await this.zocUtil.upload(zip, time)
-    console.log(result, 'upResult')
+    console.log(result, 'result')
+    if (result.success) {
+      const client = this.redis.getClient()
+      client.hincrby(this.config.LOG, this.config.LOG_RESIDENT, 1)
+      await this.residentService.findByIdAndUpdate(id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
+    }
+    console.log('end.....:', count)
   }
 
   async testProCo(id) {

@@ -200,6 +200,10 @@ export class ResidentService {
     return owner
   }
 
+  async findByIdAndUpdate(id: string, update: any) {
+    await this.residentModel.findByIdAndUpdate(id, update)
+  }
+
   // 上报常住人至智能感知平台
   async uploadToZoc(userId: string, zoneId: string, profile: IZoneProfile, deviceIds: string[], phone: string, resident: string) {
     if (String(zoneId) === '5dd762b15a793eb1c0d62a33') {
@@ -209,7 +213,7 @@ export class ResidentService {
     if (!userToZOC) {
       return
     }
-    const data = await this.zocUtil.genResidentData(profile, userToZOC, deviceIds, phone)
+    const data = await this.zocUtil.genResidentData(profile, userToZOC, deviceIds, phone, userToZOC.faceUrl)
     const time = moment().format('YYYYMMDDHHmmss');
     const zip = await this.zocUtil.genZip()
     await this.zocUtil.genResident(zip, time, [data])
