@@ -191,7 +191,9 @@ export class CallbackController {
     // await this.faceService.fixError()
     // await this.faceService.fixDevice(code)
     // await this.faceService.fixDelete()
-    await this.callbackService.reUpdateResident()
+    const newDevice = await this.deviceService.findById(code1)
+    await this.faceService.copy(code, code1, newDevice)
+    // await this.callbackService.reUpdateResident()
     // await this.faceService.addErrorDelete()
     // const device = await this.deviceService.findById(code)
     // const data = await this.camera.getDeviceInfo(device)
@@ -250,6 +252,17 @@ export class CallbackController {
   ) {
     const data = await this.deviceService.findNoAlive()
     return data
+  }
+
+  @ApiOkResponse({
+    description: '未在线设备',
+  })
+  @Get('/resident')
+
+  @ApiOperation({ title: '未在线设备', description: '未在线设备' })
+  async reUpZOC(
+  ) {
+    return await this.callbackService.reUpdateResident()
   }
 
 }

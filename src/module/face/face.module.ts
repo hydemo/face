@@ -13,6 +13,7 @@ import { P2PErrorModule } from '../p2pError/p2pError.module';
   exports: [FaceService],
   imports: [
     DatabaseModule,
+
     P2PErrorModule,
     // forwardRef(() => ResidentModule),
     PassportModule.register({ defaultStrategy: 'jwt' }),

@@ -410,6 +410,55 @@ export class FaceService {
     }))
   }
 
+  async reload(device: string) {
+    const faces = await this.faceModel
+      .find({ isDelete: false, device })
+      .populate({ path: 'device', model: 'device' })
+      .populate({ path: 'user', model: 'user' })
+      .lean()
+      .exec()
+    await this.faceModel.updateMany({ isDelete: false, device }, { checkResult: 1 })
+    await Promise.all(faces.map(async face => {
+      if (!face.user) {
+        console.log(face, 'user')
+        return
+      }
+      await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
+    }))
+  }
+
+  async copy(device: string, newDevice: string, newDeviceDetail: IDevice) {
+    await this.faceModel.remove({ device: newDevice })
+    const faces = await this.faceModel
+      .find({ isDelete: false, device })
+      .populate({ path: 'device', model: 'device' })
+      .populate({ path: 'user', model: 'user' })
+      .lean()
+      .exec()
+    // await this.faceModel.updateMany({ isDelete: false, device }, { checkResult: 1 })
+    await Promise.all(faces.map(async face => {
+      const newFace: CreateFaceDTO = {
+        device: newDevice,
+        user: face.user._id,
+        mode: 2,
+        bondToObjectId: face.bondToObjectId,
+        bondType: face.bondType,
+        zone: face.zone,
+        checkResult: 1,
+        // faceUrl: user.faceUrl,
+      }
+      if (face.expire) {
+        newFace.expire = face.expire;
+      }
+      const createFace = await this.faceModel.create(newFace)
+      if (!face.user) {
+        console.log(face, 'user')
+        return
+      }
+      await this.addOnePic(createFace, newDeviceDetail, face.user, face.mode, face.user.faceUrl)
+    }))
+  }
+
   async addFace() {
     const id = '5d85c8c079564a6052c65116'
     const faces = await this.faceModel

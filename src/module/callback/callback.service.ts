@@ -636,14 +636,24 @@ export class CallbackService {
   }
 
   async reUpdateResident() {
-    const residents = await this.residentService.findByCondition({ isDelete: false, type: { $ne: 'visitor' } })
+    const residents = await this.residentService.findByCondition({ isDelete: false, type: { $ne: 'visitor' }, zone: '5dd762b15a793eb1c0d62a33' })
     let i = 0
+    // let t = 0
+    const result: any = []
+    console.log(residents.length, 'aa')
     for (let resident of residents) {
-      await this.sleep(500)
+      // if (resident.upTime && resident.isZOCPush && moment(resident.upTime).format('YYYY-MM-DD HH:mm:ss') > '2020-01-03 12:20:00') {
+      //   console.log(t)
+      //   t += 1
+      //   continue
+      // }
+      await this.sleep(200)
       console.log('start.......:', i)
-      await this.testResident(resident._id, i)
+      const data = await this.testResident(resident._id, i)
+      result.push(data)
       i += 1
     }
+    return result
   }
 
   async testResident(id: string, count: number) {
@@ -675,7 +685,9 @@ export class CallbackService {
       client.hincrby(this.config.LOG, this.config.LOG_RESIDENT, 1)
       await this.residentService.findByIdAndUpdate(id, { isZOCPush: true, ZOCZip: result.zipname, upTime: Date.now() })
     }
+
     console.log('end.....:', count)
+    return result.zipname
   }
 
   async testProCo(id) {

@@ -29,4 +29,6 @@ export interface IResident extends Document {
   readonly reviewer: string;
   // 归属人
   readonly owner: string;
+  upTime: Date;
+  isZOCPush: boolean;
 }
