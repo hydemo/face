@@ -172,19 +172,17 @@ export class CallbackService {
         const owner = await this.userService.updateById(resident.address.owner, {})
 
         if (owner && this.config.url === 'https://xms.thinkthen.cn') {
-          if (String(device.zone) !== '5dd762b15a793eb1c0d62a33') {
-            const zone: IZone = await this.zoneService.findById(resident.address)
-            const time = moment().format('YYYYMMDDHHmmss');
-            const zip = await this.zocUtil.genZip()
-            const type = resident.type === 'visitor' ? 2 : 1
-            const enrecord = await this.zocUtil.genEnRecord(zip, time, zone.profile, user, device, owner, imgBase, type)
-            if (enrecord) {
-              const data = await this.zocUtil.upload(zip, time)
-              if (data.success) {
-                isZOCPush = true
-                zipname = data.zipname
-                client.hincrby(this.config.LOG, this.config.LOG_ENRECORD, 1)
-              }
+          const zone: IZone = await this.zoneService.findById(resident.address)
+          const time = moment().format('YYYYMMDDHHmmss');
+          const zip = await this.zocUtil.genZip()
+          const type = resident.type === 'visitor' ? 2 : 1
+          const enrecord = await this.zocUtil.genEnRecord(zip, time, zone.profile, user, device, owner, imgBase, type)
+          if (enrecord) {
+            const data = await this.zocUtil.upload(zip, time)
+            if (data.success) {
+              isZOCPush = true
+              zipname = data.zipname
+              client.hincrby(this.config.LOG, this.config.LOG_ENRECORD, 1)
             }
           }
         }
