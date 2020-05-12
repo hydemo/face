@@ -5,43 +5,42 @@ import {
   Get,
   Query,
   Response,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiUseTags,
   ApiBearerAuth,
   ApiOkResponse,
   ApiForbiddenResponse,
   ApiOperation,
-} from '@nestjs/swagger';
-import * as moment from 'moment'
-import { CallbackService } from 'src/module/callback/callback.service';
-import { CameraUtil } from 'src/utils/camera.util';
-import { MediaGateway } from 'src/module/media/media.gateway';
-import { SOCUtil } from 'src/utils/soc.util';
-import { PhoneUtil } from 'src/utils/phone.util';
-import { ZOCUtil } from 'src/utils/zoc.util';
-import { RedisService } from 'nestjs-redis';
-import { PreownerService } from 'src/module/preowner/preowner.service';
-import { ZoneService } from 'src/module/zone/zone.service';
-import { IDetail } from 'src/module/zone/interfaces/detail.interface';
-import { IZone } from 'src/module/zone/interfaces/zone.interfaces';
-import { ConfigService } from 'src/config/config.service';
-import { IPropertyCo } from 'src/module/zone/interfaces/propertyCo.interface';
-import { ResidentService } from 'src/module/resident/resident.service';
-import { P2PErrorService } from 'src/module/p2pError/p2pError.service';
-import { IDevice } from 'src/module/device/interfaces/device.interfaces';
-import { RoleService } from 'src/module/role/role.service';
-import { FaceService } from 'src/module/face/face.service';
-import { CreatePoliceRole } from 'src/module/role/dto/role.dto';
-import { UserService } from 'src/module/users/user.service';
-import { DeviceService } from 'src/module/device/device.service';
-import { SchoolService } from 'src/module/school/school.service';
+} from "@nestjs/swagger";
+import * as moment from "moment";
+import { CallbackService } from "src/module/callback/callback.service";
+import { CameraUtil } from "src/utils/camera.util";
+import { MediaGateway } from "src/module/media/media.gateway";
+import { SOCUtil } from "src/utils/soc.util";
+import { PhoneUtil } from "src/utils/phone.util";
+import { ZOCUtil } from "src/utils/zoc.util";
+import { RedisService } from "nestjs-redis";
+import { PreownerService } from "src/module/preowner/preowner.service";
+import { ZoneService } from "src/module/zone/zone.service";
+import { IDetail } from "src/module/zone/interfaces/detail.interface";
+import { IZone } from "src/module/zone/interfaces/zone.interfaces";
+import { ConfigService } from "src/config/config.service";
+import { IPropertyCo } from "src/module/zone/interfaces/propertyCo.interface";
+import { ResidentService } from "src/module/resident/resident.service";
+import { P2PErrorService } from "src/module/p2pError/p2pError.service";
+import { IDevice } from "src/module/device/interfaces/device.interfaces";
+import { RoleService } from "src/module/role/role.service";
+import { FaceService } from "src/module/face/face.service";
+import { CreatePoliceRole } from "src/module/role/dto/role.dto";
+import { UserService } from "src/module/users/user.service";
+import { DeviceService } from "src/module/device/device.service";
+import { SchoolService } from "src/module/school/school.service";
 
-
-@ApiUseTags('callback')
+@ApiUseTags("callback")
 @ApiBearerAuth()
-@ApiForbiddenResponse({ description: 'Unauthorized' })
-@Controller('/')
+@ApiForbiddenResponse({ description: "Unauthorized" })
+@Controller("/")
 export class CallbackController {
   constructor(
     private readonly callbackService: CallbackService,
@@ -61,17 +60,14 @@ export class CallbackController {
     private readonly userService: UserService,
     private readonly zoneService: ZoneService,
     private readonly deviceService: DeviceService,
-    private readonly schoolService: SchoolService,
-  ) {
-
-  }
+    private readonly schoolService: SchoolService
+  ) {}
 
   @ApiOkResponse({
-    description: '人脸识别回调',
+    description: "人脸识别回调",
   })
-  @Post('/faceinfo')
-
-  @ApiOperation({ title: '人脸识别回调', description: '人脸识别回调' })
+  @Post("/faceinfo")
+  @ApiOperation({ title: "人脸识别回调", description: "人脸识别回调" })
   async faceInfo(@Request() req) {
     // // return await this.zocUtil.test()
     // const time = moment().format('YYYYMMDDHHmmss');
@@ -89,74 +85,68 @@ export class CallbackController {
     // // await this.zocUtil.genImage(zip, time, zone, '7443634e-c73e-417d-940f-341648e994e2.jpg')
     // // await this.zocUtil.upload(zip, time)
     // // // await this.zocUtil.
-    await this.callbackService.callback(req.body)
+    await this.callbackService.callback(req.body);
     // await this.camera.getList()
     // await this.mediaWS.sendMessage('5d089fba19fbcb626a93a5f0', { type: '1', imgUrl: '543edbc2-e452-4b96-8e70-1d9dadb17e79.jpg' })
-    return { status: 200 }
+    return { status: 200 };
   }
 
-
   @ApiOkResponse({
-    description: '心跳数据',
+    description: "心跳数据",
   })
-  @Post('/keepalive')
-
-  @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  @Post("/keepalive")
+  @ApiOperation({ title: "心跳数据", description: "心跳数据" })
   async keeplive(@Request() req) {
-    await this.callbackService.keepalive(req.body)
-    return { status: 200 }
+    await this.callbackService.keepalive(req.body);
+    return { status: 200 };
   }
 
   @ApiOkResponse({
-    description: '设备注册',
+    description: "设备注册",
   })
-  @Post('/register')
-
-  @ApiOperation({ title: '设备注册', description: '设备注册' })
-  async register(
-    @Request() req,
-    @Response() res
-  ) {
-    const result = await this.callbackService.register(req.body)
-    res.setHeader("Content-Type", "text/json;charset=UTF-8")
-    res.end(JSON.stringify(result))
+  @Post("/register")
+  @ApiOperation({ title: "设备注册", description: "设备注册" })
+  async register(@Request() req, @Response() res) {
+    const result = await this.callbackService.register(req.body);
+    res.setHeader("Content-Type", "text/json;charset=UTF-8");
+    res.end(JSON.stringify(result));
   }
 
   @ApiOkResponse({
-    description: '心跳数据',
+    description: "心跳数据",
   })
-  @Post('/send')
-
-  @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  @Post("/send")
+  @ApiOperation({ title: "心跳数据", description: "心跳数据" })
   async send(@Request() req) {
-    const client = this.redis.getClient()
-    const pools = await client.hkeys('p2p_pool')
-    const errorPools = await client.hkeys('p2pError_pool')
-    const p2pPools: any = []
-    const p2pErrorPools: any = []
-    await Promise.all(pools.map(async pool => {
-      const count = await client.llen(`p2p_${pool}`)
-      p2pPools.push({ pool, count })
-    }))
-    await Promise.all(errorPools.map(async pool => {
-      const count = await client.llen(`p2pError_${pool}`)
-      p2pErrorPools.push({ pool, count })
-    }))
-    const finalCount = await client.llen('p2pErrorFinal')
-    const final = await client.lrange('p2pErrorFinal', 0, finalCount)
-    return { p2pPools, p2pErrorPools, finalCount, final }
-
+    const client = this.redis.getClient();
+    const pools = await client.hkeys("p2p_pool");
+    const errorPools = await client.hkeys("p2pError_pool");
+    const p2pPools: any = [];
+    const p2pErrorPools: any = [];
+    await Promise.all(
+      pools.map(async (pool) => {
+        const count = await client.llen(`p2p_${pool}`);
+        p2pPools.push({ pool, count });
+      })
+    );
+    await Promise.all(
+      errorPools.map(async (pool) => {
+        const count = await client.llen(`p2pError_${pool}`);
+        p2pErrorPools.push({ pool, count });
+      })
+    );
+    const finalCount = await client.llen("p2pErrorFinal");
+    const final = await client.lrange("p2pErrorFinal", 0, finalCount);
+    return { p2pPools, p2pErrorPools, finalCount, final };
   }
 
   @ApiOkResponse({
-    description: '心跳数据',
+    description: "心跳数据",
   })
-
-  @Post('/handle')
-
-  @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  @Post("/handle")
+  @ApiOperation({ title: "心跳数据", description: "心跳数据" })
   async handle(@Request() req) {
-    const client = this.redis.getClient()
+    const client = this.redis.getClient();
     // const ips = await client.hkeys('Log_op')
     // await client.hset('Log', 'resident', 0)
     // const ss = await client.hget('Log', 'resident')
@@ -173,29 +163,29 @@ export class CallbackController {
     // console.log(await client.rpop('p2p'))
     // co
 
-    return
+    return;
   }
 
   @ApiOkResponse({
-    description: '心跳数据',
+    description: "心跳数据",
   })
-  @Post('/tests')
-
-  @ApiOperation({ title: '心跳数据', description: '心跳数据' })
+  @Post("/tests")
+  @ApiOperation({ title: "心跳数据", description: "心跳数据" })
   async test(
     @Request() req,
-    @Query('code') code: string,
-    @Query('code1') code1: string,
+    @Query("code") code: string,
+    @Query("code1") code1: string
   ) {
     // await this.schoolService.fsix()
-    // await this.faceService.fixError()
-    // await this.faceService.fixDevice(code)
+    await this.faceService.fixError();
+    // await this.faceService.copy()
+    // // await this.faceService.fixDevice(code)
     // await this.faceService.fixDelete()
-    // const newDevice = await this.deviceService.findById(code1)
-    // await this.faceService.copy(code, code1, newDevice)
+    // const newDevice = await this.deviceService.findById(code1);
+    // await this.faceService.copy(code, code1, newDevice);
     // await this.callbackService.reUpdateResident()
     // await this.faceService.addErrorDelete()
-    await this.faceService.reload(code)
+    // await this.faceService.reload(code)
     // const device = await this.deviceService.findById(code)
     // const data = await this.camera.getDeviceInfo(device)
     // console.log(data, 'ata')
@@ -203,8 +193,8 @@ export class CallbackController {
     // console.log(today, 'today')
     // await this.callbackService.upResidentToSOC(code)
     // await this.callbackService.upDeviceToZOC(code)
-    // const data = await this.socUtil.qrcodeAddress(code)
-    // console.log(data)
+    // const data = await this.socUtil.qrcodeAddress(code);
+    // console.log(data);
     // await this.residentService.fix()
     // await this.faceService.check()
     // await this.socUtil.upload('')
@@ -239,31 +229,25 @@ export class CallbackController {
     // const data = await this.socUtil.qrcodeAddress(code, '2')
     // console.log(data)
     // await this.zoneService.fix(code, code1)
-    return
-
+    return;
   }
 
   @ApiOkResponse({
-    description: '未在线设备',
+    description: "未在线设备",
   })
-  @Get('/no-alive')
-
-  @ApiOperation({ title: '未在线设备', description: '未在线设备' })
-  async noAlive(
-  ) {
-    const data = await this.deviceService.findNoAlive()
-    return data
+  @Get("/no-alive")
+  @ApiOperation({ title: "未在线设备", description: "未在线设备" })
+  async noAlive() {
+    const data = await this.deviceService.findNoAlive();
+    return data;
   }
 
   @ApiOkResponse({
-    description: '未在线设备',
+    description: "未在线设备",
   })
-  @Get('/resident')
-
-  @ApiOperation({ title: '未在线设备', description: '未在线设备' })
-  async reUpZOC(
-  ) {
-    return await this.callbackService.reUpdateResident()
+  @Get("/resident")
+  @ApiOperation({ title: "未在线设备", description: "未在线设备" })
+  async reUpZOC() {
+    return await this.callbackService.reUpdateResident();
   }
-
 }

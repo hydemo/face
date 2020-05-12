@@ -1,7 +1,7 @@
-import { Document } from 'mongoose';
-import { IZoneProfile } from './zonePrifile.interface';
-import { IPropertyCo } from './propertyCo.interface';
-import { IDetail } from './detail.interface';
+import { Document } from "mongoose";
+import { IZoneProfile } from "./zonePrifile.interface";
+import { IPropertyCo } from "./propertyCo.interface";
+import { IDetail } from "./detail.interface";
 
 export interface IZone extends Document {
   // 区域名称
@@ -31,11 +31,11 @@ export interface IZone extends Document {
   // 设备数
   readonly deviceCount: number;
   // 业主
-  readonly owner: string,
+  readonly owner: string;
   //门牌号
   houseNumber: string;
   //是否分区
-  hasPartition: Boolean;
+  hasPartition: boolean;
   // 地址信息
   readonly profile: IZoneProfile;
   //物业信息

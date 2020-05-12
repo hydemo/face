@@ -1,27 +1,28 @@
-import { Model } from 'mongoose';
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
-import { IFace } from './interfaces/face.interfaces';
-import { CreateFaceDTO } from './dto/face.dto';
-import { ApiErrorCode } from 'src/common/enum/api-error-code.enum';
-import { ApiException } from 'src/common/expection/api.exception';
-import { Pagination } from 'src/common/dto/pagination.dto';
-import { IList } from 'src/common/interface/list.interface';
-import { CameraUtil } from 'src/utils/camera.util';
-import { IUser } from '../users/interfaces/user.interfaces';
-import { IDevice } from '../device/interfaces/device.interfaces';
-import { ResidentService } from '../resident/resident.service';
-import { RedisService } from 'nestjs-redis';
-import { IPic } from 'src/common/interface/pic.interface';
-import { P2PErrorService } from '../p2pError/p2pError.service';
+import { Model } from "mongoose";
+import { Inject, Injectable, forwardRef } from "@nestjs/common";
+import { IFace } from "./interfaces/face.interfaces";
+import { CreateFaceDTO } from "./dto/face.dto";
+import { ApiErrorCode } from "src/common/enum/api-error-code.enum";
+import { ApiException } from "src/common/expection/api.exception";
+import { Pagination } from "src/common/dto/pagination.dto";
+import { IList } from "src/common/interface/list.interface";
+import { CameraUtil } from "src/utils/camera.util";
+import { IUser } from "../users/interfaces/user.interfaces";
+import { IDevice } from "../device/interfaces/device.interfaces";
+import { ResidentService } from "../resident/resident.service";
+import { RedisService } from "nestjs-redis";
+import { IPic } from "src/common/interface/pic.interface";
+import { P2PErrorService } from "../p2pError/p2pError.service";
+import { UserService } from "../users/user.service";
 
 @Injectable()
 export class FaceService {
   constructor(
-    @Inject('FaceModelToken') private readonly faceModel: Model<IFace>,
+    @Inject("FaceModelToken") private readonly faceModel: Model<IFace>,
     @Inject(CameraUtil) private readonly cameraUtil: CameraUtil,
     @Inject(P2PErrorService) private readonly p2pErrorService: P2PErrorService,
-    private readonly redis: RedisService,
-  ) { }
+    private readonly redis: RedisService
+  ) {}
 
   // 创建数据
   async create(createFaceDTO: CreateFaceDTO): Promise<IFace> {
@@ -31,20 +32,32 @@ export class FaceService {
   }
   // 根据条件查询
   async findByCondition(condition: any): Promise<IFace[]> {
-    return await this.faceModel.find(condition).lean().exec();
+    return await this.faceModel
+      .find(condition)
+      .lean()
+      .exec();
   }
   // 根据条件查询
   async findOne(condition: any): Promise<IFace | null> {
-    return await this.faceModel.findOne(condition).lean().exec();
+    return await this.faceModel
+      .findOne(condition)
+      .lean()
+      .exec();
   }
 
   // 根据条件查询
   async findById(id: string): Promise<IFace | null> {
-    return await this.faceModel.findById(id).lean().exec();
+    return await this.faceModel
+      .findById(id)
+      .lean()
+      .exec();
   }
   // 统计数量
   async count(condition: any): Promise<number> {
-    return await this.faceModel.countDocuments(condition).lean().exec();
+    return await this.faceModel
+      .countDocuments(condition)
+      .lean()
+      .exec();
   }
 
   // 查询全部数据
@@ -54,7 +67,7 @@ export class FaceService {
     if (pagination.search) {
       const sea = JSON.parse(pagination.search);
       for (const key in sea) {
-        if (key === 'base' && sea[key]) {
+        if (key === "base" && sea[key]) {
         } else if (sea[key] === 0 || sea[key]) {
           condition[key] = sea[key];
         }
@@ -68,8 +81,12 @@ export class FaceService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ status: 1 })
-      .populate({ path: 'user', model: 'user' })
-      .populate({ path: 'device', model: 'device', populate: { path: 'zone', model: 'zone' } })
+      .populate({ path: "user", model: "user" })
+      .populate({
+        path: "device",
+        model: "device",
+        populate: { path: "zone", model: "zone" },
+      })
       .lean()
       .exec();
     const total = await this.faceModel.countDocuments(condition);
@@ -77,7 +94,10 @@ export class FaceService {
   }
 
   // 用户列表
-  async findByZone(pagination: Pagination, zone: string): Promise<IList<IFace>> {
+  async findByZone(
+    pagination: Pagination,
+    zone: string
+  ): Promise<IList<IFace>> {
     const search: any = [];
     const condition: any = {
       // zone: { $in: zone }
@@ -85,8 +105,8 @@ export class FaceService {
     if (pagination.search) {
       const sea = JSON.parse(pagination.search);
       for (const key in sea) {
-        if (key === 'base' && sea[key]) {
-          const username: RegExp = new RegExp(sea[key], 'i');
+        if (key === "base" && sea[key]) {
+          const username: RegExp = new RegExp(sea[key], "i");
           search.push({ username });
         } else if (sea[key] === 0 || sea[key]) {
           condition[key] = sea[key];
@@ -101,8 +121,12 @@ export class FaceService {
       .limit(pagination.limit)
       .skip((pagination.offset - 1) * pagination.limit)
       .sort({ status: 1 })
-      .populate({ path: 'user', model: 'user' })
-      .populate({ path: 'device', model: 'device', populate: { path: 'zone', model: 'zone' } })
+      .populate({ path: "user", model: "user" })
+      .populate({
+        path: "device",
+        model: "device",
+        populate: { path: "zone", model: "zone" },
+      })
       .lean()
       .exec();
     const total = await this.faceModel.countDocuments(condition);
@@ -110,52 +134,54 @@ export class FaceService {
   }
   // 判断是否上传过
   genFaces(deviceFaces, deviceId, face: IFace) {
-    let isAdd = false
-    deviceFaces.map(deviceFace => {
+    let isAdd = false;
+    deviceFaces.map((deviceFace) => {
       if (deviceFace.deviceId === deviceId) {
-        deviceFace.faces.push(String(face._id))
+        deviceFace.faces.push(String(face._id));
         if (face.mode > 1) {
-          deviceFace.mode = face.mode
+          deviceFace.mode = face.mode;
         }
-        isAdd = true
+        isAdd = true;
       }
-    })
+    });
     if (!isAdd) {
-      const faces = [String(face._id)]
-      deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode, face })
+      const faces = [String(face._id)];
+      deviceFaces.push({ deviceId: deviceId, faces, mode: face.mode, face });
     }
-    return
+    return;
   }
   // 根据条件更新
   async updatePic(user: IUser, imgUrl: string) {
-    const faces: IFace[] = await this.faceModel.find({ user: user._id, isDelete: false }).populate({ path: 'device', model: 'device' })
-    const deviceFaces: any = []
-    const client = this.redis.getClient()
+    const faces: IFace[] = await this.faceModel
+      .find({ user: user._id, isDelete: false })
+      .populate({ path: "device", model: "device" });
+    const deviceFaces: any = [];
+    const client = this.redis.getClient();
     for (let face of faces) {
       if (!face.device.enable) {
-        continue
+        continue;
       }
       switch (face.bondType) {
-        case 'resident':
-          client.hset('pending_resident', `${face.bondToObjectId}`, 1)
+        case "resident":
+          client.hset("pending_resident", `${face.bondToObjectId}`, 1);
           break;
-        case 'role':
-          client.hset('pending_role', `${face.bondToObjectId}`, 1)
+        case "role":
+          client.hset("pending_role", `${face.bondToObjectId}`, 1);
           break;
-        case 'school':
-          client.hset('pending_school', `${face.bondToObjectId}`, 1)
+        case "school":
+          client.hset("pending_school", `${face.bondToObjectId}`, 1);
           break;
-        case 'black':
-          client.hset('pending_black', `${face.bondToObjectId}`, 1)
+        case "black":
+          client.hset("pending_black", `${face.bondToObjectId}`, 1);
           break;
         default:
           break;
       }
-      await this.faceModel.findByIdAndUpdate(face._id, { checkResult: 1 })
-      this.genFaces(deviceFaces, String(face.device._id), face)
+      await this.faceModel.findByIdAndUpdate(face._id, { checkResult: 1 });
+      this.genFaces(deviceFaces, String(face.device._id), face);
     }
-    deviceFaces.map(async deviceFace => {
-      const { _id, version } = deviceFace.face.device
+    deviceFaces.map(async (deviceFace) => {
+      const { _id, version } = deviceFace.face.device;
       const data = {
         count: 0,
         user: String(user._id),
@@ -164,190 +190,245 @@ export class FaceService {
         username: user.username,
         mode: deviceFace.mode,
         face: String(deviceFace.face._id),
-      }
-      const poolExist = await client.hget('p2p_pool', String(_id))
+      };
+      const poolExist = await client.hget("p2p_pool", String(_id));
       if (!poolExist) {
-        await client.hset('p2p_pool', String(_id), 1)
+        await client.hset("p2p_pool", String(_id), 1);
       }
-      await client.hincrby('img', imgUrl, 1)
-      if (version === '1.0.0') {
-        await client.lpush(`p2p_${_id}`, JSON.stringify({
-          ...data,
-          LibIndex: deviceFace.face.libIndex,
-          FlieIndex: deviceFace.face.flieIndex,
-          Pic: deviceFace.face.pic,
-          type: 'update-delete',
-        }))
-        await client.lpush(`p2p_${_id}`, JSON.stringify({ ...data, type: 'update-add' }))
-      } else if (version === '1.1.0') {
-        await client.lpush(`p2p_${_id}`, JSON.stringify({ ...data, type: 'update' }))
+      await client.hincrby("img", imgUrl, 1);
+      if (version === "1.0.0") {
+        await client.lpush(
+          `p2p_${_id}`,
+          JSON.stringify({
+            ...data,
+            LibIndex: deviceFace.face.libIndex,
+            FlieIndex: deviceFace.face.flieIndex,
+            Pic: deviceFace.face.pic,
+            type: "update-delete",
+          })
+        );
+        await client.lpush(
+          `p2p_${_id}`,
+          JSON.stringify({ ...data, type: "update-add" })
+        );
+      } else if (version === "1.1.0") {
+        await client.lpush(
+          `p2p_${_id}`,
+          JSON.stringify({ ...data, type: "update" })
+        );
       }
-
-    })
+    });
   }
 
   // 根据条件更新
-  async addOnePic(createFace: IFace, device: IDevice, user: IPic, mode: number, imgUrl) {
+  async addOnePic(
+    createFace: IFace,
+    device: IDevice,
+    user: IPic,
+    mode: number,
+    imgUrl
+  ) {
     if (!device.enable) {
-      return
+      return;
     }
     const data = {
       count: 0,
-      type: 'add',
+      type: "add",
       user: String(user._id),
       imgUrl,
       username: user.username,
       face: createFace._id,
       mode,
-      faces: [String(createFace._id)]
-    }
+      faces: [String(createFace._id)],
+    };
 
-    const client = this.redis.getClient()
-    const poolExist = await client.hget('p2p_pool', String(device._id))
+    const client = this.redis.getClient();
+    const poolExist = await client.hget("p2p_pool", String(device._id));
     if (!poolExist) {
-      await client.hset('p2p_pool', String(device._id), 1)
+      await client.hset("p2p_pool", String(device._id), 1);
     }
-    await client.lpush(`p2p_${device._id}`, JSON.stringify(data))
-    await client.hincrby('img', imgUrl, 1)
+    await client.lpush(`p2p_${device._id}`, JSON.stringify(data));
+    await client.hincrby("img", imgUrl, 1);
   }
 
   // 根据id删除
   async delete(face: IFace) {
-    let checkResult = 2
-    const faceCount: number = await this.count({ isDelete: false, device: face.device, user: face.user })
+    let checkResult = 2;
+    const faceCount: number = await this.count({
+      isDelete: false,
+      device: face.device,
+      user: face.user,
+    });
     if (faceCount === 1) {
-      const faceToDelete: any = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
-      if (!faceToDelete) { return }
+      const faceToDelete: any = await this.faceModel
+        .findById(face._id)
+        .populate({ path: "device", model: "device" });
+      if (!faceToDelete) {
+        return;
+      }
 
       // const exist = await this.cameraUtil.getPersionInfo(faceToDelete.user, faceToDelete.device, faceToDelete.mode)
       // if (exist) {
-      const { _id, enable } = faceToDelete.device
+      const { _id, enable } = faceToDelete.device;
       if (!enable) {
-        return
+        return;
       }
       const data = {
         count: 0,
         user: String(faceToDelete.user),
-        type: 'delete',
+        type: "delete",
         face: faceToDelete._id,
         LibIndex: faceToDelete.libIndex,
         FlieIndex: faceToDelete.flieIndex,
         Pic: faceToDelete.pic,
         mode: faceToDelete.mode,
-        faces: [String(faceToDelete._id)]
-      }
-      const client = this.redis.getClient()
-      const poolExist = await client.hget('p2p_pool', String(_id))
+        faces: [String(faceToDelete._id)],
+      };
+      const client = this.redis.getClient();
+      const poolExist = await client.hget("p2p_pool", String(_id));
       if (!poolExist) {
-        await client.hset('p2p_pool', String(_id), 1)
+        await client.hset("p2p_pool", String(_id), 1);
       }
-      await client.lpush(`p2p_${_id}`, JSON.stringify(data))
-      checkResult = 1
+      await client.lpush(`p2p_${_id}`, JSON.stringify(data));
+      checkResult = 1;
       // }
     }
-    await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true, checkResult })
-    return true
+    await this.faceModel.findByIdAndUpdate(face._id, {
+      isDelete: true,
+      checkResult,
+    });
+    return true;
   }
-
 
   // 根据id删除
   async deleteByFix(face: IFace) {
-    let checkResult = 2
-    const faceCount: number = await this.count({ isDelete: false, device: face.device, user: face.user })
+    let checkResult = 2;
+    const faceCount: number = await this.count({
+      isDelete: false,
+      device: face.device,
+      user: face.user,
+    });
     if (faceCount === 0) {
-      const faceToDelete: any = await this.faceModel.findById(face._id).populate({ path: 'device', model: 'device' })
-      if (!faceToDelete) { return }
+      const faceToDelete: any = await this.faceModel
+        .findById(face._id)
+        .populate({ path: "device", model: "device" });
+      if (!faceToDelete) {
+        return;
+      }
 
       // const exist = await this.cameraUtil.getPersionInfo(faceToDelete.user, faceToDelete.device, faceToDelete.mode)
       // if (exist) {
-      const { _id, enable } = faceToDelete.device
+      const { _id, enable } = faceToDelete.device;
       if (!enable) {
-        return
+        return;
       }
       const data = {
         count: 0,
         user: String(faceToDelete.user),
-        type: 'delete',
+        type: "delete",
         face: faceToDelete._id,
         LibIndex: faceToDelete.libIndex,
         FlieIndex: faceToDelete.flieIndex,
         Pic: faceToDelete.pic,
         mode: faceToDelete.mode,
-        faces: [String(faceToDelete._id)]
-      }
-      const client = this.redis.getClient()
-      const poolExist = await client.hget('p2p_pool', String(_id))
+        faces: [String(faceToDelete._id)],
+      };
+      const client = this.redis.getClient();
+      const poolExist = await client.hget("p2p_pool", String(_id));
       if (!poolExist) {
-        await client.hset('p2p_pool', String(_id), 1)
+        await client.hset("p2p_pool", String(_id), 1);
       }
-      await client.lpush(`p2p_${_id}`, JSON.stringify(data))
-      checkResult = 1
+      await client.lpush(`p2p_${_id}`, JSON.stringify(data));
+      checkResult = 1;
       // }
     }
-    await this.faceModel.findByIdAndUpdate(face._id, { isDelete: true, checkResult })
-    return true
+    await this.faceModel.findByIdAndUpdate(face._id, {
+      isDelete: true,
+      checkResult,
+    });
+    return true;
   }
 
   // 根据id删除
   async checkResult(bondToObjectId: string): Promise<number> {
-    const isFail = await this.faceModel.findOne({ bondToObjectId, checkResult: 3, isDelete: false })
-    const isPending = await this.faceModel.findOne({ bondToObjectId, checkResult: 1, isDelete: false })
+    const isFail = await this.faceModel.findOne({
+      bondToObjectId,
+      checkResult: 3,
+      isDelete: false,
+    });
+    const isPending = await this.faceModel.findOne({
+      bondToObjectId,
+      checkResult: 1,
+      isDelete: false,
+    });
     if (isPending) {
-      return 4
+      return 4;
     }
     if (isFail) {
-      return 5
+      return 5;
     }
-    return 2
+    return 2;
   }
 
   async updateByCondition(condition: any, update: any) {
-    return await this.faceModel.updateMany(condition, update)
+    return await this.faceModel.updateMany(condition, update);
   }
   async updateById(id: string, update: any) {
-    return await this.faceModel.findByIdAndUpdate(id, update)
+    return await this.faceModel.findByIdAndUpdate(id, update);
   }
 
   async confirm(id: string, checkResult: number, type: string) {
     let isDelete = false;
-    if (type === 'delete') {
-      isDelete = true
+    if (type === "delete") {
+      isDelete = true;
     }
-    const face = await this.faceModel.findById(id)
+    const face = await this.faceModel.findById(id);
     if (!face) {
-      return
+      return;
     }
-    await this.faceModel.updateMany({ user: face.user, device: face.device, isDelete }, { checkResult })
+    await this.faceModel.updateMany(
+      { user: face.user, device: face.device, isDelete },
+      { checkResult }
+    );
     // return await this.faceModel.findByIdAndUpdate(id, update)
   }
 
   async remove(bondToObjectId) {
-    await this.faceModel.remove({ bondToObjectId })
+    await this.faceModel.remove({ bondToObjectId });
   }
   async fixError() {
-    const p2pErrors = await this.p2pErrorService.find({})
+    const p2pErrors = await this.p2pErrorService.find({});
     for (let p2pError of p2pErrors) {
-      if (p2pError.type === 'update') {
+      if (p2pError.type === "update") {
         const face = await this.faceModel
           .findById(p2pError.face)
-          .populate({ path: 'device', model: 'device' })
-          .populate({ path: 'user', model: 'user' })
+          .populate({ path: "device", model: "device" })
+          .populate({ path: "user", model: "user" })
           .lean()
-          .exec()
-        await this.updateFace(face, face.user.faceUrl)
-      } else if (p2pError.type === 'add') {
+          .exec();
+        await this.updateFace(face, face.user.faceUrl);
+      } else if (p2pError.type === "add") {
         const face = await this.faceModel
           .findById(p2pError.face)
-          .populate({ path: 'device', model: 'device' })
-          .populate({ path: 'user', model: 'user' })
+          .populate({ path: "device", model: "device" })
+          .populate({ path: "user", model: "user" })
           .lean()
-          .exec()
-        await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
-      } else if (p2pError.type === 'add') {
-        const face = await this.faceModel.findById(p2pError.face).lean().exec()
-        await this.delete(face)
+          .exec();
+        await this.addOnePic(
+          face,
+          face.device,
+          face.user,
+          face.mode,
+          face.user.faceUrl
+        );
+      } else if (p2pError.type === "add") {
+        const face = await this.faceModel
+          .findById(p2pError.face)
+          .lean()
+          .exec();
+        await this.delete(face);
       }
-      await this.p2pErrorService.remove(p2pError._id)
+      await this.p2pErrorService.remove(p2pError._id);
     }
     // const client = this.redis.getClient()
     // const faces = await this.faceModel
@@ -365,127 +446,168 @@ export class FaceService {
     // }))
   }
   async fixDevice(device) {
-    const client = this.redis.getClient()
-    await this.faceModel.updateMany({ isDelete: false, device }, { checkResult: 1 })
+    const client = this.redis.getClient();
+    await this.faceModel.updateMany(
+      { isDelete: false, device },
+      { checkResult: 1 }
+    );
     const faces = await this.faceModel
       .find({ isDelete: false, device })
-      .populate({ path: 'device', model: 'device' })
-      .populate({ path: 'user', model: 'user' })
+      .populate({ path: "device", model: "device" })
+      .populate({ path: "user", model: "user" })
       .lean()
-      .exec()
-    await Promise.all(faces.map(async face => {
-      const alive = await client.hget('device', face.device.deviceUUID)
-      if (!alive || Number(alive) > 4) {
-        return
-      }
-      if (face.user) {
-        await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
-      }
-    }))
+      .exec();
+    await Promise.all(
+      faces.map(async (face) => {
+        const alive = await client.hget("device", face.device.deviceUUID);
+        if (!alive || Number(alive) > 4) {
+          return;
+        }
+        if (face.user) {
+          await this.addOnePic(
+            face,
+            face.device,
+            face.user,
+            face.mode,
+            face.user.faceUrl
+          );
+        }
+      })
+    );
   }
 
   async fix() {
-    const client = this.redis.getClient()
+    const client = this.redis.getClient();
     const faces = await this.faceModel
       .find({ checkResult: 1, isDelete: false })
-      .populate({ path: 'device', model: 'device' })
-      .populate({ path: 'user', model: 'user' })
+      .populate({ path: "device", model: "device" })
+      .populate({ path: "user", model: "user" })
       .lean()
-      .exec()
-    await Promise.all(faces.map(async face => {
-      const alive = await client.hget('device', face.device.deviceUUID)
-      if (!alive || Number(alive) > 4) {
-        return
-      }
-      await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
-    }))
+      .exec();
+    await Promise.all(
+      faces.map(async (face) => {
+        const alive = await client.hget("device", face.device.deviceUUID);
+        if (!alive || Number(alive) > 4) {
+          return;
+        }
+        await this.addOnePic(
+          face,
+          face.device,
+          face.user,
+          face.mode,
+          face.user.faceUrl
+        );
+      })
+    );
   }
   async fixDelete() {
     const faces = await this.faceModel
       .find({ checkResult: 1, isDelete: true })
       .lean()
-      .exec()
-    await Promise.all(faces.map(async face => {
-      await this.deleteByFix(face)
-    }))
+      .exec();
+    await Promise.all(
+      faces.map(async (face) => {
+        await this.deleteByFix(face);
+      })
+    );
   }
 
   async reload(device: string) {
     const faces = await this.faceModel
       .find({ isDelete: false, device })
-      .populate({ path: 'device', model: 'device' })
-      .populate({ path: 'user', model: 'user' })
+      .populate({ path: "device", model: "device" })
+      .populate({ path: "user", model: "user" })
       .lean()
-      .exec()
-    await this.faceModel.updateMany({ isDelete: false, device }, { checkResult: 1 })
-    await Promise.all(faces.map(async face => {
-      if (!face.user) {
-        console.log(face, 'user')
-        return
-      }
-      await this.addOnePic(face, face.device, face.user, face.mode, face.user.faceUrl)
-    }))
+      .exec();
+    await this.faceModel.updateMany(
+      { isDelete: false, device },
+      { checkResult: 1 }
+    );
+    await Promise.all(
+      faces.map(async (face) => {
+        if (!face.user) {
+          console.log(face, "user");
+          return;
+        }
+        await this.addOnePic(
+          face,
+          face.device,
+          face.user,
+          face.mode,
+          face.user.faceUrl
+        );
+      })
+    );
   }
 
   async copy(device: string, newDevice: string, newDeviceDetail: IDevice) {
-    await this.faceModel.remove({ device: newDevice })
+    // await this.faceModel.remove({ device: newDevice });
     const faces = await this.faceModel
       .find({ isDelete: false, device })
-      .populate({ path: 'device', model: 'device' })
-      .populate({ path: 'user', model: 'user' })
+      .populate({ path: "device", model: "device" })
+      .populate({ path: "user", model: "user" })
       .lean()
-      .exec()
+      .exec();
     // await this.faceModel.updateMany({ isDelete: false, device }, { checkResult: 1 })
-    await Promise.all(faces.map(async face => {
-      const newFace: CreateFaceDTO = {
-        device: newDevice,
-        user: face.user._id,
-        mode: 2,
-        bondToObjectId: face.bondToObjectId,
-        bondType: face.bondType,
-        zone: face.zone,
-        checkResult: 1,
-        // faceUrl: user.faceUrl,
-      }
-      if (face.expire) {
-        newFace.expire = face.expire;
-      }
-      const createFace = await this.faceModel.create(newFace)
-      if (!face.user) {
-        console.log(face, 'user')
-        return
-      }
-      await this.addOnePic(createFace, newDeviceDetail, face.user, face.mode, face.user.faceUrl)
-    }))
+    await Promise.all(
+      faces.map(async (face) => {
+        const newFace: CreateFaceDTO = {
+          device: newDevice,
+          user: face.user._id,
+          mode: 2,
+          bondToObjectId: face.bondToObjectId,
+          bondType: face.bondType,
+          zone: face.zone,
+          checkResult: 1,
+          // faceUrl: user.faceUrl,
+        };
+        if (face.expire) {
+          newFace.expire = face.expire;
+        }
+        const createFace = await this.faceModel.create(newFace);
+        if (!face.user) {
+          console.log(face, "user");
+          return;
+        }
+        await this.addOnePic(
+          createFace,
+          newDeviceDetail,
+          face.user,
+          face.mode,
+          face.user.faceUrl
+        );
+      })
+    );
   }
 
   async addFace() {
-    const id = '5d85c8c079564a6052c65116'
+    const id = "5d85c8c079564a6052c65116";
     const faces = await this.faceModel
       .find({ isDelete: false, device: id, checkResult: 1 })
-      .populate({ path: 'user', model: 'user' })
+      .populate({ path: "user", model: "user" });
     // .
     // console.log(faces, 'faces')
-    const client = this.redis.getClient()
-    await Promise.all(faces.map(async face => {
-      const data = {
-        count: 0,
-        type: 'add',
-        user: face.user._id,
-        imgUrl: face.user.imgUrl,
-        username: face.user.username,
-        face: face._id,
-        mode: face.mode,
-        faces: [String(face._id)]
-      }
-      console.log(data, 'data')
-      const poolExist = await client.hget('p2p_pool', id)
-      if (!poolExist) {
-        await client.hset('p2p_pool', id, 1)
-      }
-      await client.lpush(`p2p_${id}`, JSON.stringify(data))
-    }))
-
+    const client = this.redis.getClient();
+    await Promise.all(
+      faces.map(async (face) => {
+        const data = {
+          count: 0,
+          type: "add",
+          user: face.user._id,
+          imgUrl: face.user.imgUrl,
+          username: face.user.username,
+          face: face._id,
+          mode: face.mode,
+          faces: [String(face._id)],
+        };
+        console.log(data, "data");
+        const poolExist = await client.hget("p2p_pool", id);
+        if (!poolExist) {
+          await client.hset("p2p_pool", id, 1);
+        }
+        await client.lpush(`p2p_${id}`, JSON.stringify(data));
+      })
+    );
   }
 
   // async fixBount(bound, type) {
@@ -533,34 +655,36 @@ export class FaceService {
   //   await this.faceModel.updateMany(condition, { checkResult: 2 })
   // }
 
-
   async disableDevice(device: string) {
-    await this.faceModel.updateMany({ device, isDelete: false }, {
-      isDelete: true
-    })
+    await this.faceModel.updateMany(
+      { device, isDelete: false },
+      {
+        isDelete: true,
+      }
+    );
   }
   async updateFace(face, imgUrl) {
-    const client = this.redis.getClient()
+    const client = this.redis.getClient();
     if (!face.device.enable) {
-      return
+      return;
     }
     switch (face.bondType) {
-      case 'resident':
-        client.hset('pending_resident', `${face.bondToObjectId}`, 1)
+      case "resident":
+        client.hset("pending_resident", `${face.bondToObjectId}`, 1);
         break;
-      case 'role':
-        client.hset('pending_role', `${face.bondToObjectId}`, 1)
+      case "role":
+        client.hset("pending_role", `${face.bondToObjectId}`, 1);
         break;
-      case 'school':
-        client.hset('pending_school', `${face.bondToObjectId}`, 1)
+      case "school":
+        client.hset("pending_school", `${face.bondToObjectId}`, 1);
         break;
-      case 'black':
-        client.hset('pending_black', `${face.bondToObjectId}`, 1)
+      case "black":
+        client.hset("pending_black", `${face.bondToObjectId}`, 1);
         break;
       default:
         break;
     }
-    await this.faceModel.findByIdAndUpdate(face._id, { checkResult: 1 })
+    await this.faceModel.findByIdAndUpdate(face._id, { checkResult: 1 });
     const data = {
       count: 0,
       user: String(face.user._id),
@@ -569,20 +693,20 @@ export class FaceService {
       username: face.user.username,
       mode: face.mode,
       face: String(face._id),
-      type: 'update',
-    }
-    const poolExist = await client.hget('p2p_pool', String(face.device._id))
+      type: "update",
+    };
+    const poolExist = await client.hget("p2p_pool", String(face.device._id));
     if (!poolExist) {
-      await client.hset('p2p_pool', String(face.device._id), 1)
+      await client.hset("p2p_pool", String(face.device._id), 1);
     }
-    await client.lpush(`p2p_${face.device._id}`, JSON.stringify(data))
+    await client.lpush(`p2p_${face.device._id}`, JSON.stringify(data));
   }
 
   async check() {
     const faces = await this.faceModel
       .find({ checkResult: 3, isDelete: true })
-      .populate({ path: 'device', model: 'device' })
-      .populate({ path: 'user', model: 'user' })
+      .populate({ path: "device", model: "device" })
+      .populate({ path: "user", model: "user" });
     // if (!face) {
     //   return
     // }
@@ -598,25 +722,36 @@ export class FaceService {
     // await this.updatePic(face.user, face.user.faceUrl)
     // }
     // console.log(result, 'result')
-    await Promise.all(faces.map(async face => await this.delete(face)))
+    await Promise.all(faces.map(async (face) => await this.delete(face)));
   }
 
   async addErrorDelete() {
     const faces = await this.faceModel
       .find({ isDelete: true })
       .lean()
-      .exec()
-    await Promise.all(faces.map(async face => {
-      const faceCount = await this.faceModel
-        .findOne({ isDelete: false, device: face.device, user: face.user })
-        .populate({ path: 'device', model: 'device' })
-        .populate({ path: 'user', model: 'user' })
-        .lean()
-        .exec()
-      if (faceCount) {
-        await this.faceModel.updateMany({ user: face.user, device: face.device, isDelete: false }, { checkResult: 1 })
-        await this.addOnePic(faceCount, faceCount.device, faceCount.user, faceCount.mode, faceCount.user.faceUrl)
-      }
-    }))
+      .exec();
+    await Promise.all(
+      faces.map(async (face) => {
+        const faceCount = await this.faceModel
+          .findOne({ isDelete: false, device: face.device, user: face.user })
+          .populate({ path: "device", model: "device" })
+          .populate({ path: "user", model: "user" })
+          .lean()
+          .exec();
+        if (faceCount) {
+          await this.faceModel.updateMany(
+            { user: face.user, device: face.device, isDelete: false },
+            { checkResult: 1 }
+          );
+          await this.addOnePic(
+            faceCount,
+            faceCount.device,
+            faceCount.user,
+            faceCount.mode,
+            faceCount.user.faceUrl
+          );
+        }
+      })
+    );
   }
 }
